@@ -1,2 +1,2 @@
-# vectra
+# Vectra
 Intent-Aware Governance Gateway
