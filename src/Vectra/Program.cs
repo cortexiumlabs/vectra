@@ -31,8 +31,12 @@ static void ConfigureServices(WebApplicationBuilder builder, string[] args)
 
     services
         .AddInfrastructure(builder.Configuration)
+        .AddFlowSynxPersistence()
         .AddOpenApi()
-        .AddVectraProxyForwarder();
+        .AddVectraServer()
+        .AddVectraProxyForwarder()
+        .AddVectraHealthChecker()
+        .AddVectraVersion();
 
     if (!env.IsDevelopment())
         builder.Services.ParseVectraArguments(args);

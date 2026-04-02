@@ -11,31 +11,27 @@ public class ProxyMiddleware
     private readonly RequestDelegate _next;
     private readonly IHttpForwarder _forwarder;
     private readonly ILogger<ProxyMiddleware> _logger;
-    private readonly EvaluateRequestUseCase _evaluateUseCase;
-    private readonly IHitlService _hitlService;
     private readonly IHttpClientFactory _httpClientFactory;
-    private readonly IAgentRepository _agentRepository;
 
     public ProxyMiddleware(
         RequestDelegate next,
         IHttpForwarder forwarder,
         ILogger<ProxyMiddleware> logger,
-        EvaluateRequestUseCase evaluateUseCase,
-        IHitlService hitlService,
-        IHttpClientFactory httpClientFactory,
-        IAgentRepository agentRepository)
+        IHttpClientFactory httpClientFactory)
     {
         _next = next;
         _forwarder = forwarder;
         _logger = logger;
-        _evaluateUseCase = evaluateUseCase;
-        _hitlService = hitlService;
         _httpClientFactory = httpClientFactory;
-        _agentRepository = agentRepository;
     }
 
     public async Task InvokeAsync(HttpContext context)
     {
+        // Resolve scoped services per-request.
+        var evaluateUseCase = context.RequestServices.GetRequiredService<EvaluateRequestUseCase>();
+        var hitlService = context.RequestServices.GetRequiredService<IHitlService>();
+        var agentRepository = context.RequestServices.GetRequiredService<IAgentRepository>();
+
         // 1. Get agent ID from JWT (attached by JwtMiddleware)
         if (!context.Items.TryGetValue("AgentId", out var agentIdObj) || agentIdObj is not Guid agentId)
         {
@@ -45,7 +41,7 @@ public class ProxyMiddleware
         }
 
         // 2. Fetch agent data (including trust score)
-        var agent = await _agentRepository.GetByIdAsync(agentId);
+        var agent = await agentRepository.GetByIdAsync(agentId);
         if (agent == null || agent.Status != AgentStatus.Active)
         {
             context.Response.StatusCode = StatusCodes.Status403Forbidden;
@@ -71,7 +67,7 @@ public class ProxyMiddleware
         context.Request.EnableBuffering();
         requestContext.Body = await ReadBodyAsync(context.Request);
 
-        var decision = await _evaluateUseCase.ExecuteAsync(requestContext);
+        var decision = await evaluateUseCase.ExecuteAsync(requestContext);
 
         if (decision.IsDenied)
         {
@@ -82,7 +78,7 @@ public class ProxyMiddleware
 
         if (decision.IsHitl)
         {
-            var hitlId = await _hitlService.SuspendRequestAsync(requestContext, decision.Reason ?? "HITL required");
+            var hitlId = await hitlService.SuspendRequestAsync(requestContext, decision.Reason ?? "HITL required");
             context.Response.StatusCode = StatusCodes.Status202Accepted;
             context.Response.Headers.Location = $"/hitl/status/{hitlId}";
             await context.Response.WriteAsync($"Request pending approval. Poll {context.Response.Headers.Location}");

@@ -32,7 +32,7 @@ public static class WebApplicationBuilderExtensions
 
             if (!httpsPort.HasValue)
             {
-                Console.WriteLine("Configuring HTTP endpoint only: HTTP {HttpPort}", httpPort);
+                Console.WriteLine($"Configuring HTTP endpoint only: HTTP {httpPort}");
                 return;
             }
 
@@ -73,7 +73,7 @@ public static class WebApplicationBuilderExtensions
             ConfigureListenOptions(listenOptions, httpsConfig);
         });
 
-        Console.WriteLine("Configuring HTTP and HTTPS endpoints: HTTP {HttpPort}, HTTPS {HttpsPort}", httpPort, httpsPort);
+        Console.WriteLine($"Configuring HTTP and HTTPS endpoints: HTTP {httpPort}, HTTPS {httpsPort}");
     }
 
     private static void ConfigureListenOptions(
