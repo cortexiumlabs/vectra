@@ -14,4 +14,4 @@ jobs:
         uses: EndBug/label-sync@v2
         with:
           config-file: .github/labels.yml
-          delete-other-labels: false
+          delete-other-labels: true
