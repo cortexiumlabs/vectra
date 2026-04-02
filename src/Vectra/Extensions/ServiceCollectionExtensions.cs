@@ -217,4 +217,19 @@ public static class ServiceCollectionExtensions
     };
 
     #endregion
+
+    #region HttpClient
+
+    public static IServiceCollection AddVectraProxyForwarder(this IServiceCollection services)
+    {
+        services.AddHttpClient("ProxyForwarder")
+            .ConfigureHttpClient(client =>
+            {
+                client.Timeout = TimeSpan.FromSeconds(30);
+                client.DefaultRequestHeaders.ConnectionClose = false;
+            });
+        return services;
+    }
+
+    #endregion
 }
