@@ -38,6 +38,10 @@ static void ConfigureServices(WebApplicationBuilder builder, string[] args)
         .AddVectraHealthChecker()
         .AddVectraVersion();
 
+    services
+        .AddReverseProxy()
+        .LoadFromConfig(builder.Configuration.GetSection("ReverseProxy"));
+
     if (!env.IsDevelopment())
         builder.Services.ParseVectraArguments(args);
 
@@ -64,6 +68,7 @@ static void ConfigureMiddleware(WebApplication app)
     app.UseVectraHealthCheck();
 
     app.UseMiddleware<ProxyMiddleware>();
+    app.MapReverseProxy();
 }
 
 static async Task ConfigureFlowSynxApplication(WebApplication app)
