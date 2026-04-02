@@ -31,7 +31,8 @@ static void ConfigureServices(WebApplicationBuilder builder, string[] args)
 
     services
         .AddInfrastructure(builder.Configuration)
-        .AddOpenApi();
+        .AddOpenApi()
+        .AddVectraProxyForwarder();
 
     if (!env.IsDevelopment())
         builder.Services.ParseVectraArguments(args);
