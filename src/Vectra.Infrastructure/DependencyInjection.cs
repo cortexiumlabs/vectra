@@ -9,7 +9,6 @@ using Vectra.Infrastructure.Policy;
 using Vectra.Infrastructure.Risk;
 using Vectra.Infrastructure.Security;
 using Vectra.Infrastructure.Semantic;
-using Yarp.ReverseProxy.Forwarder;
 
 namespace Vectra.Infrastructure;
 
