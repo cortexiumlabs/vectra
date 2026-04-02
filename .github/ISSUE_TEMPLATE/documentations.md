@@ -2,7 +2,7 @@
 name: Documentations
 about: Add or edit some documentation's relation things
 title: ''
-labels: documentation
+labels: type:docs
 assignees: ''
 ---
 
