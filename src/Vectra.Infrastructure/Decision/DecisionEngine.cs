@@ -26,7 +26,7 @@ public class DecisionEngine : IDecisionEngine
             path = context.Path,
             agent = new { trust_score = context.TrustScore }
         };
-        var opaDecision = await _opaClient.EvaluateAsync("aegis/authz", opaInput, cancellationToken);
+        var opaDecision = await _opaClient.EvaluateAsync("vectra/authz", opaInput, cancellationToken);
         if (opaDecision.Decision == "deny")
             return DecisionResult.Deny("OPA policy denied");
         if (opaDecision.Decision == "hitl")
