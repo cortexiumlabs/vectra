@@ -2,7 +2,7 @@
 name: DevOps
 about: Add or edit some DevOps CI/CD scripts related to deployment and release
 title: ''
-labels: devops, enhancement
+labels: area:infra, type:enhancement
 assignees: ''
 ---
 
