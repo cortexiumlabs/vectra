@@ -1,0 +1,158 @@
+# =========================
+# TYPE
+# =========================
+- name: type:bug
+  color: d73a4a
+  description: Something is broken
+
+- name: type:feature
+  color: a2eeef
+  description: New feature
+
+- name: type:enhancement
+  color: 84b6eb
+  description: Improvement to existing functionality
+
+- name: type:refactor
+  color: cfd3d7
+  description: Code cleanup or restructuring
+
+- name: type:docs
+  color: 0075ca
+  description: Documentation changes
+
+- name: type:test
+  color: bfdadc
+  description: Tests or testing improvements
+
+- name: type:chore
+  color: fef2c0
+  description: Maintenance tasks
+
+
+# =========================
+# PRIORITY
+# =========================
+- name: priority:critical
+  color: b60205
+  description: System-breaking or urgent
+
+- name: priority:high
+  color: d93f0b
+  description: High priority
+
+- name: priority:medium
+  color: fbca04
+  description: Normal priority
+
+- name: priority:low
+  color: 0e8a16
+  description: Low priority
+
+
+# =========================
+# STATUS
+# =========================
+- name: status:todo
+  color: ededed
+  description: Not started
+
+- name: status:in-progress
+  color: 0052cc
+  description: Work in progress
+
+- name: status:blocked
+  color: e11d21
+  description: Blocked by dependency or issue
+
+- name: status:review
+  color: 5319e7
+  description: Awaiting review
+
+- name: status:done
+  color: 0e8a16
+  description: Completed
+
+
+# =========================
+# AREA
+# =========================
+- name: area:api
+  color: 1d76db
+  description: API layer
+
+- name: area:backend
+  color: bfd4f2
+  description: Backend services
+
+- name: area:frontend
+  color: c5def5
+  description: Frontend/UI
+
+- name: area:infra
+  color: f9d0c4
+  description: Infrastructure / DevOps
+
+- name: area:security
+  color: b60205
+  description: Security concerns
+
+- name: area:auth
+  color: 5319e7
+  description: Authentication / Authorization
+
+- name: area:database
+  color: 006b75
+  description: Database layer
+
+
+# =========================
+# SIZE / EFFORT
+# =========================
+- name: size:xs
+  color: c2e0c6
+  description: Very small effort
+
+- name: size:s
+  color: 7bd389
+  description: Small effort
+
+- name: size:m
+  color: 239a3b
+  description: Medium effort
+
+- name: size:l
+  color: 196127
+  description: Large effort
+
+- name: size:xl
+  color: 0b3d0b
+  description: Very large effort
+
+
+# =========================
+# SPECIAL
+# =========================
+- name: good first issue
+  color: 7057ff
+  description: Good for newcomers
+
+- name: help wanted
+  color: 008672
+  description: Extra attention is needed
+
+- name: breaking-change
+  color: b60205
+  description: Introduces breaking changes
+
+- name: needs-discussion
+  color: d4c5f9
+  description: Requires design discussion
+
+- name: duplicate
+  color: cfd3d7
+  description: Issue already exists
+
+- name: wontfix
+  color: ffffff
+  description: Will not be worked on
