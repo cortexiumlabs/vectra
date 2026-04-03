@@ -1,20 +1,15 @@
-﻿using Asp.Versioning;
-using Microsoft.AspNetCore.Mvc;
-using Vectra.BuildingBlocks.Services;
+﻿using Microsoft.AspNetCore.Mvc;
 using Vectra.Core.DTOs;
 using Vectra.Core.UseCases;
 using Vectra.Extensions;
 
-namespace Vectra.Endpoints.V1;
+namespace Vectra.Endpoints;
 
 public class Agents : EndpointGroupBase
 {
     public override void Map(WebApplication app)
     {
-        var group = app
-            .MapGroup("/v{version:apiVersion}/Agents")
-            .HasApiVersion(new ApiVersion(1, 0))
-            .WithTags("Agents");
+        var group = app.MapGroup(this).WithTags("Agents");
 
         group.MapPost("", RegisterAgent)
             .WithName("RegisterAgent")

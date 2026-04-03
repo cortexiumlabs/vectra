@@ -1,17 +1,13 @@
-﻿using Asp.Versioning;
-using Vectra.Core.Interfaces;
+﻿using Vectra.Core.Interfaces;
 using Vectra.Extensions;
 
-namespace Vectra.Endpoints.V1;
+namespace Vectra.Endpoints;
 
 public class Hitls : EndpointGroupBase
 {
     public override void Map(WebApplication app)
     {
-        var group = app
-            .MapGroup("/v{version:apiVersion}/Hitls")
-            .HasApiVersion(new ApiVersion(1, 0))
-            .WithTags("Human-in-the-Loop");
+        var group = app.MapGroup(this).WithTags("Human-in-the-Loop");
 
         group.MapGet("/{id}/status", GetStatus)
             .WithName("GetHitlStatus")
