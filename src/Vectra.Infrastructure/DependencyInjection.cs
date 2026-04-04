@@ -20,17 +20,22 @@ public static class DependencyInjection
         services.Configure<JwtSettings>(configuration.GetSection("Jwt"));
         services.AddScoped<ITokenService, JwtTokenService>();
 
-        // OPA client
-        services.AddHttpClient<IPolicyEngine, PolicyEngine>(client =>
-        {
-            client.BaseAddress = new Uri(configuration["Opa:Endpoint"] ?? "http://localhost:8181");
-        });
+        // Policy engine
+        services.AddScoped<IPolicyEngine, PolicyEngine>();
+        services.AddScoped<IPolicyCacheInvalidator, PolicyCacheInvalidator>();
 
         // Risk scoring
         services.AddScoped<IRiskScoringService, RiskScoringService>();
 
         // Semantic engine (stub)
         services.AddScoped<ISemanticEngine, SemanticEngineStub>();
+
+        services.AddMemoryCache();
+
+        services.AddStackExchangeRedisCache(options =>
+        {
+            options.Configuration = configuration.GetConnectionString("Redis");
+        });
 
         // HITL (Redis)
         services.AddSingleton<IConnectionMultiplexer>(_ =>
