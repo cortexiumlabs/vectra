@@ -9,7 +9,6 @@ public class Agent
     public string ClientSecretHash { get; private set; }
     public double TrustScore { get; private set; }
     public DateTime CreatedAt { get; private set; }
-    public ICollection<Policy> Policies { get; private set; } = new List<Policy>();
 
     private Agent() { } // EF Core
 

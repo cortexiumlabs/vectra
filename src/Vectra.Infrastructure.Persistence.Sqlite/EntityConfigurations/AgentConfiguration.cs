@@ -24,7 +24,5 @@ public class AgentConfiguration : IEntityTypeConfiguration<Agent>
             .HasMaxLength(50)
             .HasConversion(statusConverter)
             .HasDefaultValue(AgentStatus.Active);
-
-        builder.HasMany(e => e.Policies).WithOne(e => e.Agent).HasForeignKey(e => e.AgentId);
     }
 }
