@@ -1,8 +1,7 @@
-﻿using System.Text.RegularExpressions;
-using Vectra.Core.DTOs;
-using Vectra.Core.Entities;
-using Vectra.Core.Interfaces;
-using Vectra.Core.UseCases;
+﻿using Vectra.Application.Abstractions.Executions;
+using Vectra.Application.Abstractions.Persistence;
+using Vectra.Application.Models;
+using Vectra.Domain.Agents;
 using Yarp.ReverseProxy.Forwarder;
 
 namespace Vectra.Middleware;
@@ -53,7 +52,7 @@ public class ProxyMiddleware
         context.Request.QueryString = new QueryString(targetUri.Query);
 
         // 4. Resolve services
-        var evaluateUseCase = context.RequestServices.GetRequiredService<EvaluateRequestUseCase>();
+        var decisionEngine = context.RequestServices.GetRequiredService<IDecisionEngine>();
         var hitlService = context.RequestServices.GetRequiredService<IHitlService>();
         var agentRepository = context.RequestServices.GetRequiredService<IAgentRepository>();
 
@@ -85,7 +84,7 @@ public class ProxyMiddleware
             Body = await ReadBodyAsync(context.Request)
         };
 
-        var decision = await evaluateUseCase.ExecuteAsync(requestContext);
+        var decision = await decisionEngine.EvaluateAsync(requestContext);
 
         if (decision.IsDenied)
         {

@@ -9,7 +9,7 @@ using Vectra.Infrastructure.Persistence.Sqlite.Configuration;
 using Vectra.Configuration.Server;
 using Vectra.Exceptions;
 using Vectra.Services;
-using Vectra.BuildingBlocks.Services;
+using Vectra.Application.Abstractions.Versioning;
 
 namespace Vectra.Extensions;
 

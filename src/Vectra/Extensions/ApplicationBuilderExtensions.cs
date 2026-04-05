@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
+using Vectra.Application.Abstractions.Serializations;
 using Vectra.Configuration.Server;
-using Vectra.Core.Serializations;
 using Vectra.HealthCheck;
 using Vectra.Infrastructure.Persistence.Abstractions;
 using Vectra.Middleware;
