@@ -1,4 +1,4 @@
-﻿using Vectra.Core.Interfaces;
+﻿using Vectra.Application.Abstractions.Executions;
 
 namespace Vectra.Infrastructure.Semantic;
 
