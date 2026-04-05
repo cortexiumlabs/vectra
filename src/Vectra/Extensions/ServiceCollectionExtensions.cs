@@ -2,7 +2,6 @@
 using Vectra.Infrastructure.Persistence.Sqlite;
 using Microsoft.OpenApi;
 using System.Text.Json.Serialization;
-using Vectra.BuildingBlocks.Clock;
 using Vectra.Infrastructure.Persistence.Abstractions;
 using Vectra.Configuration.Database;
 using Vectra.Infrastructure.Persistence.Sqlite.Configuration;
@@ -10,7 +9,6 @@ using Vectra.Configuration.Server;
 using Vectra.Exceptions;
 using Vectra.Services;
 using Vectra.Application.Abstractions.Versioning;
-using Vectra.Infrastructure;
 
 namespace Vectra.Extensions;
 
