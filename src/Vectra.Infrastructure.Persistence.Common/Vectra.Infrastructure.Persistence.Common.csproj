@@ -16,7 +16,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\Vectra.Core\Vectra.Core.csproj" />
+		<ProjectReference Include="..\Vectra.Application\Vectra.Application.csproj" />
 	</ItemGroup>
 
 </Project>

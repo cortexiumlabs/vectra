@@ -1,6 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using Vectra.Core.Entities;
+using Vectra.Domain.Agents;
+using Vectra.Domain.AuditTrails;
+using Vectra.Domain.Policies;
 using Vectra.Infrastructure.Persistence.Abstractions.Exceptions;
 
 namespace Vectra.Infrastructure.Persistence.Abstractions;
@@ -16,7 +18,7 @@ public abstract class BaseDbContext : DbContext, IDatabaseContext
         Logger = logger;
     }
 
-    public DbSet<AuditLog> AuditLogs { get; set; }
+    public DbSet<AuditTrail> AuditLogs { get; set; }
     public DbSet<Agent> Agents { get; set; }
     public DbSet<PolicyDefinition> Policies { get; set; }
     public DbSet<PolicyRule> Rules { get; set; }
