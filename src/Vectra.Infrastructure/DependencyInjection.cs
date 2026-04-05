@@ -1,9 +1,10 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using StackExchange.Redis;
-using Vectra.Core.Interfaces;
-using Vectra.Core.UseCases;
+using Vectra.Application.Abstractions.Dispatchers;
+using Vectra.Application.Abstractions.Executions;
 using Vectra.Infrastructure.Decision;
+using Vectra.Infrastructure.Dispatchers;
 using Vectra.Infrastructure.Hitl;
 using Vectra.Infrastructure.Policy;
 using Vectra.Infrastructure.Risk;
@@ -52,10 +53,12 @@ public static class DependencyInjection
         // Decision engine
         services.AddScoped<IDecisionEngine, DecisionEngine>();
 
-        // Use cases
-        services.AddScoped<RegisterAgentUseCase>();
-        services.AddScoped<AuthenticateAgentUseCase>();
-        services.AddScoped<EvaluateRequestUseCase>();
+        //// Use cases
+        //services.AddScoped<RegisterAgentUseCase>();
+        //services.AddScoped<AuthenticateAgentUseCase>();
+        //services.AddScoped<EvaluateRequestUseCase>();
+
+        services.AddScoped<IDispatcher, Dispatcher>();
 
         // YARP forwarder
         services.AddHttpForwarder();
