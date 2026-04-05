@@ -1,174 +1,42 @@
-﻿namespace Vectra.BuildingBlocks.Results;
+﻿using Vectra.BuildingBlocks.Errors;
 
-public class Result : IResult
+namespace Vectra.BuildingBlocks.Results;
+
+public class Result
 {
-    public List<string> Messages { get; set; } = new();
+    public bool IsSuccess { get; }
+    public Error? Error { get; }
 
-    public bool Succeeded { get; set; }
-
-    public DateTime GeneratedAtUtc { get; } = DateTime.UtcNow;
-
-    public static IResult Fail()
+    protected Result(bool isSuccess, Error? error)
     {
-        return new Result { Succeeded = false };
+        IsSuccess = isSuccess;
+        Error = error;
     }
 
-    public static IResult Fail(string message)
-    {
-        return new Result { Succeeded = false, Messages = new List<string> { message } };
-    }
-
-    public static IResult Fail(List<string> messages)
-    {
-        return new Result { Succeeded = false, Messages = messages };
-    }
-
-    public static Task<IResult> FailAsync()
-    {
-        return Task.FromResult(Fail());
-    }
-
-    public static Task<IResult> FailAsync(string message)
-    {
-        return Task.FromResult(Fail(message));
-    }
-
-    public static Task<IResult> FailAsync(List<string> messages)
-    {
-        return Task.FromResult(Fail(messages));
-    }
-
-    public static IResult Success()
-    {
-        return new Result { Succeeded = true };
-    }
-
-    public static IResult Success(string message)
-    {
-        return new Result { Succeeded = true, Messages = new List<string> { message } };
-    }
-
-    public static Task<IResult> SuccessAsync(string message)
-    {
-        return Task.FromResult(Success(message));
-    }
+    public static Result Success() => new(true, null);
+    public static Task<Result> SuccessAsync() => Task.FromResult(Success());
+    public static Result Failure(Error error) => new(false, error);
+    public static Task<Result> FailureAsync(Error error) => Task.FromResult(Failure(error));
 }
 
-public class Result<T> : Result, IResult<T>
+public class Result<T> : Result
 {
-    public T Data { get; set; } = default!;
+    public T? Value { get; }
 
-    public new static Result<T> Fail()
+    private Result(T value) : base(true, null)
     {
-        return new Result<T> { Succeeded = false };
+        Value = value;
     }
 
-    public new static Result<T> Fail(string message)
+    private Result(Error error) : base(false, error)
     {
-        return new Result<T> { Succeeded = false, Messages = new List<string> { message } };
     }
 
-    public new static Result<T> Fail(List<string> messages)
-    {
-        return new Result<T> { Succeeded = false, Messages = messages };
-    }
+    public static Result<T> Success(T value) => new(value);
+    public static Task<Result<T>> SuccessAsync(T value) => Task.FromResult(Success(value));
+    public static new Result<T> Failure(Error error) => new(error);
+    public static new Task<Result<T>> FailureAsync(Error error) => Task.FromResult(Failure(error));
 
-    public static Result<T> Fail(T data)
-    {
-        return new Result<T>
-        {
-            Succeeded = false,
-            Data = data,
-            Messages = new List<string> { }
-        };
-    }
-
-    public static Result<T> Fail(T data, string message)
-    {
-        return new Result<T> { 
-            Succeeded = false, 
-            Data = data, 
-            Messages = new List<string> { message } 
-        };
-    }
-
-    public static Result<T> Fail(T data, IEnumerable<string> messages)
-    {
-        return new Result<T>
-        {
-            Succeeded = false,
-            Data = data,
-            Messages = messages.ToList()
-        };
-    }
-
-    public new static Task<Result<T>> FailAsync()
-    {
-        return Task.FromResult(Fail());
-    }
-
-    public new static Task<Result<T>> FailAsync(string message)
-    {
-        return Task.FromResult(Fail(message));
-    }
-
-    public new static Task<Result<T>> FailAsync(List<string> messages)
-    {
-        return Task.FromResult(Fail(messages));
-    }
-
-    public static Task<Result<T>> FailAsync(T data)
-    {
-        return Task.FromResult(Fail(data));
-    }
-
-    public static Task<Result<T>> FailAsync(T data, string message)
-    {
-        return Task.FromResult(Fail(data, message));
-    }
-
-    public static Task<Result<T>> FailAsync(T data, List<string> messages)
-    {
-        return Task.FromResult(Fail(data, messages));
-    }
-
-    public new static Result<T> Success()
-    {
-        return new Result<T> { Succeeded = true };
-    }
-
-    public new static Result<T> Success(string message)
-    {
-        return new Result<T> { Succeeded = true, Messages = new List<string> { message } };
-    }
-
-    public static Result<T> Success(T data)
-    {
-        return new Result<T> { Succeeded = true, Data = data };
-    }
-
-    public static Result<T> Success(T data, string message)
-    {
-        return new Result<T> { Succeeded = true, Data = data, Messages = new List<string> { message } };
-    }
-
-    public static Result<T> Success(T data, List<string> messages)
-    {
-        return new Result<T> { Succeeded = true, Data = data, Messages = messages };
-    }
-
-    public new static Task<Result<T>> SuccessAsync(string message)
-    {
-        return Task.FromResult(Success(message));
-    }
-
-    public static Task<Result<T>> SuccessAsync(T data)
-    {
-        return Task.FromResult(Success(data));
-    }
-
-    public static Task<Result<T>> SuccessAsync(T data, string message)
-    {
-        return Task.FromResult(Success(data, message));
-    }
+    public static implicit operator Result<T>(T value) => Success(value);
+    public static implicit operator Result<T>(Error error) => Failure(error);
 }
