@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Vectra.Core.DTOs;
-using Vectra.Core.UseCases;
+using System.Reflection;
+using Vectra.Application.Abstractions.Dispatchers;
+using Vectra.Application.Extensions;
+using Vectra.Application.Features.Agents.RegisterAgent;
 using Vectra.Extensions;
 
 namespace Vectra.Endpoints;
@@ -13,19 +15,15 @@ public class Agents : EndpointGroupBase
 
         group.MapPost("", RegisterAgent)
             .WithName("RegisterAgent")
-            .WithSummary("Register a new AI agent")
-            .Produces<RegisterResponse>(StatusCodes.Status200OK)
-            .Produces(StatusCodes.Status400BadRequest);
+            .WithSummary("Register a new AI agent");
     }
 
     public static async Task<IResult> RegisterAgent(
-        [FromBody] RegisterAgentRequest request,
-        RegisterAgentUseCase useCase,
+        [FromBody] CreateAgentRequest request,
+        [FromServices] IDispatcher dispatcher,
         CancellationToken cancellationToken)
     {
-        var agentId = await useCase.ExecuteAsync(request, cancellationToken);
-        return Results.Ok(new { agent_id = agentId });
+        var result = await dispatcher.RegisterAgent(request, cancellationToken);
+        return result.ToHttpResult();
     }
-
-    public record RegisterResponse(Guid agent_id);
 }

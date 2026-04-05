@@ -1,4 +1,4 @@
-﻿using Vectra.Core.Interfaces;
+﻿using Vectra.Application.Abstractions.Executions;
 using Vectra.Extensions;
 
 namespace Vectra.Endpoints;

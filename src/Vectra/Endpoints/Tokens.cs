@@ -1,7 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Vectra.Core.DTOs;
-using Vectra.Core.UseCases;
+using Vectra.Application.Abstractions.Dispatchers;
+using Vectra.Application.Features.Authentications.GenerateToken;
 using Vectra.Extensions;
+using Vectra.Application.Extensions;
 
 namespace Vectra.Endpoints;
 
@@ -13,21 +14,15 @@ public class Tokens : EndpointGroupBase
 
         group.MapPost("", GetToken)
             .WithName("GetToken")
-            .WithSummary("Exchange credentials for JWT")
-            .Produces<TokenResponse>(StatusCodes.Status200OK)
-            .Produces(StatusCodes.Status401Unauthorized);
+            .WithSummary("Exchange credentials for JWT");
     }
 
     public static async Task<IResult> GetToken(
-        [FromBody] TokenRequest request,
-        AuthenticateAgentUseCase useCase,
+        [FromBody] GenerateTokenRequest request,
+        [FromServices] IDispatcher dispatcher,
         CancellationToken cancellationToken)
     {
-        var token = await useCase.ExecuteAsync(request, cancellationToken);
-        if (token == null)
-            return Results.Unauthorized();
-        return Results.Ok(new { access_token = token });
+        var result = await dispatcher.GenerateToken(request, cancellationToken);
+        return result.ToHttpResult();
     }
-
-    public record TokenResponse(string access_token);
 }
