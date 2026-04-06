@@ -17,27 +17,7 @@ public class AgentAuthMiddleware
     public async Task InvokeAsync(HttpContext context)
     {
         var authenticator = context.RequestServices.GetRequiredService<IAgentAuthenticator>();
-
-        context.Items["AuthScheme"] = authenticator.Scheme;
-
-        switch (authenticator.Scheme)
-        {
-            case AgentAuthScheme.None:
-                // No authentication – attach an anonymous principal and continue.
-                context.Items["AgentId"] = Guid.Empty;
-                context.Items["TrustScore"] = 0.5d;
-                _logger.LogDebug("Auth scheme is None – anonymous access granted");
-                break;
-
-            case AgentAuthScheme.Jwt:
-                await AttachFromHeaderAsync(context, authenticator, "Bearer");
-                break;
-
-            default:
-                _logger.LogWarning("Unsupported auth scheme: {Scheme}", authenticator.Scheme);
-                break;
-        }
-
+        await AttachFromHeaderAsync(context, authenticator, "Bearer");
         await _next(context);
     }
 
