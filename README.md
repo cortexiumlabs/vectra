@@ -1,15 +1,28 @@
 <div align="center">
-  <img src="/img/logo.png" height="180px" alt="Vectra Logo" />
+  <img src="/img/banner.png" alt="Vectra Banner" />
   <h2>VECTRA — Intent-Aware Governance Gateway</h2>
 
   [![dotnet][dotnet-budge]][dotnet-url]
+  [![Quality Gate Status][sonarcloud-quality-gate-badge]][sonarcloud-quality-gate-url]
   [![License: Apache 2.0][apache-badge]][apache-url]
   [![Build Status][actions-badge]][actions-url]
   [![Good First Issues][github-good-first-issue-badge]][github-good-first-issue-url]
 </div>
 
-## Overview
-VECTRA is an open-source project that provides an intent-aware governance gateway for microservices. It enables developers to define and enforce policies based on the intent of API calls, allowing for more granular control over access and behavior in a microservices architecture.
+## Overview: VECTRA
+
+**VECTRA** is an open-source **Intent-Aware Governance Gateway** designed to secure, monitor, and control interactions between autonomous agents, services, and complex systems. 
+
+While traditional API gateways route traffic based on static endpoints and basic authentication, VECTRA introduces a semantic layer of security by evaluating the *actual intent* behind every API call. This allows developers to establish dynamic guardrails, ensuring that AI agents and automated systems operate strictly within defined behavioral boundaries.
+
+### Key Capabilities
+
+* **Intent-Based Policy Enforcement:** Move beyond standard Role-Based Access Control (RBAC). VECTRA analyzes the underlying purpose of a request, allowing you to build context-aware policies that govern *what* an agent is trying to achieve, rather than just *who* the agent is.
+* **Human-in-the-Loop (HITL) Safeguards:** Not all automated actions should happen instantly. When VECTRA identifies an agent's intent as high-risk, potentially destructive, or malicious, it automatically intercepts the request. The gateway holds the action and routes it to a human operator for manual review and approval before execution.
+* **Precise Agent Governance:** As AI agents become more autonomous, the risk of unintended actions grows. VECTRA provides the fine-grained control necessary to oversee agent behavior, preventing systemic damage and ensuring compliance.
+
+### Why VECTRA?
+As organizations deploy more LLM-driven agents and complex microservices, establishing trust in automated workflows is critical. VECTRA bridges the gap between automation and safety, providing the necessary oversight to let agents act freely while keeping humans firmly in control of critical decisions.
 
 ## License
 
@@ -29,3 +42,5 @@ Your support helps others discover the project and drives continued innovation.
 [actions-url]: https://github.com/cortexium-labs/vectra/actions?workflow=build
 [github-good-first-issue-badge]: https://img.shields.io/github/issues/cortexium-labs/vectra/good%20first%20issue?style=flat-square&logo=github&label=good%20first%20issues
 [github-good-first-issue-url]: https://github.com/cortexium-labs/vectra/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22
+[sonarcloud-quality-gate-badge]: https://sonarcloud.io/api/project_badges/measure?project=cortexium-labs_vectra&metric=alert_status
+[sonarcloud-quality-gate-url]: https://sonarcloud.io/summary/new_code?id=cortexium-labs_vectra
