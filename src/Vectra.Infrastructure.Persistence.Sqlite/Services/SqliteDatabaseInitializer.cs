@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using Vectra.Infrastructure.Persistence.Abstractions;
-using Vectra.Infrastructure.Persistence.Abstractions.Exceptions;
+using Vectra.Infrastructure.Persistence.Common;
+using Vectra.Infrastructure.Persistence.Common.Exceptions;
 using Vectra.Infrastructure.Persistence.Sqlite.Contexts;
 
 namespace Vectra.Infrastructure.Persistence.Sqlite.Services;

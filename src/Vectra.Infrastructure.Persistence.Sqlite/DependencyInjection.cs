@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Vectra.Application.Abstractions.Persistence;
-using Vectra.Infrastructure.Persistence.Abstractions;
+using Vectra.Infrastructure.Persistence.Common;
 using Vectra.Infrastructure.Persistence.Sqlite.Contexts;
 using Vectra.Infrastructure.Persistence.Sqlite.Repositories;
 using Vectra.Infrastructure.Persistence.Sqlite.Services;
