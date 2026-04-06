@@ -8,6 +8,7 @@ public class Agent: AuditableEntity<Guid>
     public string Name { get; private set; }
     public string OwnerId { get; private set; }
     public AgentStatus Status { get; private set; }
+    public Guid PolicyId { get; set; }
     public string ClientSecretHash { get; private set; }
     public double TrustScore { get; private set; }
     public DateTime CreatedAt { get; private set; }
