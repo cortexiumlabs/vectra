@@ -12,11 +12,11 @@ namespace Vectra.Infrastructure.Security;
 
 public sealed class JwtAgentAuthenticator : IAgentAuthenticator
 {
-    private readonly JwtConfiguration _config;
+    private readonly AgentAuthConfiguration _config;
     private readonly JwtTokenService _selfSignedService;
     private readonly Lazy<ConfigurationManager<OpenIdConnectConfiguration>> _oidcConfigManager;
 
-    public JwtAgentAuthenticator(IOptions<JwtConfiguration> config, JwtTokenService selfSignedService)
+    public JwtAgentAuthenticator(IOptions<AgentAuthConfiguration> config, JwtTokenService selfSignedService)
     {
         _config = config.Value;
         _selfSignedService = selfSignedService;
@@ -33,8 +33,6 @@ public sealed class JwtAgentAuthenticator : IAgentAuthenticator
                 new HttpDocumentRetriever { RequireHttps = !metadataUrl.StartsWith("http://localhost", StringComparison.OrdinalIgnoreCase) });
         });
     }
-
-    public AgentAuthScheme Scheme => AgentAuthScheme.Jwt;
 
     public AgentAuthResult Authenticate(Agent agent)
     {

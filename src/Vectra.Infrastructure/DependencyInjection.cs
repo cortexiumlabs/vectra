@@ -31,19 +31,10 @@ public static class DependencyInjection
         services.AddScoped<ITokenService>(sp => sp.GetRequiredService<JwtTokenService>());
 
         // Register the selected authenticator scheme
-        switch (agentAuthConfiguration.Scheme)
-        {
-            case AgentAuthScheme.None:
-                services.AddSingleton<IAgentAuthenticator, NoneAgentAuthenticator>();
-                break;
-
-            case AgentAuthScheme.Jwt:
-            default:
-                services.AddScoped<IAgentAuthenticator, JwtAgentAuthenticator>();
-                break;
-        }
+        services.AddScoped<IAgentAuthenticator, JwtAgentAuthenticator>();
 
         // Policy engine
+        services.AddScoped<IPolicyLoader, FileSystemPolicyLoader>();
         services.AddScoped<IPolicyEngine, PolicyEngine>();
         services.AddScoped<IPolicyCacheInvalidator, PolicyCacheInvalidator>();
 
