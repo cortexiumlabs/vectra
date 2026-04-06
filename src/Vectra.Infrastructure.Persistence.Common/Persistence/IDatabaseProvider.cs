@@ -1,4 +1,4 @@
-﻿namespace Vectra.Infrastructure.Persistence.Abstractions;
+﻿namespace Vectra.Infrastructure.Persistence.Common;
 
 public interface IDatabaseProvider
 {

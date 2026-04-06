@@ -3,9 +3,9 @@ using Microsoft.Extensions.Logging;
 using Vectra.Domain.Agents;
 using Vectra.Domain.AuditTrails;
 using Vectra.Domain.Policies;
-using Vectra.Infrastructure.Persistence.Abstractions.Exceptions;
+using Vectra.Infrastructure.Persistence.Common.Exceptions;
 
-namespace Vectra.Infrastructure.Persistence.Abstractions;
+namespace Vectra.Infrastructure.Persistence.Common;
 
 public abstract class BaseDbContext : DbContext, IDatabaseContext
 {

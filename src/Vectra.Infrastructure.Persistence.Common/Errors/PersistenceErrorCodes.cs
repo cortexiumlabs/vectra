@@ -1,6 +1,6 @@
 ﻿using Vectra.BuildingBlocks.Errors;
 
-namespace Vectra.Infrastructure.Persistence.Abstractions.Errors;
+namespace Vectra.Infrastructure.Persistence.Common.Errors;
 
 public class PersistenceErrorCodes
 {

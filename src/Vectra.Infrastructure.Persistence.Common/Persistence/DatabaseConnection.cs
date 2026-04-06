@@ -1,9 +1,13 @@
-﻿namespace Vectra.Infrastructure.Persistence.Abstractions;
+﻿namespace Vectra.Infrastructure.Persistence.Common;
 
-public abstract class DatabaseConnection
+public class DatabaseConnection
 {
-    public string Provider { get; set; } = string.Empty;
-    public string? ConnectionString { get; protected set; }
+    public string Provider { get; }
+    public string ConnectionString { get; }
 
-    public abstract void BuildConnectionString();
+    public DatabaseConnection(string provider, string connectionString)
+    {
+        Provider = provider ?? throw new ArgumentNullException(nameof(provider));
+        ConnectionString = connectionString ?? throw new ArgumentNullException(nameof(connectionString));
+    }
 }

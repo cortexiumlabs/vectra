@@ -1,7 +1,7 @@
 ﻿using Vectra.BuildingBlocks.Errors;
 using Vectra.BuildingBlocks.Exceptions;
 
-namespace Vectra.Infrastructure.Persistence.Abstractions.Exceptions;
+namespace Vectra.Infrastructure.Persistence.Common.Exceptions;
 
 public abstract class PersistenceException : BaseException
 {

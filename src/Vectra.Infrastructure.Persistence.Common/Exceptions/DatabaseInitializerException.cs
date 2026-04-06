@@ -1,6 +1,6 @@
-﻿using Vectra.Infrastructure.Persistence.Abstractions.Errors;
+﻿using Vectra.Infrastructure.Persistence.Common.Errors;
 
-namespace Vectra.Infrastructure.Persistence.Abstractions.Exceptions;
+namespace Vectra.Infrastructure.Persistence.Common.Exceptions;
 
 public sealed class DatabaseInitializerException : PersistenceException
 {

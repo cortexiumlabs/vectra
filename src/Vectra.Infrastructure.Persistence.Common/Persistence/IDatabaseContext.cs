@@ -3,7 +3,7 @@ using Vectra.Domain.Agents;
 using Vectra.Domain.AuditTrails;
 using Vectra.Domain.Policies;
 
-namespace Vectra.Infrastructure.Persistence.Abstractions;
+namespace Vectra.Infrastructure.Persistence.Common;
 
 public interface IDatabaseContext
 {
