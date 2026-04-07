@@ -1,8 +1,9 @@
-﻿namespace Vectra.Domain.Policies;
+﻿using Vectra.Domain.Primitives;
 
-public class PolicyRule
+namespace Vectra.Domain.Policies;
+
+public class PolicyRule : AuditableEntity<Guid>
 {
-    public Guid Id { get; set; }
     public Guid PolicyId { get; set; }
     public string Name { get; set; } = string.Empty;
     public int Priority { get; set; } = 0;          // higher = more important

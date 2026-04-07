@@ -11,7 +11,6 @@ public class Agent: AuditableEntity<Guid>
     public Guid PolicyId { get; set; }
     public string ClientSecretHash { get; private set; }
     public double TrustScore { get; private set; }
-    public DateTime CreatedAt { get; private set; }
 
     private Agent() { } // EF Core
 
@@ -23,7 +22,6 @@ public class Agent: AuditableEntity<Guid>
         Status = AgentStatus.Active;
         ClientSecretHash = clientSecretHash;
         TrustScore = 0.5;
-        CreatedAt = DateTime.UtcNow;
     }
 
     public void UpdateTrustScore(double newScore)

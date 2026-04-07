@@ -1,8 +1,9 @@
-﻿namespace Vectra.Domain.Policies;
+﻿using Vectra.Domain.Primitives;
 
-public class RuleCondition
+namespace Vectra.Domain.Policies;
+
+public class RuleCondition : AuditableEntity<Guid>
 {
-    public Guid Id { get; set; }
     public Guid RuleId { get; set; }
     public string LogicalOperator { get; set; } = "and";   // and, or
     public int Order { get; set; } = 0;
