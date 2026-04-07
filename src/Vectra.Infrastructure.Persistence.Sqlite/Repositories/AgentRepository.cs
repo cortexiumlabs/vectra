@@ -14,6 +14,31 @@ public class AgentRepository : IAgentRepository
         _appContextFactory = appContextFactory ?? throw new ArgumentNullException(nameof(appContextFactory));
     }
 
+    public async Task<(IReadOnlyList<Agent> Items, int TotalCount)> GetPagedAsync(int page, int pageSize, CancellationToken cancellationToken = default)
+    {
+        await using var context = await _appContextFactory.CreateDbContextAsync(cancellationToken);
+
+        var totalCount = await context.Agents
+            .CountAsync(cancellationToken)
+            .ConfigureAwait(false);
+
+        var items = await context.Agents
+            .OrderBy(a => a.Name)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .AsNoTracking()
+            .ToListAsync(cancellationToken)
+            .ConfigureAwait(false);
+
+        return (items, totalCount);
+    }
+
+    public async Task<IReadOnlyList<Agent>> GetAllAsync(CancellationToken cancellationToken = default)
+    {
+        await using var context = await _appContextFactory.CreateDbContextAsync(cancellationToken);
+        return await context.Agents.AsNoTracking().ToListAsync(cancellationToken).ConfigureAwait(false);
+    }
+
     public async Task<Agent?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
     {
         await using var context = await _appContextFactory.CreateDbContextAsync(cancellationToken);
