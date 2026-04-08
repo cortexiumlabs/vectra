@@ -1,6 +1,7 @@
 ﻿using Vectra.Application.Abstractions.Dispatchers;
 using Vectra.Application.Features.Agents.AgentsList;
 using Vectra.Application.Features.Agents.AssignPolicy;
+using Vectra.Application.Features.Agents.DeleteAgent;
 using Vectra.Application.Features.Agents.RegisterAgent;
 using Vectra.Application.Features.Authentications.GenerateToken;
 using Vectra.BuildingBlocks.Results;
@@ -43,6 +44,15 @@ public static class DispatcherExtensions
             AgentId = agentId,
             PolicyId = policyId
         };
+        return dispatcher.Dispatch(request, cancellationToken);
+    }
+
+    public static Task<Result<Abstractions.Dispatchers.Void>> DeleteAgent(
+        this IDispatcher dispatcher,
+        Guid agentId,
+        CancellationToken cancellationToken)
+    {
+        var request = new DeleteAgentRequest { AgentId = agentId.ToString() };
         return dispatcher.Dispatch(request, cancellationToken);
     }
 

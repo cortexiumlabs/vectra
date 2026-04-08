@@ -24,6 +24,10 @@ public class Agents : EndpointGroupBase
         group.MapPut("/{agentId}/policy", AssignPolicyToAgent)
             .WithName("AssignPolicyToAgent")
             .WithSummary("Assign a policy to an AI agent");
+
+        group.MapDelete("/{agentId}", DeleteAgent)
+            .WithName("DeleteAgent")
+            .WithSummary("Delete an AI agent");
     }
 
     public static async Task<IResult> AgentsList(
@@ -52,6 +56,15 @@ public class Agents : EndpointGroupBase
         CancellationToken cancellationToken)
     {
         var result = await dispatcher.AssignPolicyToAgent(agentId, request.PolicyId, cancellationToken);
+        return result.ToHttpResult();
+    }
+
+    public static async Task<IResult> DeleteAgent(
+        string agentId,
+        [FromServices] IDispatcher dispatcher,
+        CancellationToken cancellationToken)
+    {
+        var result = await dispatcher.DeleteAgent(Guid.Parse(agentId), cancellationToken);
         return result.ToHttpResult();
     }
 }
