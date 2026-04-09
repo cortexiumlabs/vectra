@@ -7,7 +7,9 @@ using StackExchange.Redis;
 using Vectra.Application.Abstractions.Dispatchers;
 using Vectra.Application.Abstractions.Executions;
 using Vectra.Application.Abstractions.Security;
+using Vectra.Infrastructure.Configuration.Hitl;
 using Vectra.Infrastructure.Configuration.Logging;
+using Vectra.Infrastructure.Configuration.Memory;
 using Vectra.Infrastructure.Configuration.Security;
 using Vectra.Infrastructure.Decision;
 using Vectra.Infrastructure.Dispatchers;
@@ -47,22 +49,40 @@ public static class DependencyInjection
 
         services.AddMemoryCache();
 
-        services.AddStackExchangeRedisCache(options =>
+        // HITL provider selection
+        var hitlConfiguration = configuration.GetSection("Hitl").Get<HitlConfiguration>()
+                             ?? new HitlConfiguration();
+
+        services.AddSingleton(Options.Create(hitlConfiguration));
+
+        if (hitlConfiguration.Provider.Equals("Redis", StringComparison.OrdinalIgnoreCase))
         {
-            options.Configuration = configuration.GetConnectionString("Redis");
-        });
+            var memoryConfiguration = configuration.GetSection("Memory").Get<MemoryConfiguration>()
+                                      ?? new MemoryConfiguration();
 
-        // HITL (Redis)
-        services.AddSingleton<IConnectionMultiplexer>(_ =>
+            services.AddSingleton(Options.Create(memoryConfiguration));
+
+            services.AddStackExchangeRedisCache(options =>
+            {
+                options.Configuration = memoryConfiguration.RedisAddress;
+            });
+
+            services.AddSingleton<IConnectionMultiplexer>(_ =>
+            {
+                var redis = memoryConfiguration.RedisAddress;
+                if (string.IsNullOrWhiteSpace(redis))
+                    throw new InvalidOperationException("Missing Redis connection string: Memory:RedisAddress");
+
+                return ConnectionMultiplexer.Connect(redis);
+            });
+
+            services.AddScoped<IHitlService, RedisHitlService>();
+        }
+        else
         {
-            var redis = configuration.GetConnectionString("Redis");
-            if (string.IsNullOrWhiteSpace(redis))
-                throw new InvalidOperationException("Missing Redis connection string: ConnectionStrings:Redis");
-
-            return ConnectionMultiplexer.Connect(redis);
-        });
-
-        services.AddScoped<IHitlService, RedisHitlService>();
+            services.AddDistributedMemoryCache();
+            services.AddSingleton<IHitlService, InMemoryHitlService>();
+        }
 
         // Decision engine
         services.AddScoped<IDecisionEngine, DecisionEngine>();
