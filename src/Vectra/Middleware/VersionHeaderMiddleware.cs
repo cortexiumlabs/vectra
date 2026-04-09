@@ -15,7 +15,7 @@ public sealed class VersionHeaderMiddleware
 
     public Task Invoke(HttpContext context)
     {
-        context.Response.Headers["vectra-version"] = _version.Version.ToString();
+        context.Response.Headers["Vectra-Version"] = _version.Version.ToString();
         return _next(context);
     }
 }
