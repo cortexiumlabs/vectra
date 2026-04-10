@@ -2,8 +2,8 @@
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Options;
 using Vectra.Application.Abstractions.Serializations;
+using Vectra.BuildingBlocks.Configuration.System;
 using Vectra.HealthCheck;
-using Vectra.Infrastructure.Configuration.System;
 using Vectra.Infrastructure.Persistence.Common;
 using Vectra.Middleware;
 

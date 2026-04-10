@@ -1,0 +1,40 @@
+﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
+using Vectra.Application.Abstractions.Caches;
+using Vectra.BuildingBlocks.Configuration.System;
+using Vectra.BuildingBlocks.Configuration.System.Storage.Cache;
+
+namespace Vectra.Infrastructure.Caches;
+
+public sealed class CacheProviderFactory : ICacheProviderFactory
+{
+    private readonly CacheConfiguration _config;
+    private readonly IServiceProvider _serviceProvider;
+
+    public CacheProviderFactory(IOptions<SystemConfiguration> options, IServiceProvider serviceProvider)
+    {
+        ArgumentNullException.ThrowIfNull(options);
+        ArgumentNullException.ThrowIfNull(serviceProvider);
+
+        _config = options.Value.Storage.Cache
+            ?? throw new InvalidOperationException("Cache configuration is missing.");
+
+        _serviceProvider = serviceProvider;
+    }
+
+    public ICacheProvider Create()
+    {
+        return _config.Provider.ToLowerInvariant() switch
+        {
+            "redis" => CreateRedis(),
+            "inmemory" => CreateMemory(),
+            _ => throw new NotSupportedException($"Cache provider '{_config.Provider}' is not supported.")
+        };
+    }
+
+    private ICacheProvider CreateRedis() =>
+        ActivatorUtilities.CreateInstance<RedisCacheProvider>(_serviceProvider, _config.Redis);
+
+    private ICacheProvider CreateMemory() =>
+        ActivatorUtilities.CreateInstance<MemoryCacheProvider>(_serviceProvider, _config.Memory);
+}

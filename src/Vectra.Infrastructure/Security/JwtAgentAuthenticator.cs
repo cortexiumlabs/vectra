@@ -4,28 +4,30 @@ using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using Vectra.Application.Abstractions.Executions;
 using Vectra.Application.Abstractions.Security;
 using Vectra.Domain.Agents;
-using Vectra.Infrastructure.Configuration.Security.AgentAuth;
+using Vectra.BuildingBlocks.Configuration.Security;
+using Vectra.BuildingBlocks.Configuration.Security.AgentAuth;
 
 namespace Vectra.Infrastructure.Security;
 
 public sealed class JwtAgentAuthenticator : IAgentAuthenticator
 {
-    private readonly AgentAuthConfiguration _config;
-    private readonly JwtTokenService _selfSignedService;
+    private readonly AgentAuthConfiguration _options;
+    private readonly ITokenService _selfSignedService;
     private readonly Lazy<ConfigurationManager<OpenIdConnectConfiguration>> _oidcConfigManager;
 
-    public JwtAgentAuthenticator(IOptions<AgentAuthConfiguration> config, JwtTokenService selfSignedService)
+    public JwtAgentAuthenticator(IOptions<SecurityConfiguration> options, ITokenService selfSignedService)
     {
-        _config = config.Value;
+        _options = options.Value.AgentAuth;
         _selfSignedService = selfSignedService;
 
         _oidcConfigManager = new Lazy<ConfigurationManager<OpenIdConnectConfiguration>>(() =>
         {
-            var metadataUrl = !string.IsNullOrWhiteSpace(_config.MetadataUrl)
-                ? _config.MetadataUrl
-                : $"{_config.Authority.TrimEnd('/')}/.well-known/openid-configuration";
+            var metadataUrl = !string.IsNullOrWhiteSpace(_options.MetadataUrl)
+                ? _options.MetadataUrl
+                : $"{_options.Authority.TrimEnd('/')}/.well-known/openid-configuration";
 
             return new ConfigurationManager<OpenIdConnectConfiguration>(
                 metadataUrl,
@@ -36,7 +38,7 @@ public sealed class JwtAgentAuthenticator : IAgentAuthenticator
 
     public AgentAuthResult Authenticate(Agent agent)
     {
-        if (_config.Provider != JwtProviderType.SelfSigned)
+        if (_options.Provider != JwtProviderType.SelfSigned)
             return AgentAuthResult.Failure(
                 "Token generation is not supported for external JWT providers. " +
                 "Obtain a token from the configured identity provider.");
@@ -47,7 +49,7 @@ public sealed class JwtAgentAuthenticator : IAgentAuthenticator
 
     public async Task<ClaimsPrincipal?> ValidateAsync(string credential, CancellationToken cancellationToken = default)
     {
-        return _config.Provider == JwtProviderType.SelfSigned
+        return _options.Provider == JwtProviderType.SelfSigned
             ? _selfSignedService.ValidateToken(credential)
             : await ValidateExternalTokenAsync(credential, cancellationToken);
     }
@@ -61,10 +63,10 @@ public sealed class JwtAgentAuthenticator : IAgentAuthenticator
             {
                 ValidateIssuerSigningKey = true,
                 IssuerSigningKeys = oidcConfig.SigningKeys,
-                ValidateIssuer = _config.ValidateIssuer,
-                ValidIssuer = _config.ValidateIssuer ? _config.Authority : null,
-                ValidateAudience = _config.ValidateAudience,
-                ValidAudience = _config.ValidateAudience ? _config.Audience : null,
+                ValidateIssuer = _options.ValidateIssuer,
+                ValidIssuer = _options.ValidateIssuer ? _options.Authority : null,
+                ValidateAudience = _options.ValidateAudience,
+                ValidAudience = _options.ValidateAudience ? _options.Audience : null,
                 ValidateLifetime = true,
                 ClockSkew = TimeSpan.FromSeconds(30)
             };

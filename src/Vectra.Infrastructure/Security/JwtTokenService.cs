@@ -5,7 +5,8 @@ using System.Security.Claims;
 using System.Text;
 using Vectra.Application.Abstractions.Executions;
 using Vectra.Domain.Agents;
-using Vectra.Infrastructure.Configuration.Security.AgentAuth;
+using Vectra.BuildingBlocks.Configuration.Security;
+using Vectra.BuildingBlocks.Configuration.Security.AgentAuth;
 
 namespace Vectra.Infrastructure.Security;
 
@@ -13,9 +14,9 @@ public class JwtTokenService : ITokenService
 {
     private readonly AgentAuthConfiguration _agentAuthConfiguration;
 
-    public JwtTokenService(IOptions<AgentAuthConfiguration> authSettings)
+    public JwtTokenService(IOptions<SecurityConfiguration> authSettings)
     {
-        _agentAuthConfiguration = authSettings.Value;
+        _agentAuthConfiguration = authSettings.Value.AgentAuth;
     }
 
     public string GenerateToken(Agent agent)

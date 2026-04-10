@@ -31,14 +31,14 @@ static void ConfigureServices(WebApplicationBuilder builder, string[] args)
 
     services
         .AddVectraConfiguration(config)
-        .AddInfrastructure(config)
-        .AddVectraPersistence(config)
+        .AddInfrastructure()
+        .AddVectraPersistence()
         .AddVectraApiDocumentation()
         .AddVectraProxyForwarder()
         .AddVectraHealthChecker()
         .AddVectraVersion()
         .AddVectraApplication()
-        .AddVectraLogging(config);
+        .AddVectraLogging();
 
     if (!env.IsDevelopment())
         builder.Services.ParseVectraArguments(args);

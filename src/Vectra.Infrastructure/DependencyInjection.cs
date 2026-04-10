@@ -1,15 +1,15 @@
-﻿using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Serilog;
+using Serilog.Extensions.Logging;
 using StackExchange.Redis;
 using Vectra.Application.Abstractions.Dispatchers;
 using Vectra.Application.Abstractions.Executions;
 using Vectra.Application.Abstractions.Security;
-using Vectra.Infrastructure.Configuration.Features.Hitl;
-using Vectra.Infrastructure.Configuration.Observability.Logging;
-using Vectra.Infrastructure.Configuration.Security.AgentAuth;
+using Vectra.Infrastructure.Caches;
+using Vectra.BuildingBlocks.Configuration.Features;
+using Vectra.BuildingBlocks.Configuration.System;
 using Vectra.Infrastructure.Decision;
 using Vectra.Infrastructure.Dispatchers;
 using Vectra.Infrastructure.Hitl;
@@ -22,14 +22,9 @@ namespace Vectra.Infrastructure;
 
 public static class DependencyInjection
 {
-    public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
+    public static IServiceCollection AddInfrastructure(this IServiceCollection services)
     {
-        var agentAuthConfiguration = configuration.GetSection("AgentAuth").Get<AgentAuthConfiguration>()
-                                     ?? new AgentAuthConfiguration();
-
-        services.AddSingleton(Options.Create(agentAuthConfiguration));
-        services.AddScoped<JwtTokenService>();
-        services.AddScoped<ITokenService>(sp => sp.GetRequiredService<JwtTokenService>());
+        services.AddScoped<ITokenService, JwtTokenService>();
 
         // Register the selected authenticator scheme
         services.AddScoped<IAgentAuthenticator, JwtAgentAuthenticator>();
@@ -48,45 +43,30 @@ public static class DependencyInjection
 
         services.AddMemoryCache();
 
-        // HITL provider selection
-        var hitlConfiguration = configuration.GetSection("Hitl").Get<HitlConfiguration>()
-                             ?? new HitlConfiguration();
+        // HITL provider selection (DI + factory method)
+        services.AddDistributedMemoryCache();
 
-        services.AddSingleton(Options.Create(hitlConfiguration));
-
-        if (hitlConfiguration.Provider.Equals("Redis", StringComparison.OrdinalIgnoreCase))
+        services.AddSingleton<IConnectionMultiplexer>(sp =>
         {
-            //var memoryConfiguration = configuration.GetSection("Memory").Get<MemoryConfiguration>()
-            //                          ?? new MemoryConfiguration();
+            var features = sp.GetRequiredService<IOptions<FeaturesConfiguration>>().Value;
+            var provider = features.Hitl?.Provider;
 
-            //services.AddSingleton(Options.Create(memoryConfiguration));
+            if (!string.Equals(provider, "Redis", StringComparison.OrdinalIgnoreCase))
+                throw new InvalidOperationException("Redis multiplexer requested while HITL provider is not 'Redis'.");
 
-            var redisAddress = "localhost:6379";
-            services.AddStackExchangeRedisCache(options =>
-            {
-                options.Configuration = redisAddress; // memoryConfiguration.RedisAddress;
-            });
+            var cacheProvider = sp.GetRequiredService<IOptions<SystemConfiguration>>().Value;
 
-            services.AddSingleton<IConnectionMultiplexer>(_ =>
-            {
-                var redis = redisAddress;
-                if (string.IsNullOrWhiteSpace(redis))
-                    throw new InvalidOperationException("Missing Redis connection string: Memory:RedisAddress");
+            var redisAddress = cacheProvider.Storage.Cache.Redis.Address;
+            if (string.IsNullOrWhiteSpace(redisAddress))
+                throw new InvalidOperationException("Missing Redis connection string.");
 
-                return ConnectionMultiplexer.Connect(redis);
-            });
+            return ConnectionMultiplexer.Connect(redisAddress);
+        });
 
-            services.AddScoped<IHitlService, RedisHitlService>();
-        }
-        else
-        {
-            services.AddDistributedMemoryCache();
-            services.AddSingleton<IHitlService, InMemoryHitlService>();
-        }
+        services.AddScoped<IHitlService>(CreateHitlService);
 
         // Decision engine
         services.AddScoped<IDecisionEngine, DecisionEngine>();
-
         services.AddScoped<IDispatcher, Dispatcher>();
 
         // YARP forwarder
@@ -95,18 +75,38 @@ public static class DependencyInjection
         return services;
     }
 
-    public static IServiceCollection AddVectraLogging(this IServiceCollection services, IConfiguration configuration)
+    private static IHitlService CreateHitlService(IServiceProvider sp)
     {
-        var loggingConfiguration = configuration.GetSection("Logger").Get<LoggingConfiguration>()
-                             ?? new LoggingConfiguration();
+        var features = sp.GetRequiredService<IOptions<FeaturesConfiguration>>().Value;
+        var provider = features.Hitl?.Provider;
 
-        Log.Logger = Logging.LoggerFactory.CreateLogger(loggingConfiguration);
+        return string.Equals(provider, "Redis", StringComparison.OrdinalIgnoreCase)
+            ? ActivatorUtilities.CreateInstance<RedisHitlService>(sp)
+            : ActivatorUtilities.CreateInstance<InMemoryHitlService>(sp);
+    }
+
+    public static IServiceCollection AddVectraLogging(this IServiceCollection services)
+    {
+        services.AddSingleton<Logging.ILoggerFactory, Logging.LoggerFactory>();
 
         services.AddLogging(builder =>
         {
             builder.ClearProviders();
-            builder.AddSerilog(Log.Logger, dispose: true);
+            builder.Services.AddSingleton<ILoggerProvider>(sp =>
+            {
+                var logger = sp.GetRequiredService<Logging.ILoggerFactory>().CreateLogger();
+                Log.Logger = logger;
+                return new SerilogLoggerProvider(logger, dispose: true);
+            });
         });
+
+        return services;
+    }
+
+    public static IServiceCollection AddCache(this IServiceCollection services)
+    {
+        services.AddSingleton<ICacheProviderFactory, CacheProviderFactory>();
+        services.AddSingleton<ICacheService, CacheService>();
 
         return services;
     }

@@ -1,12 +1,12 @@
-﻿using Microsoft.OpenApi;
+﻿using Microsoft.Extensions.Options;
+using Microsoft.OpenApi;
 using System.Text.Json.Serialization;
 using Vectra.Application.Abstractions.Versioning;
+using Vectra.BuildingBlocks.Configuration.Features;
+using Vectra.BuildingBlocks.Configuration.Observability;
+using Vectra.BuildingBlocks.Configuration.Security;
+using Vectra.BuildingBlocks.Configuration.System;
 using Vectra.Exceptions;
-using Vectra.Infrastructure.Configuration.Features;
-using Vectra.Infrastructure.Configuration.Observability;
-using Vectra.Infrastructure.Configuration.Security;
-using Vectra.Infrastructure.Configuration.System;
-using Vectra.Infrastructure.Configuration.System.Storage.Database;
 using Vectra.Infrastructure.Persistence.Sqlite;
 using Vectra.Services;
 
@@ -18,8 +18,6 @@ public static class ServiceCollectionExtensions
     private const string ObservabilityConfigurationName = "Observability";
     private const string SecurityConfigurationName = "Security";
     private const string FeaturesConfigurationName = "Features";
-    private const string DefaultSqliteProvider = "SQLite";
-    private const string DatabaseSectionName = "Databases";
 
     #region Simple registrations
 
@@ -119,81 +117,30 @@ public static class ServiceCollectionExtensions
 
     #region Persistence
 
-    public static IServiceCollection AddVectraPersistence(this IServiceCollection services, IConfiguration configuration)
+    public static IServiceCollection AddVectraPersistence(this IServiceCollection services)
     {
-        var dbConfig = LoadDatabaseConfiguration(configuration);
-        var activeConnection = dbConfig.GetActiveConnection();
+        using var scope = services.BuildServiceProvider().CreateScope();
+        var systemConfig = scope.ServiceProvider.GetRequiredService<IOptions<SystemConfiguration>>().Value;
 
-        services.AddSingleton(dbConfig);
-        services.AddSingleton(activeConnection);
+        var provider = systemConfig.Storage.Database.Provider;
 
-        RegisterPersistenceLayer(services, activeConnection);
+        switch (provider?.ToLowerInvariant())
+        {
+            case "sqlite":
+                services.AddSqlitePersistenceLayer();
+                break;
+
+            //case "postgres":
+            //    services.AddPostgresPersistenceLayer();
+            //    break;
+
+            default:
+                throw new InvalidOperationException(
+                    $"Unsupported database provider '{provider}'.");
+        }
 
         return services;
     }
-
-    private static void RegisterPersistenceLayer(IServiceCollection services, DatabaseConnection activeConnection)
-    {
-        switch (activeConnection.Provider.ToLowerInvariant())
-        {
-            //case "postgres":
-            //    services.AddPostgresPersistenceLayer(activeConnection.ConnectionString);
-            //    break;
-            case "sqlite":
-                services.AddSqlitePersistenceLayer(activeConnection.ConnectionString);
-                break;
-            default:
-                throw new InvalidOperationException($"Unsupported database provider '{activeConnection.Provider}'.");
-        }
-    }
-
-    private static DatabaseConfiguration LoadDatabaseConfiguration(IConfiguration configuration)
-    {
-        var databasesSection = configuration.GetSection(DatabaseSectionName);
-        if (!databasesSection.Exists() || !databasesSection.GetChildren().Any())
-            return CreateDefaultDatabaseConfiguration();
-
-        var defaultProvider = databasesSection.GetValue<string>("Default") ?? DefaultSqliteProvider;
-        var connections = new Dictionary<string, DatabaseConnection>();
-
-        var connectionsSection = databasesSection.GetSection("Connections");
-        if (!connectionsSection.Exists() || !connectionsSection.GetChildren().Any())
-        {
-            connections[defaultProvider] = CreateDefaultSqliteConnection();
-            return new DatabaseConfiguration { Default = defaultProvider, Connections = connections };
-        }
-
-        foreach (var connSection in connectionsSection.GetChildren())
-        {
-            var provider = connSection.GetValue<string>("Provider") ?? DefaultSqliteProvider;
-            var connectionString = connSection.GetValue<string>("ConnectionString");
-
-            if (string.IsNullOrEmpty(connectionString))
-                throw new InvalidOperationException($"Missing ConnectionString for provider '{provider}'.");
-
-            // Use the section key as the logical name (e.g., "Postgres", "Sqlite")
-            var logicalName = connSection.Key;
-            connections[logicalName] = new DatabaseConnection(provider, connectionString);
-        }
-
-        // Ensure the default provider exists in the dictionary
-        if (!connections.ContainsKey(defaultProvider))
-            connections[defaultProvider] = CreateDefaultSqliteConnection();
-
-        return new DatabaseConfiguration { Default = defaultProvider, Connections = connections };
-    }
-
-    private static DatabaseConfiguration CreateDefaultDatabaseConfiguration() => new()
-    {
-        Default = DefaultSqliteProvider,
-        Connections = new Dictionary<string, DatabaseConnection>
-        {
-            [DefaultSqliteProvider] = CreateDefaultSqliteConnection()
-        }
-    };
-
-    private static DatabaseConnection CreateDefaultSqliteConnection() =>
-            new DatabaseConnection(DefaultSqliteProvider, "Data Source=vectra.db");
 
     #endregion
 

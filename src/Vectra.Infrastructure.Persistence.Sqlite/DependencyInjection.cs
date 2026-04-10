@@ -1,6 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using Vectra.Application.Abstractions.Persistence;
+using Vectra.BuildingBlocks.Configuration.System;
 using Vectra.Infrastructure.Persistence.Common;
 using Vectra.Infrastructure.Persistence.Sqlite.Contexts;
 using Vectra.Infrastructure.Persistence.Sqlite.Repositories;
@@ -11,15 +13,19 @@ namespace Vectra.Infrastructure.Persistence.Sqlite;
 public static class DependencyInjection
 {
     public static IServiceCollection AddSqlitePersistenceLayer(
-        this IServiceCollection services, string databaseConnection)
+        this IServiceCollection services)
     {
         services
             .AddScoped<IAgentRepository, AgentRepository>()
-            .AddScoped<IDatabaseInitializer, SqliteDatabaseInitializer>()
-            .AddPooledDbContextFactory<SqliteApplicationContext>(options =>
-            {
-                options.UseSqlite(databaseConnection);
-            });
+            .AddScoped<IDatabaseInitializer, SqliteDatabaseInitializer>();
+
+        services.AddPooledDbContextFactory<SqliteApplicationContext>((sp, options) =>
+        {
+            var db = sp.GetRequiredService<IOptions<SystemConfiguration>>()
+                       .Value.Storage.Database;
+
+            options.UseSqlite(db.Sqlite.ConnectionString);
+        });
 
         return services;
     }

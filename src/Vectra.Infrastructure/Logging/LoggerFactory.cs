@@ -1,13 +1,23 @@
-﻿using Serilog;
+﻿using Microsoft.Extensions.Options;
+using Serilog;
 using Serilog.Events;
-using Vectra.Infrastructure.Configuration.Observability.Logging;
+using Vectra.BuildingBlocks.Configuration.Observability;
+using Vectra.BuildingBlocks.Configuration.Observability.Logging;
 
 namespace Vectra.Infrastructure.Logging;
 
-public static class LoggerFactory
+public class LoggerFactory: ILoggerFactory
 {
-    public static ILogger CreateLogger(LoggingConfiguration configuration)
+    private readonly IOptions<ObservabilityConfiguration> options;
+
+    public LoggerFactory(IOptions<ObservabilityConfiguration> options)
     {
+        this.options = options;
+    }
+
+    public ILogger CreateLogger()
+    {
+        var configuration = options.Value.Logging;
         var config = new LoggerConfiguration()
             .Enrich.FromLogContext()
             .MinimumLevel.Override("Microsoft.EntityFrameworkCore", Serilog.Events.LogEventLevel.Warning)

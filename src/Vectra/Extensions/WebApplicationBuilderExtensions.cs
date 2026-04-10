@@ -1,8 +1,8 @@
 ﻿using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.Extensions.Options;
 using Serilog;
-using Vectra.Infrastructure.Configuration.System;
-using Vectra.Infrastructure.Configuration.System.Server;
+using Vectra.BuildingBlocks.Configuration.System;
+using Vectra.BuildingBlocks.Configuration.System.Server;
 
 namespace Vectra.Extensions;
 
