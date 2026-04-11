@@ -33,7 +33,6 @@ public static class DependencyInjection
         // Policy engine
         services.AddSingleton<IPolicyLoader, FileSystemPolicyLoader>();
         services.AddScoped<IPolicyEngine, PolicyEngine>();
-        services.AddScoped<IPolicyCacheInvalidator, PolicyCacheInvalidator>();
 
         // Risk scoring
         services.AddScoped<IRiskScoringService, RiskScoringService>();
