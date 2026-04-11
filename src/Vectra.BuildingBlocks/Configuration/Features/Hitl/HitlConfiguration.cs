@@ -2,5 +2,5 @@
 
 public class HitlConfiguration
 {
-    public string Provider { get; set; } = "InMemory";
+    public string Provider { get; set; } = "Memory";
 }
