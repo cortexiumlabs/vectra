@@ -3,6 +3,7 @@ using Microsoft.Extensions.Options;
 using Vectra.Application.Abstractions.Caches;
 using Vectra.BuildingBlocks.Configuration.System;
 using Vectra.BuildingBlocks.Configuration.System.Storage.Cache;
+using Vectra.Infrastructure.Caches.Providers;
 
 namespace Vectra.Infrastructure.Caches;
 
@@ -27,7 +28,7 @@ public sealed class CacheProviderFactory : ICacheProviderFactory
         return _config.Provider.ToLowerInvariant() switch
         {
             "redis" => CreateRedis(),
-            "inmemory" => CreateMemory(),
+            "memory" => CreateMemory(),
             _ => throw new NotSupportedException($"Cache provider '{_config.Provider}' is not supported.")
         };
     }

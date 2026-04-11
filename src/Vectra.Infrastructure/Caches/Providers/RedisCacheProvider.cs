@@ -5,7 +5,7 @@ using System.Text.Json;
 using Vectra.Application.Abstractions.Caches;
 using Vectra.BuildingBlocks.Configuration.System.Storage.Cache;
 
-namespace Vectra.Infrastructure.Caches;
+namespace Vectra.Infrastructure.Caches.Providers;
 
 public class RedisCacheProvider : ICacheProvider
 {
@@ -31,11 +31,41 @@ public class RedisCacheProvider : ICacheProvider
         _logger.LogInformation($"Redis ({_config.Address}) SET {key}");
     }
 
-    public async Task<string?> GetAsync(string key)
+    public async Task<object?> GetAsync(object key)
     {
         var db = _redis.GetDatabase();
         var value = await db.StringGetAsync($"hitl:{key}");
         _logger.LogInformation($"Redis ({_config.Address}) GET {key}");
         return value.ToString();
+    }
+
+    public async Task<TItem?> GetAsync<TItem>(object key)
+    {
+        var db = _redis.GetDatabase();
+        var value = await db.StringGetAsync($"hitl:{key}");
+        _logger.LogInformation($"Redis ({_config.Address}) GET {key}");
+        return JsonSerializer.Deserialize<TItem>(value.ToString());
+    }
+
+    public async Task<TItem> SetAsync<TItem>(object key, TItem value)
+    {
+        var db = _redis.GetDatabase();
+        var serializedValue = JsonSerializer.Serialize(value);
+        await db.StringSetAsync($"hitl:{key}", serializedValue, TimeSpan.FromMilliseconds(_config.TimeToLiveMilliseconds));
+        _logger.LogInformation($"Redis ({_config.Address}) SET {key}");
+        return value;
+    }
+        
+    public async Task<(bool success, TItem? value)> TryGetValueAsync<TItem>(string key)
+    {
+        var db = _redis.GetDatabase();
+        var redisValue = await db.StringGetAsync($"hitl:{key}");
+        if (redisValue.HasValue)
+        {
+            var value = JsonSerializer.Deserialize<TItem>(redisValue.ToString());
+            _logger.LogInformation($"Redis ({_config.Address}) GET {key}");
+            return (true, value);
+        }
+        return (false, default);
     }
 }

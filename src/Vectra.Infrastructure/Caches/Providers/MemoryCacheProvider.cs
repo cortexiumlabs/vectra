@@ -4,7 +4,7 @@ using Microsoft.Extensions.Logging;
 using Vectra.Application.Abstractions.Caches;
 using Vectra.BuildingBlocks.Configuration.System.Storage.Cache;
 
-namespace Vectra.Infrastructure.Caches;
+namespace Vectra.Infrastructure.Caches.Providers;
 
 public class MemoryCacheProvider : ICacheProvider
 {
@@ -14,7 +14,7 @@ public class MemoryCacheProvider : ICacheProvider
     private readonly ILogger<MemoryCacheProvider> _logger;
 
     public MemoryCacheProvider(
-        MemoryCacheConfiguration config, 
+        MemoryCacheConfiguration config,
         IServiceProvider serviceProvider)
     {
         _config = config;
@@ -23,22 +23,35 @@ public class MemoryCacheProvider : ICacheProvider
         _logger = _serviceProvider.GetRequiredService<ILogger<MemoryCacheProvider>>();
     }
 
-    public Task SetAsync(string key, string value)
+    public Task<object?> GetAsync(object key)
+    {
+        _cache.TryGetValue(key, out object? value);
+        _logger.LogInformation($"InMemory GET {key}");
+        return Task.FromResult(value);
+    }
+
+    public Task<TItem?> GetAsync<TItem>(object key)
+    {
+        _cache.TryGetValue(key, out TItem? value);
+        _logger.LogInformation($"InMemory GET {key}");
+        return Task.FromResult(value);
+    }
+
+    public Task<TItem> SetAsync<TItem>(object key, TItem value)
     {
         var options = new MemoryCacheEntryOptions
         {
             AbsoluteExpirationRelativeToNow = TimeSpan.FromMilliseconds(_config.TimeToLiveMilliseconds)
         };
-
         _cache.Set(key, value, options);
         _logger.LogInformation($"InMemory SET {key}");
-        return Task.CompletedTask;
+        return Task.FromResult(value);
     }
 
-    public Task<string?> GetAsync(string key)
+    public Task<(bool success, TItem? value)> TryGetValueAsync<TItem>(string key)
     {
-        _cache.TryGetValue(key, out string? value);
+        var result = _cache.TryGetValue(key, out TItem? value);
         _logger.LogInformation($"InMemory GET {key}");
-        return Task.FromResult(value);
+        return Task.FromResult((result, value));
     }
 }
