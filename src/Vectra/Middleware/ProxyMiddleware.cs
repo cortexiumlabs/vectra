@@ -1,6 +1,5 @@
 ﻿using Vectra.Application.Abstractions.Executions;
 using Vectra.Application.Abstractions.Persistence;
-using Vectra.Application.Abstractions.Security;
 using Vectra.Application.Models;
 using Vectra.Domain.Agents;
 using Yarp.ReverseProxy.Forwarder;
@@ -20,10 +19,10 @@ public class ProxyMiddleware
         ILogger<ProxyMiddleware> logger,
         IHttpClientFactory httpClientFactory)
     {
-        _next = next;
-        _forwarder = forwarder;
-        _logger = logger;
-        _httpClientFactory = httpClientFactory;
+        _next = next ?? throw new ArgumentNullException(nameof(next));
+        _forwarder = forwarder ?? throw new ArgumentNullException(nameof(forwarder));
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        _httpClientFactory = httpClientFactory ?? throw new ArgumentNullException(nameof(httpClientFactory));
     }
 
     public async Task InvokeAsync(HttpContext context)
