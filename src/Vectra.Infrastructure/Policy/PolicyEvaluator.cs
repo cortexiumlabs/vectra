@@ -12,7 +12,7 @@ public static class PolicyEvaluator
     {
         var attributeValue = GetValueFromPath(condition.Field, input);
         var expectedValue = DeserializeValue(condition.Value);
-        return condition.Operator switch
+        return condition.Operator.ToLowerInvariant() switch
         {
             "eq" => Equals(attributeValue, expectedValue),
             "ne" => !Equals(attributeValue, expectedValue),
@@ -22,8 +22,8 @@ public static class PolicyEvaluator
             "le" => Compare(attributeValue, expectedValue) <= 0,
             "in" => IsIn(attributeValue, expectedValue),
             "contains" => Contains(attributeValue, expectedValue),
-            "startsWith" => StartsWith(attributeValue, expectedValue),
-            "endsWith" => EndsWith(attributeValue, expectedValue),
+            "startswith" => StartsWith(attributeValue, expectedValue),
+            "endswith" => EndsWith(attributeValue, expectedValue),
             "regex" => RegexMatch(attributeValue, expectedValue),
             _ => false
         };

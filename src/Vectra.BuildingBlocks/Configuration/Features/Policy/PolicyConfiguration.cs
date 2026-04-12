@@ -2,5 +2,8 @@
 
 public class PolicyConfiguration
 {
-    public string Directory { get; set; } = string.Empty;
+    public bool? Enabled { get; set; } = true;
+    public string Provider { get; set; } = "Internal";
+    public InternalPolicyConfiguration Internal { get; set; } = new();
+    public OpaPolicyConfiguration Opa { get; set; } = new();
 }

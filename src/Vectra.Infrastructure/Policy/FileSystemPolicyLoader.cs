@@ -3,14 +3,13 @@ using Microsoft.Extensions.Options;
 using Vectra.Application.Abstractions.Executions;
 using Vectra.Application.Abstractions.Serializations;
 using Vectra.BuildingBlocks.Configuration.Features;
-using Vectra.BuildingBlocks.Configuration.Features.Policy;
 using Vectra.Domain.Policies;
 
 namespace Vectra.Infrastructure.Policy;
 
 public class FileSystemPolicyLoader : IPolicyLoader
 {
-    private readonly PolicyConfiguration _policyConfiguration;
+    private readonly IOptions<FeaturesConfiguration> _options;
     private readonly ILogger<FileSystemPolicyLoader> _logger;
     private readonly IDeserializer _deserializer;
 
@@ -19,7 +18,7 @@ public class FileSystemPolicyLoader : IPolicyLoader
         ILogger<FileSystemPolicyLoader> logger,
         IDeserializer deserializer)
     {
-        _policyConfiguration = options.Value.Policy ?? new PolicyConfiguration();
+        _options = options ?? throw new ArgumentNullException(nameof(options));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         _deserializer = deserializer ?? throw new ArgumentNullException(nameof(deserializer));
     }
@@ -32,20 +31,21 @@ public class FileSystemPolicyLoader : IPolicyLoader
 
     public async Task<Dictionary<string, PolicyDefinition>> LoadAllAsync(CancellationToken ct)
     {
+        var policyConfiguration = _options.Value.Policy.Internal;
         var policies = new Dictionary<string, PolicyDefinition>();
-        if (string.IsNullOrEmpty(_policyConfiguration.Directory))
+        if (string.IsNullOrEmpty(policyConfiguration.Directory))
         {
             _logger.LogWarning("Policy directory is not configured");
             return policies;
         }
 
-        if (!Directory.Exists(_policyConfiguration.Directory))
+        if (!Directory.Exists(policyConfiguration.Directory))
         {
-            _logger.LogWarning("Policy directory {Directory} does not exist", _policyConfiguration.Directory);
+            _logger.LogWarning("Policy directory {Directory} does not exist", policyConfiguration.Directory);
             return policies;
         }
 
-        foreach (var file in Directory.GetFiles(_policyConfiguration.Directory, "*.json"))
+        foreach (var file in Directory.GetFiles(policyConfiguration.Directory, "*.json"))
         {
             try
             {

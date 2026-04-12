@@ -2,7 +2,7 @@
 
 namespace Vectra.Application.Abstractions.Executions;
 
-public interface IPolicyEngine
+public interface IPolicyProvider
 {
     Task<PolicyDecision> EvaluateAsync(string policyName, Dictionary<string, object> input);
 }

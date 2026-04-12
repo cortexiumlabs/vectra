@@ -15,6 +15,7 @@ using Vectra.Infrastructure.Decision;
 using Vectra.Infrastructure.Dispatchers;
 using Vectra.Infrastructure.Hitl;
 using Vectra.Infrastructure.Policy;
+using Vectra.Infrastructure.Policy.Providers;
 using Vectra.Infrastructure.Risk;
 using Vectra.Infrastructure.Security;
 using Vectra.Infrastructure.Semantic;
@@ -34,7 +35,8 @@ public static class DependencyInjection
 
         // Policy engine
         services.AddSingleton<IPolicyLoader, FileSystemPolicyLoader>();
-        services.AddScoped<IPolicyEngine, PolicyEngine>();
+        services.AddHttpClient("opa-policy");
+        services.AddScoped<IPolicyProvider>(CreatePolicyProvider);
 
         // Risk scoring
         services.AddScoped<IRiskScoringService, RiskScoringService>();
@@ -57,6 +59,19 @@ public static class DependencyInjection
         services.AddHttpForwarder();
 
         return services;
+    }
+
+    private static IPolicyProvider CreatePolicyProvider(IServiceProvider sp)
+    {
+        var features = sp.GetRequiredService<IOptions<FeaturesConfiguration>>().Value;
+        var provider = (features.Policy?.Provider ?? "Internal").Trim();
+
+        return provider.ToLowerInvariant() switch
+        {
+            "internal" => ActivatorUtilities.CreateInstance<InternalPolicyEngine>(sp),
+            "opa" => ActivatorUtilities.CreateInstance<OpaPolicyEngine>(sp),
+            _ => ActivatorUtilities.CreateInstance<InternalPolicyEngine>(sp)
+        };
     }
 
     private static IHitlService CreateHitlService(IServiceProvider sp)

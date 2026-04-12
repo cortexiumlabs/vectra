@@ -5,19 +5,19 @@ using Vectra.Application.Abstractions.Executions;
 using Vectra.Domain.Policies;
 using Vectra.Infrastructure.Caches;
 
-namespace Vectra.Infrastructure.Policy;
+namespace Vectra.Infrastructure.Policy.Providers;
 
-public class PolicyEngine : IPolicyEngine
+public class InternalPolicyEngine : IPolicyProvider
 {
     private readonly ICacheProvider _cacheProvider;
     private readonly IPolicyLoader _loader;
-    private readonly ILogger<PolicyEngine> _logger;
+    private readonly ILogger<InternalPolicyEngine> _logger;
     private const string CacheKey = "all_policies";
 
-    public PolicyEngine(
+    public InternalPolicyEngine(
         ICacheService cacheService,
         IPolicyLoader loader,
-        ILogger<PolicyEngine> logger)
+        ILogger<InternalPolicyEngine> logger)
     {
         _cacheProvider = cacheService.Current ?? throw new ArgumentNullException(nameof(cacheService));
         _loader = loader ?? throw new ArgumentNullException(nameof(loader));

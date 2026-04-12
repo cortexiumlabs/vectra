@@ -1,21 +1,26 @@
-﻿using Vectra.Application.Abstractions.Executions;
+﻿using Microsoft.Extensions.Options;
+using Vectra.Application.Abstractions.Executions;
 using Vectra.Application.Models;
+using Vectra.BuildingBlocks.Configuration.Features;
 using Vectra.Domain.Policies;
 
 namespace Vectra.Infrastructure.Decision;
 
 public class DecisionEngine : IDecisionEngine
 {
-    private readonly IPolicyEngine _policyEngine;
+    private readonly IOptions<FeaturesConfiguration> _options;
+    private readonly IPolicyProvider _policyProvider;
     private readonly IRiskScoringService _riskScoring;
     private readonly ISemanticEngine _semanticEngine;
 
     public DecisionEngine(
-        IPolicyEngine policyEngine, 
+        IOptions<FeaturesConfiguration> options,
+        IPolicyProvider policyEngine, 
         IRiskScoringService riskScoring, 
         ISemanticEngine semanticEngine)
     {
-        _policyEngine = policyEngine ?? throw new ArgumentNullException(nameof(policyEngine));
+        _options = options ?? throw new ArgumentNullException(nameof(options));
+        _policyProvider = policyEngine ?? throw new ArgumentNullException(nameof(policyEngine));
         _riskScoring = riskScoring ?? throw new ArgumentNullException(nameof(riskScoring));
         _semanticEngine = semanticEngine ?? throw new ArgumentNullException(nameof(semanticEngine));
     }
@@ -34,11 +39,15 @@ public class DecisionEngine : IDecisionEngine
             }
         };
 
-        var policyDecision = await _policyEngine.EvaluateAsync(context.PolicyName, input);
-        if (policyDecision.IsDenied)
-            return DecisionResult.Deny(policyDecision.Reason ?? "Policy denied");
-        if (policyDecision.IsHitl)
-            return DecisionResult.Hitl(policyDecision.Reason ?? "Policy requires HITL");
+        var policyEnabled = _options.Value.Policy.Enabled ?? true;
+        if (policyEnabled)
+        {
+            var policyDecision = await _policyProvider.EvaluateAsync(context.PolicyName, input);
+            if (policyDecision.IsDenied)
+                return DecisionResult.Deny(policyDecision.Reason ?? "Policy denied");
+            if (policyDecision.IsHitl)
+                return DecisionResult.Hitl(policyDecision.Reason ?? "Policy requires HITL");
+        }
 
         // Continue with risk scoring & semantic
         var riskScore = _riskScoring.ComputeRiskScore(context);
