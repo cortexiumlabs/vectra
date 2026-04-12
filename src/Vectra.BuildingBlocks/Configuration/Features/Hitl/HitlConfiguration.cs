@@ -2,5 +2,5 @@
 
 public class HitlConfiguration
 {
-    public string Provider { get; set; } = "Memory";
+    public double HitlThreshold { get; set; } = 0.8;
 }

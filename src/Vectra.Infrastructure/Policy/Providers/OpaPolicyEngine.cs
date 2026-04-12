@@ -24,7 +24,10 @@ public class OpaPolicyEngine : IPolicyProvider
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
-    public async Task<PolicyDecision> EvaluateAsync(string policyName, Dictionary<string, object> input)
+    public async Task<PolicyDecision> EvaluateAsync(
+        string policyName, 
+        Dictionary<string, object> input, 
+        CancellationToken cancellationToken)
     {
         var opa = _features.Value.Policy?.Opa;
         if (opa is null || string.IsNullOrWhiteSpace(opa.BaseUrl))
@@ -42,15 +45,15 @@ public class OpaPolicyEngine : IPolicyProvider
             }
         };
 
-        using var response = await client.PostAsJsonAsync(opa.Path, body);
+        using var response = await client.PostAsJsonAsync(opa.Path, body, cancellationToken);
         if (!response.IsSuccessStatusCode)
         {
             _logger.LogWarning("OPA returned status code {StatusCode}", response.StatusCode);
             return PolicyDecision.Deny($"OPA request failed with status code {(int)response.StatusCode}");
         }
 
-        await using var stream = await response.Content.ReadAsStreamAsync();
-        using var json = await JsonDocument.ParseAsync(stream);
+        await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
+        using var json = await JsonDocument.ParseAsync(stream, cancellationToken: cancellationToken);
 
         if (!json.RootElement.TryGetProperty("result", out var result))
             return PolicyDecision.Deny("OPA response does not contain 'result'");

@@ -17,6 +17,7 @@ using Vectra.Infrastructure.Hitl;
 using Vectra.Infrastructure.Policy;
 using Vectra.Infrastructure.Policy.Providers;
 using Vectra.Infrastructure.Risk;
+using Vectra.Infrastructure.Risk.Calculators;
 using Vectra.Infrastructure.Security;
 using Vectra.Infrastructure.Semantic;
 using Vectra.Infrastructure.Serializations.Json;
@@ -57,6 +58,7 @@ public static class DependencyInjection
 
         // YARP forwarder
         services.AddHttpForwarder();
+        services.AddRiskScoring();
 
         return services;
     }
@@ -76,8 +78,8 @@ public static class DependencyInjection
 
     private static IHitlService CreateHitlService(IServiceProvider sp)
     {
-        var features = sp.GetRequiredService<IOptions<FeaturesConfiguration>>().Value;
-        var provider = features.Hitl?.Provider;
+        var systemConfiguration = sp.GetRequiredService<IOptions<SystemConfiguration>>().Value;
+        var provider = systemConfiguration.Storage?.Cache?.Provider;
 
         return string.Equals(provider, "Redis", StringComparison.OrdinalIgnoreCase)
             ? ActivatorUtilities.CreateInstance<RedisHitlService>(sp)
@@ -120,6 +122,24 @@ public static class DependencyInjection
             return ConnectionMultiplexer.Connect(options);
         });
 
+        return services;
+    }
+
+    private static IServiceCollection AddRiskScoring(this IServiceCollection services)
+    {
+        // Register calculators
+        services.AddScoped<IRiskCalculator, MethodRiskCalculator>();
+        services.AddScoped<IRiskCalculator, PathRiskCalculator>();
+        services.AddScoped<IRiskCalculator, AgentHistoryCalculator>();
+        services.AddScoped<IRiskCalculator, TimeBasedCalculator>();
+        services.AddScoped<IRiskCalculator, BodySizeRiskCalculator>();
+        services.AddScoped<IRiskCalculator, AnomalyDetectionCalculator>();
+
+        services.AddScoped<IAnomalyDetector, StatisticalAnomalyDetector>();
+
+        services.AddScoped<RiskScoreAggregator>();
+        services.AddScoped<IRiskScoringService, RiskScoringService>();
+        
         return services;
     }
 

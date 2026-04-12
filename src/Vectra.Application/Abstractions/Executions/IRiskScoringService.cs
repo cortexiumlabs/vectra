@@ -4,5 +4,5 @@ namespace Vectra.Application.Abstractions.Executions;
 
 public interface IRiskScoringService
 {
-    double ComputeRiskScore(RequestContext context);
+    Task<double> ComputeRiskScoreAsync(RequestContext context, CancellationToken ct = default);
 }

@@ -24,9 +24,12 @@ public class InternalPolicyEngine : IPolicyProvider
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
-    public async Task<PolicyDecision> EvaluateAsync(string policyName, Dictionary<string, object> input)
+    public async Task<PolicyDecision> EvaluateAsync(
+        string policyName, 
+        Dictionary<string, object> input, 
+        CancellationToken cancellationToken)
     {
-        var policy = await GetPolicyAsync(policyName);
+        var policy = await GetPolicyAsync(policyName, cancellationToken);
         if (policy == null)
             return PolicyDecision.Deny($"Policy {policyName} not found");
 
@@ -59,13 +62,13 @@ public class InternalPolicyEngine : IPolicyProvider
         };
     }
 
-    public async Task<PolicyDefinition?> GetPolicyAsync(string policyName)
+    private async Task<PolicyDefinition?> GetPolicyAsync(string policyName, CancellationToken cancellationToken)
     {
-        var allPolicies = await GetAllPoliciesAsync();
+        var allPolicies = await GetAllPoliciesAsync(cancellationToken);
         return allPolicies.TryGetValue(policyName, out var policy) ? policy : null;
     }
 
-    private async Task<Dictionary<string, PolicyDefinition>> GetAllPoliciesAsync()
+    private async Task<Dictionary<string, PolicyDefinition>> GetAllPoliciesAsync(CancellationToken cancellationToken)
     {
         var (success, policies) = await _cacheProvider.TryGetValueAsync<Dictionary<string, PolicyDefinition>>(CacheKey);
         if (success && policies != null)

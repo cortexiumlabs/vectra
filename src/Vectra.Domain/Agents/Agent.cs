@@ -11,6 +11,7 @@ public class Agent: AuditableEntity<Guid>
     public string? PolicyName { get; set; }
     public string ClientSecretHash { get; private set; }
     public double TrustScore { get; private set; }
+    public ICollection<AgentHistory> AgentHistories { get; set; } = new List<AgentHistory>();
 
     private Agent() { } // EF Core
 

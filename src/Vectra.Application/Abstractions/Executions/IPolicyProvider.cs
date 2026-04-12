@@ -4,7 +4,10 @@ namespace Vectra.Application.Abstractions.Executions;
 
 public interface IPolicyProvider
 {
-    Task<PolicyDecision> EvaluateAsync(string policyName, Dictionary<string, object> input);
+    Task<PolicyDecision> EvaluateAsync(
+        string policyName, 
+        Dictionary<string, object> input, 
+        CancellationToken cancellationToken);
 }
 
 public record PolicyDecision
