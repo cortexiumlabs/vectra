@@ -70,9 +70,9 @@ public static class DependencyInjection
 
         return provider.ToLowerInvariant() switch
         {
-            "internal" => ActivatorUtilities.CreateInstance<InternalPolicyEngine>(sp),
-            "opa" => ActivatorUtilities.CreateInstance<OpaPolicyEngine>(sp),
-            _ => ActivatorUtilities.CreateInstance<InternalPolicyEngine>(sp)
+            "internal" => ActivatorUtilities.CreateInstance<InternalPolicyProvider>(sp),
+            "opa" => ActivatorUtilities.CreateInstance<OpaPolicyProvider>(sp),
+            _ => ActivatorUtilities.CreateInstance<InternalPolicyProvider>(sp)
         };
     }
 

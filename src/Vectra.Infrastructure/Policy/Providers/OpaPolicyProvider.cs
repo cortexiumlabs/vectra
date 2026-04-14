@@ -7,17 +7,17 @@ using Vectra.BuildingBlocks.Configuration.Features;
 
 namespace Vectra.Infrastructure.Policy.Providers;
 
-public class OpaPolicyEngine : IPolicyProvider
+public class OpaPolicyProvider : IPolicyProvider
 {
     private readonly IHttpClientFactory _httpClientFactory;
     private readonly IOptions<FeaturesConfiguration> _features;
-    private readonly ILogger<OpaPolicyEngine> _logger;
+    private readonly ILogger<OpaPolicyProvider> _logger;
     private const string OpaHttpClientName = "opa-policy";
 
-    public OpaPolicyEngine(
+    public OpaPolicyProvider(
         IHttpClientFactory httpClientFactory,
         IOptions<FeaturesConfiguration> features,
-        ILogger<OpaPolicyEngine> logger)
+        ILogger<OpaPolicyProvider> logger)
     {
         _httpClientFactory = httpClientFactory ?? throw new ArgumentNullException(nameof(httpClientFactory));
         _features = features ?? throw new ArgumentNullException(nameof(features));

@@ -7,17 +7,17 @@ using Vectra.Infrastructure.Caches;
 
 namespace Vectra.Infrastructure.Policy.Providers;
 
-public class InternalPolicyEngine : IPolicyProvider
+public class InternalPolicyProvider : IPolicyProvider
 {
     private readonly ICacheProvider _cacheProvider;
     private readonly IPolicyLoader _loader;
-    private readonly ILogger<InternalPolicyEngine> _logger;
+    private readonly ILogger<InternalPolicyProvider> _logger;
     private const string CacheKey = "all_policies";
 
-    public InternalPolicyEngine(
+    public InternalPolicyProvider(
         ICacheService cacheService,
         IPolicyLoader loader,
-        ILogger<InternalPolicyEngine> logger)
+        ILogger<InternalPolicyProvider> logger)
     {
         _cacheProvider = cacheService.Current ?? throw new ArgumentNullException(nameof(cacheService));
         _loader = loader ?? throw new ArgumentNullException(nameof(loader));
