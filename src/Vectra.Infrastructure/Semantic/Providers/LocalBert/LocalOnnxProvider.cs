@@ -1,9 +1,13 @@
-﻿using Microsoft.Extensions.Caching.Memory;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Microsoft.ML.OnnxRuntime;
+using Microsoft.ML.OnnxRuntime.Tensors;
 using System.Text;
+using System.Text.Json;
+using Vectra.Application.Abstractions.Caches;
 using Vectra.Application.Abstractions.Executions;
+using Vectra.BuildingBlocks.Configuration.Semantic;
+using Vectra.Infrastructure.Caches;
 
 namespace Vectra.Infrastructure.Semantic.Providers.LocalBert;
 
@@ -11,48 +15,62 @@ public class LocalOnnxProvider: ISemanticProvider
 {
     private readonly InferenceSession _session;
     private readonly BertTokenizer _tokenizer;
-    private readonly IMemoryCache _cache;
+    private readonly ICacheProvider _cacheProvider;
     private readonly ILogger<LocalOnnxProvider> _logger;
-    private readonly string[] _intentLabels = { "safe_read", "safe_write", "bulk_export", "destructive_delete", "admin_action", "harmful" };
+    private readonly string[] _intentLabels;
+    private readonly int _maxLength;
 
-    public LocalOnnxProvider(IConfiguration config, IMemoryCache cache, ILogger<LocalOnnxProvider> logger)
+    public LocalOnnxProvider(
+        IOptions<SemanticConfiguration> options, 
+        ICacheService cacheService, 
+        ILogger<LocalOnnxProvider> logger)
     {
-        var modelPath = config["Semantic:ModelPath"] ?? "Models/intent_model.onnx";
+        var modelPath = options.Value.Providers.Local.ModelPath ?? "/Models/intent_model_onnx/model.onnx";
+        var vocabPath = options.Value.Providers.Local.VocabPath ?? "/Models/intent_model_onnx/vocab.txt";
+        var labelsPath = options.Value.Providers.Local.LabelsPath ?? "/Models/intent_model_onnx/labels.json";
+        _maxLength = options.Value.Providers.Local.MaxLength ?? 128;
+
         _session = new InferenceSession(modelPath);
-        _tokenizer = new BertTokenizer(config["Semantic:VocabPath"] ?? "Models/vocab.txt");
-        _cache = cache;
-        _logger = logger;
+        _tokenizer = new BertTokenizer(vocabPath);
+        _cacheProvider = cacheService.Current ?? throw new ArgumentNullException(nameof(cacheService));
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+
+        var labelsJson = File.ReadAllText(labelsPath);
+        var labelDict = JsonSerializer.Deserialize<Dictionary<string, string>>(labelsJson);
+        _intentLabels = labelDict!.OrderBy(kv => int.Parse(kv.Key)).Select(kv => kv.Value).ToArray();
     }
 
-    public async Task<SemanticAnalysisResult> AnalyzeAsync(string? body, string metadata, CancellationToken cancellationToken = default)
+    public async Task<SemanticAnalysisResult> AnalyzeAsync(string? requestBody, string metadata, CancellationToken cancellationToken)
     {
-        if (string.IsNullOrWhiteSpace(body))
+        if (string.IsNullOrWhiteSpace(requestBody))
             return new SemanticAnalysisResult { Intent = "unknown", Confidence = 0.5, FallbackSafe = true };
 
-        // Cache key: hash of request body (exact match)
-        var cacheKey = $"semantic:{Convert.ToBase64String(Encoding.UTF8.GetBytes(body))}";
-        if (_cache.TryGetValue<SemanticAnalysisResult>(cacheKey, out var cached))
+        // Cache by exact body
+        var cacheKey = $"semantic_local:{ComputeHash(requestBody)}";
+        var (success, cached) = await _cacheProvider.TryGetValueAsync<SemanticAnalysisResult>(cacheKey);
+        if (success)
             return cached!;
 
         // Tokenize
-        var (inputIds, attentionMask) = _tokenizer.Tokenize(body, maxLength: 128);
+        var (inputIds, attentionMask) = _tokenizer.Tokenize(requestBody, _maxLength);
+        var inputTensor = new DenseTensor<long>(inputIds, new[] { 1, _maxLength });
+        var maskTensor = new DenseTensor<long>(attentionMask, new[] { 1, _maxLength });
 
         // Run inference
         var inputs = new List<NamedOnnxValue>
         {
-            NamedOnnxValue.CreateFromTensor("input_ids", inputIds),
-            NamedOnnxValue.CreateFromTensor("attention_mask", attentionMask)
+            NamedOnnxValue.CreateFromTensor("input_ids", inputTensor),
+            NamedOnnxValue.CreateFromTensor("attention_mask", maskTensor)
         };
         using var results = _session.Run(inputs);
         var logits = results.First().AsTensor<float>().ToArray();
 
-        // Softmax to probabilities
+        // Softmax
         var probs = Softmax(logits);
         var maxIdx = Array.IndexOf(probs, probs.Max());
         var intent = _intentLabels[maxIdx];
         var confidence = probs[maxIdx];
 
-        // Determine risk tags based on intent
         var riskTags = intent switch
         {
             "bulk_export" => new[] { "data_exfiltration" },
@@ -68,19 +86,20 @@ public class LocalOnnxProvider: ISemanticProvider
             Confidence = confidence,
             RiskTags = riskTags,
             FallbackSafe = confidence < 0.7,
-            Explanation = $"ONNX model prediction: {intent} ({confidence:F2})"
+            Explanation = $"Local ONNX: {intent} ({confidence:F2})"
         };
 
-        // Cache for 5 minutes (since request bodies may repeat)
-        _cache.Set(cacheKey, result, TimeSpan.FromMinutes(5));
+        await _cacheProvider.SetAsync(cacheKey, result);
         return result;
     }
 
     private static float[] Softmax(float[] logits)
     {
         var max = logits.Max();
-        var exp = logits.Select(x => Math.Exp(x - max)).ToArray();
+        var exp = logits.Select(x => (float)Math.Exp(x - max)).ToArray();
         var sum = exp.Sum();
-        return exp.Select(x => (float)(x / sum)).ToArray();
+        return exp.Select(x => x / sum).ToArray();
     }
+
+    private static string ComputeHash(string input) => Convert.ToBase64String(System.Security.Cryptography.SHA256.HashData(Encoding.UTF8.GetBytes(input)));
 }

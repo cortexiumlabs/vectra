@@ -1,28 +1,68 @@
-﻿using Microsoft.ML.OnnxRuntime.Tensors;
+﻿using System.Text.RegularExpressions;
 
 namespace Vectra.Infrastructure.Semantic.Providers.LocalBert;
 
 public class BertTokenizer
 {
     private readonly Dictionary<string, int> _vocab;
+    private readonly List<string> _tokenStrings;
+    private readonly Regex _whitespaceRegex = new Regex(@"\s+");
+    private readonly Regex _punctuationRegex = new Regex(@"\p{P}");
+
     public BertTokenizer(string vocabPath)
     {
-        _vocab = File.ReadLines(vocabPath)
-            .Select((line, idx) => (line, idx))
-            .ToDictionary(x => x.line, x => x.idx);
+        var lines = File.ReadAllLines(vocabPath);
+        _vocab = new Dictionary<string, int>();
+        for (int i = 0; i < lines.Length; i++)
+            _vocab[lines[i]] = i;
+        _tokenStrings = lines.ToList();
     }
 
-    public (Tensor<int> inputIds, Tensor<int> attentionMask) Tokenize(string text, int maxLength = 128)
+    public (long[] InputIds, long[] AttentionMask) Tokenize(string text, int maxLength = 128)
     {
-        // Basic tokenization (for production, use a proper tokenizer library)
-        var tokens = new List<string> { "[CLS]" };
-        tokens.AddRange(text.Split(' ').Select(w => _vocab.ContainsKey(w) ? w : "[UNK]"));
-        tokens.Add("[SEP]");
+        // Basic cleaning
+        text = text.Trim().ToLowerInvariant();
+        // Split on whitespace and punctuation (simplified)
+        var tokens = new List<string>();
+        foreach (var word in _whitespaceRegex.Split(text))
+        {
+            if (string.IsNullOrEmpty(word)) continue;
+            // Keep punctuation as separate tokens (simple approach)
+            var chars = word.ToCharArray();
+            foreach (var c in chars)
+            {
+                if (char.IsPunctuation(c))
+                {
+                    if (tokens.Count > 0 && !char.IsPunctuation(tokens.Last().Last()))
+                        tokens.Add(c.ToString());
+                    else
+                        tokens.Add(c.ToString());
+                }
+                else
+                {
+                    // add to last token if it's not punctuation
+                    if (tokens.Count > 0 && !char.IsPunctuation(tokens.Last().Last()))
+                        tokens[^1] += c;
+                    else
+                        tokens.Add(c.ToString());
+                }
+            }
+        }
 
-        var inputIds = tokens.Select(t => _vocab.GetValueOrDefault(t, _vocab["[UNK]"])).ToArray();
-        var attentionMask = inputIds.Select(_ => 1).ToArray();
+        // WordPiece tokenization
+        var wordPieceTokens = new List<string> { "[CLS]" };
+        foreach (var token in tokens)
+        {
+            var subTokens = TokenizeWord(token);
+            wordPieceTokens.AddRange(subTokens);
+        }
+        wordPieceTokens.Add("[SEP]");
 
-        // Pad/truncate
+        // Convert to ids
+        var inputIds = wordPieceTokens.Select(t => (long)_vocab.GetValueOrDefault(t, _vocab["[UNK]"])).ToArray();
+        var attentionMask = inputIds.Select(_ => 1L).ToArray();
+
+        // Pad or truncate
         if (inputIds.Length > maxLength)
         {
             inputIds = inputIds.Take(maxLength).ToArray();
@@ -31,11 +71,36 @@ public class BertTokenizer
         else
         {
             var padLength = maxLength - inputIds.Length;
-            inputIds = inputIds.Concat(Enumerable.Repeat(0, padLength)).ToArray();
-            attentionMask = attentionMask.Concat(Enumerable.Repeat(0, padLength)).ToArray();
+            inputIds = inputIds.Concat(Enumerable.Repeat(0L, padLength)).ToArray();
+            attentionMask = attentionMask.Concat(Enumerable.Repeat(0L, padLength)).ToArray();
         }
 
-        var shape = new[] { 1, maxLength };
-        return (new DenseTensor<int>(inputIds, shape), new DenseTensor<int>(attentionMask, shape));
+        return (inputIds, attentionMask);
+    }
+
+    private List<string> TokenizeWord(string word)
+    {
+        var tokens = new List<string>();
+        while (!string.IsNullOrEmpty(word))
+        {
+            var found = false;
+            for (int i = word.Length; i >= 1; i--)
+            {
+                var sub = word.Substring(0, i);
+                if (_vocab.ContainsKey(sub))
+                {
+                    tokens.Add(sub);
+                    word = word.Substring(i);
+                    found = true;
+                    break;
+                }
+            }
+            if (!found)
+            {
+                tokens.Add("[UNK]");
+                break;
+            }
+        }
+        return tokens;
     }
 }

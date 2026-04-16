@@ -20,6 +20,7 @@ using Vectra.Infrastructure.Risk;
 using Vectra.Infrastructure.Risk.Calculators;
 using Vectra.Infrastructure.Security;
 using Vectra.Infrastructure.Semantic;
+using Vectra.Infrastructure.Semantic.Providers.LocalBert;
 using Vectra.Infrastructure.Serializations.Json;
 
 namespace Vectra.Infrastructure;
@@ -42,8 +43,8 @@ public static class DependencyInjection
         // Risk scoring
         services.AddScoped<IRiskScoringService, RiskScoringService>();
 
-        // Semantic engine (stub)
-        services.AddScoped<ISemanticProvider, SemanticEngineStub>();
+        // Semantic providers
+        services.AddScoped<ISemanticProvider, LocalOnnxProvider>();
 
         services.AddMemoryCache();
 
