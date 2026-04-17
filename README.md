@@ -3,9 +3,13 @@
   <h2>VECTRA — Intent-Aware Governance Gateway</h2>
 
   [![dotnet][dotnet-budge]][dotnet-url]
-  [![Quality Gate Status][sonarcloud-quality-gate-badge]][sonarcloud-quality-gate-url]
-  [![License: Apache 2.0][apache-badge]][apache-url]
   [![Build Status][actions-badge]][actions-url]
+  [![Quality Gate Status][sonarcloud-quality-gate-badge]][sonarcloud-quality-gate-url]
+  [![Reliability Gate Status][sonarcloud-reliability-gate-badge]][sonarcloud-reliability-gate-url]
+  [![Maintainability Gate Status][sonarcloud-maintainability-gate-badge]][sonarcloud-maintainability-gate-url]
+  [![Security Gate Status][sonarcloud-security-gate-badge]][sonarcloud-security-gate-url]
+  [![Vulnerabilities Gate Status][sonarcloud-vulnerabilities-gate-badge]][sonarcloud-vulnerabilities-gate-url]
+  [![License: Apache 2.0][apache-badge]][apache-url]
   [![FOSSA License Status][fossa-license-badge]][fossa-license-url]
   [![FOSSA Security Status][fossa-security-badge]][fossa-security-url]
   [![Good First Issues][github-good-first-issue-badge]][github-good-first-issue-url]
@@ -44,8 +48,16 @@ Your support helps others discover the project and drives continued innovation.
 [actions-url]: https://github.com/cortexium-labs/vectra/actions?workflow=build
 [github-good-first-issue-badge]: https://img.shields.io/github/issues/cortexium-labs/vectra/good%20first%20issue?style=flat-square&logo=github&label=good%20first%20issues
 [github-good-first-issue-url]: https://github.com/cortexium-labs/vectra/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22
-[sonarcloud-quality-gate-badge]: https://sonarcloud.io/api/project_badges/measure?project=cortexium-labs_vectra&metric=alert_status
+[sonarcloud-quality-gate-badge]: https://sonarcloud.io/api/project_badges/measure?project=cortexium-labs_vectra&metric=alert_status&token=0b5b5ca3c5f12401df0abb73c369c8a620fc174a
 [sonarcloud-quality-gate-url]: https://sonarcloud.io/summary/new_code?id=cortexium-labs_vectra
+[sonarcloud-reliability-gate-badge]: https://sonarcloud.io/api/project_badges/measure?project=cortexium-labs_vectra&metric=reliability_rating&token=0b5b5ca3c5f12401df0abb73c369c8a620fc174a
+[sonarcloud-reliability-gate-url]: https://sonarcloud.io/summary/new_code?id=cortexium-labs_vectra
+[sonarcloud-maintainability-gate-badge]: https://sonarcloud.io/api/project_badges/measure?project=cortexium-labs_vectra&metric=sqale_rating&token=0b5b5ca3c5f12401df0abb73c369c8a620fc174a
+[sonarcloud-maintainability-gate-url]: https://sonarcloud.io/summary/new_code?id=cortexium-labs_vectra
+[sonarcloud-security-gate-badge]: https://sonarcloud.io/api/project_badges/measure?project=cortexium-labs_vectra&metric=security_rating&token=0b5b5ca3c5f12401df0abb73c369c8a620fc174a
+[sonarcloud-security-gate-url]: https://sonarcloud.io/summary/new_code?id=cortexium-labs_vectra
+[sonarcloud-vulnerabilities-gate-badge]: https://sonarcloud.io/api/project_badges/measure?project=cortexium-labs_vectra&metric=vulnerabilities&token=0b5b5ca3c5f12401df0abb73c369c8a620fc174a
+[sonarcloud-vulnerabilities-gate-url]: https://sonarcloud.io/summary/new_code?id=cortexium-labs_vectra
 [fossa-license-badge]: https://app.fossa.com/api/projects/git%2Bgithub.com%2Fcortexium-labs%2Fvectra.svg?type=shield&issueType=license
 [fossa-license-url]: https://app.fossa.com/projects/git%2Bgithub.com%2Fcortexium-labs%2Fvectra?ref=badge_shield&issueType=license
 [fossa-security-badge]: https://app.fossa.com/api/projects/git%2Bgithub.com%2Fcortexium-labs%2Fvectra.svg?type=shield&issueType=security
