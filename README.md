@@ -7,8 +7,6 @@
   [![License: Apache 2.0][apache-badge]][apache-url]
   [![Build Status][actions-badge]][actions-url]
   [![FOSSA License Status][fossa-license-badge]][fossa-license-url]
-  [![FOSSA License Status][fossa-license-badge]][fossa-license-url]
-  [![FOSSA Security Status][fossa-security-badge]][fossa-security-url]
   [![FOSSA Security Status][fossa-security-badge]][fossa-security-url]
   [![Good First Issues][github-good-first-issue-badge]][github-good-first-issue-url]
 </div>
