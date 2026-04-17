@@ -32,10 +32,7 @@ public class BertTokenizer
             {
                 if (char.IsPunctuation(c))
                 {
-                    if (tokens.Count > 0 && !char.IsPunctuation(tokens.Last().Last()))
-                        tokens.Add(c.ToString());
-                    else
-                        tokens.Add(c.ToString());
+                    tokens.Add(c.ToString());
                 }
                 else
                 {
