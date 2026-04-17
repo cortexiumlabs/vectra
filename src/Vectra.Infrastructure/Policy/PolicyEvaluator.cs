@@ -116,6 +116,6 @@ public static class PolicyEvaluator
 
     private static bool RegexMatch(object? str, object? pattern)
     {
-        return str is string s && pattern is string p && Regex.IsMatch(s, p);
+        return str is string s && pattern is string p && Regex.IsMatch(s, p, RegexOptions.IgnoreCase, TimeSpan.FromSeconds(3));
     }
 }
