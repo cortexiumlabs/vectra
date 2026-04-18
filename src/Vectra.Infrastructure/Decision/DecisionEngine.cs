@@ -14,44 +14,118 @@ namespace Vectra.Infrastructure.Decision;
 
 public class DecisionEngine : IDecisionEngine
 {
-    private readonly IOptions<SemanticConfiguration> _semanticOptions;
-    private readonly IOptions<HumanInTheLoopConfiguration> _hitlOptions;
-    private readonly IOptions<PolicyConfiguration> _policyOptions;
+    private readonly SemanticConfiguration _semantic;
+    private readonly HumanInTheLoopConfiguration _hitl;
+    private readonly PolicyConfiguration _policy;
+
     private readonly IPolicyProvider _policyProvider;
     private readonly IRiskScoringService _riskScoring;
     private readonly ISemanticProvider _semanticProvider;
-    private readonly IAgentHistoryRepository _historyRecorder;
-    private readonly IAuditRepository _auditRepository;
+    private readonly IAgentHistoryRepository _history;
+    private readonly IAuditRepository _audit;
     private readonly IClock _clock;
     private readonly ILogger<DecisionEngine> _logger;
 
     public DecisionEngine(
-        IOptions<SemanticConfiguration> options,
-        IOptions<HumanInTheLoopConfiguration> hitlOptions,
-        IOptions<PolicyConfiguration> policyOptions,
-        IPolicyProvider policyEngine, 
-        IRiskScoringService riskScoring, 
+        IOptions<SemanticConfiguration> semantic,
+        IOptions<HumanInTheLoopConfiguration> hitl,
+        IOptions<PolicyConfiguration> policy,
+        IPolicyProvider policyProvider,
+        IRiskScoringService riskScoring,
         ISemanticProvider semanticProvider,
-        IAgentHistoryRepository historyRecorder,
-        IAuditRepository auditRepository,
+        IAgentHistoryRepository history,
+        IAuditRepository audit,
         IClock clock,
         ILogger<DecisionEngine> logger)
     {
-        _semanticOptions = options ?? throw new ArgumentNullException(nameof(options));
-        _hitlOptions = hitlOptions ?? throw new ArgumentNullException(nameof(hitlOptions));
-        _policyOptions = policyOptions ?? throw new ArgumentNullException(nameof(policyOptions));
-        _policyProvider = policyEngine ?? throw new ArgumentNullException(nameof(policyEngine));
+        _semantic = semantic?.Value ?? throw new ArgumentNullException(nameof(semantic));
+        _hitl = hitl?.Value ?? throw new ArgumentNullException(nameof(hitl));
+        _policy = policy?.Value ?? throw new ArgumentNullException(nameof(policy));
+
+        _policyProvider = policyProvider ?? throw new ArgumentNullException(nameof(policyProvider));
         _riskScoring = riskScoring ?? throw new ArgumentNullException(nameof(riskScoring));
         _semanticProvider = semanticProvider ?? throw new ArgumentNullException(nameof(semanticProvider));
-        _historyRecorder = historyRecorder ?? throw new ArgumentNullException(nameof(historyRecorder));
-        _auditRepository = auditRepository ?? throw new ArgumentNullException(nameof(auditRepository));
+        _history = history ?? throw new ArgumentNullException(nameof(history));
+        _audit = audit ?? throw new ArgumentNullException(nameof(audit));
         _clock = clock ?? throw new ArgumentNullException(nameof(clock));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
-    public async Task<DecisionResult> EvaluateAsync(RequestContext context, CancellationToken cancellationToken)
+    public async Task<DecisionResult> EvaluateAsync(RequestContext context, CancellationToken cancellationToken = default)
     {
-        var policyInput = new Dictionary<string, object>
+        // 1. Policy
+        var policyDecision = await EvaluatePolicyAsync(context, cancellationToken);
+        if (policyDecision != null)
+            return await FinalizeAsync(context, policyDecision, cancellationToken);
+
+        // 2. Risk
+        var riskScore = await _riskScoring.ComputeRiskScoreAsync(context, cancellationToken);
+        var riskDecision = EvaluateRisk(riskScore);
+        if (riskDecision != null)
+            return await FinalizeAsync(context, riskDecision, cancellationToken);
+
+        // 3. Semantic
+        var semanticDecision = await EvaluateSemanticAsync(context, cancellationToken);
+        if (semanticDecision != null)
+            return await FinalizeAsync(context, semanticDecision, cancellationToken);
+
+        // 4. Allow
+        return await FinalizeAsync(context, DecisionResult.Allow(riskScore), cancellationToken);
+    }
+
+    private async Task<DecisionResult?> EvaluatePolicyAsync(RequestContext context, CancellationToken cancellationToken = default)
+    {
+        if (_policy.Enabled == false)
+            return null;
+
+        var input = BuildPolicyInput(context);
+        var result = await _policyProvider.EvaluateAsync(context.PolicyName, input, cancellationToken);
+
+        if (result.IsDenied)
+            return DecisionResult.Deny(result.Reason ?? "Policy denied", 0);
+
+        if (result.IsHitl)
+            return DecisionResult.Hitl(result.Reason ?? "Policy requires HITL", 0);
+
+        return null;
+    }
+
+    private DecisionResult? EvaluateRisk(double riskScore)
+    {
+        var threshold = _hitl.Threshold ?? 0.8;
+
+        if (riskScore > threshold)
+            return DecisionResult.Hitl($"High risk score: {riskScore:F2}", riskScore);
+
+        return null;
+    }
+
+    private async Task<DecisionResult?> EvaluateSemanticAsync(RequestContext context, CancellationToken ct)
+    {
+        if (_semantic.Enabled == false)
+            return null;
+
+        var result = await _semanticProvider.AnalyzeAsync(context.Body, context.Path, ct);
+        var threshold = _semantic.ConfidenceThreshold ?? 0.7;
+
+        if (result.Confidence >= threshold)
+            return null;
+
+        if (_semantic.AllowLowConfidence == true)
+        {
+            _logger.LogWarning(
+                "Low semantic confidence ({Confidence}) allowed by configuration",
+                result.Confidence);
+            return null;
+        }
+
+        return DecisionResult.Hitl(
+            $"Low semantic confidence: {result.Confidence:F2}",
+            result.Confidence);
+    }
+
+    private static Dictionary<string, object> BuildPolicyInput(RequestContext context)
+        => new()
         {
             ["method"] = context.Method,
             ["path"] = context.Path,
@@ -63,92 +137,56 @@ public class DecisionEngine : IDecisionEngine
             }
         };
 
-        var policyEnabled = _policyOptions.Value.Enabled ?? true;
-        if (policyEnabled)
-        {
-            var policyDecision = await _policyProvider.EvaluateAsync(context.PolicyName, policyInput, cancellationToken);
-            if (policyDecision.IsDenied || policyDecision.IsHitl)
-            {
-                var decision = policyDecision.IsDenied 
-                    ? DecisionResult.Deny(policyDecision.Reason ?? "Policy denied", 0.0)
-                    : DecisionResult.Hitl(policyDecision.Reason ?? "Policy requires HITL", 0.0);
-                await RecordHistoryAsync(context, decision, cancellationToken);
-                await RecordAuditAsync(context, decision, cancellationToken);
-                return decision;
-            }
-        }
-
-        var riskScore = await _riskScoring.ComputeRiskScoreAsync(context, cancellationToken);
-        var hitlThreshold = _hitlOptions.Value.Threshold ?? 0.8;
-        if (riskScore > hitlThreshold)
-        {
-            var riskDecision = DecisionResult.Hitl($"High risk score: {riskScore:F2}", riskScore);
-            await RecordHistoryAsync(context, riskDecision, cancellationToken);
-            await RecordAuditAsync(context, riskDecision, cancellationToken);
-            return riskDecision;
-        }
-
-        var semanticEnabled = _semanticOptions.Value.Enabled ?? true;
-        SemanticAnalysisResult? semantic = null;
-        if (semanticEnabled)
-        {
-            semantic = await _semanticProvider.AnalyzeAsync(context.Body, context.Path, cancellationToken);
-            var confidenceThreshold = _semanticOptions.Value.ConfidenceThreshold ?? 0.7;
-
-            if (semantic.Confidence < confidenceThreshold)
-            {
-                if (_semanticOptions.Value.AllowLowConfidence == true)
-                {
-                    _logger.LogWarning("Low confidence semantic ({Confidence}), but allowing due to configuration", semantic.Confidence);
-                }
-                else
-                {
-                    var semanticDecision = DecisionResult.Hitl($"Low semantic confidence: {semantic.Confidence:F2}", semantic.Confidence);
-                    await RecordHistoryAsync(context, semanticDecision, cancellationToken);
-                    await RecordAuditAsync(context, semanticDecision, cancellationToken);
-                    return semanticDecision;
-                }
-            }
-        }
-
-        var allowDecision = DecisionResult.Allow(riskScore);
-        await RecordHistoryAsync(context, allowDecision, cancellationToken);
-        await RecordAuditAsync(context, allowDecision, cancellationToken);
-        return allowDecision;
-    }
-
-    private async Task RecordHistoryAsync(
-        RequestContext context, 
+    private async Task<DecisionResult> FinalizeAsync(
+        RequestContext context,
         DecisionResult decision,
         CancellationToken ct)
     {
-        var wasViolation = decision.IsDenied || decision.IsHitl;
+        await RecordHistoryAsync(context, decision, ct);
+        await RecordAuditAsync(context, decision, ct);
+        return decision;
+    }
+
+    private async Task RecordHistoryAsync(
+        RequestContext context,
+        DecisionResult decision,
+        CancellationToken cancellationToken = default)
+    {
+        var violation = decision.IsDenied || decision.IsHitl;
+
         try
         {
-            await _historyRecorder.RecordRequestAsync(context.AgentId, wasViolation, decision.TrustScore, ct);
+            await _history.RecordRequestAsync(
+                context.AgentId,
+                violation,
+                decision.TrustScore,
+                cancellationToken);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Failed to record agent history for {AgentId}", context.AgentId);
+            _logger.LogError(ex,
+                "Failed to record agent history for {AgentId}",
+                context.AgentId);
         }
     }
 
     private async Task RecordAuditAsync(
-        RequestContext context, 
-        DecisionResult decision, 
-        CancellationToken cancellationToken)
+        RequestContext context,
+        DecisionResult decision,
+        CancellationToken cancellationToken = default)
     {
-        var auditLog = new AuditTrail
+        var audit = new AuditTrail
         {
             AgentId = context.AgentId,
             Action = $"{context.Method} {context.Path}",
             TargetUrl = context.Path,
             Status = decision.Type.ToString(),
-            RiskScore = context.TrustScore,
+            RiskScore = decision.TrustScore, // FIXED
             Intent = context.Body,
             Reason = decision.Reason,
-            Timestamp = null
+            Timestamp = _clock.UtcNow
         };
-        await _auditRepository.AddAsync(auditLog, cancellationToken);
+
+        await _audit.AddAsync(audit, cancellationToken);
     }
 }
