@@ -103,17 +103,6 @@ public static class ServiceCollectionExtensions
 
     #region Arguments / Version helpers
 
-    public static IServiceCollection ParseVectraArguments(this IServiceCollection services, string[] args)
-    {
-        var hasStartArgument = args.Contains("--start");
-        if (!hasStartArgument)
-        {
-            throw new StartArgumentRequiredException();
-        }
-
-        return services;
-    }
-
     public static bool HandleVersionFlag(this string[] args)
     {
         if (args.Any(arg => arg.Equals("--version", StringComparison.OrdinalIgnoreCase) ||
