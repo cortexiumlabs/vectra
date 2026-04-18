@@ -40,7 +40,7 @@ jobs:
 
       - name: Run Tests with Coverage
         run: |
-          dotnet test tests\Vectra.BuildingBlocks.UnitTests\Vectra.BuildingBlocks.UnitTests.csproj `
+          dotnet test tests\ `
             --collect:"XPlat Code Coverage" `
             --results-directory ./coverage `
             -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover
