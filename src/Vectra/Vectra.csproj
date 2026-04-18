@@ -24,6 +24,11 @@
 	<ItemGroup>
 		<PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.5" />
 		<PackageReference Include="Swashbuckle.AspNetCore" Version="10.1.7" />
+		<PackageReference Include="System.CommandLine" Version="2.0.5" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<EmbeddedResource Include="Resources\splash.txt" />
 	</ItemGroup>
 
 	<ItemGroup>
