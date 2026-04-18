@@ -1,6 +1,8 @@
-﻿//namespace Vectra.Application.Abstractions.Persistence;
+﻿using Vectra.Domain.AuditTrails;
 
-//public interface IAuditRepository
-//{
-//    Task AddAsync(AuditLog log, CancellationToken cancellationToken = default);
-//}
+namespace Vectra.Application.Abstractions.Persistence;
+
+public interface IAuditRepository
+{
+    Task AddAsync(AuditTrail auditTrail, CancellationToken cancellationToken = default);
+}
