@@ -4,6 +4,7 @@ using Microsoft.Extensions.Options;
 using Serilog;
 using Serilog.Extensions.Logging;
 using StackExchange.Redis;
+using Vectra.Application.Abstractions.Caches;
 using Vectra.Application.Abstractions.Dispatchers;
 using Vectra.Application.Abstractions.Executions;
 using Vectra.Application.Abstractions.Security;
@@ -106,6 +107,7 @@ public static class DependencyInjection
     {
         services.AddSingleton<ICacheProviderFactory, CacheProviderFactory>();
         services.AddSingleton<ICacheService, CacheService>();
+        services.AddSingleton<IPolicyCacheService, PolicyCacheService>();
 
         services.AddSingleton<IConnectionMultiplexer>(sp =>
         {

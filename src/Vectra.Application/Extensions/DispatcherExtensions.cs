@@ -4,6 +4,8 @@ using Vectra.Application.Features.Agents.AssignPolicy;
 using Vectra.Application.Features.Agents.DeleteAgent;
 using Vectra.Application.Features.Agents.RegisterAgent;
 using Vectra.Application.Features.Authentications.GenerateToken;
+using Vectra.Application.Features.Policies.PolicyDetails;
+using Vectra.Application.Features.Policies.PoliciesList;
 using Vectra.BuildingBlocks.Results;
 
 namespace Vectra.Application.Extensions;
@@ -66,6 +68,31 @@ public static class DispatcherExtensions
         CancellationToken cancellationToken)
     {
         return dispatcher.Dispatch(request, cancellationToken);
+    }
+
+    #endregion
+
+    #region Policies
+
+    public static Task<PaginatedResult<PoliciesListResult>> PoliciesList(
+        this IDispatcher dispatcher,
+        int page,
+        int pageSize,
+        CancellationToken cancellationToken)
+    {
+        return dispatcher.Dispatch(new PoliciesListRequest
+        {
+            Page = page,
+            PageSize = pageSize
+        }, cancellationToken);
+    }
+
+    public static Task<Result<PolicyDetailsResult>> PolicyDetails(
+        this IDispatcher dispatcher,
+        string name,
+        CancellationToken cancellationToken)
+    {
+        return dispatcher.Dispatch(new PolicyDetailsRequest { Name = name }, cancellationToken);
     }
 
     #endregion
