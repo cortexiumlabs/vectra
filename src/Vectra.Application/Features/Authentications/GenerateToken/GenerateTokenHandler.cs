@@ -33,14 +33,14 @@ internal class GenerateTokenHandler : IActionHandler<GenerateTokenRequest, Resul
     {
         var agent = await _agentRepository.GetByIdAsync(request.AgentId, cancellationToken);
         if (agent == null || agent.Status != AgentStatus.Active)
-            return Result<GenerateTokenResult>.Failure(Error.NotFound(
+            return await Result<GenerateTokenResult>.FailureAsync(Error.NotFound(
                 ApplicationErrorCodes.AgentNotFound, "Agent not found or inactive"));
 
         if (!_secretHasher.Verify(request.ClientSecret, agent.ClientSecretHash))
-            return Result<GenerateTokenResult>.Failure(Error.Unauthorized(
+            return await Result<GenerateTokenResult>.FailureAsync(Error.Unauthorized(
                 ApplicationErrorCodes.InvalidClientSession, "Invalid client secret"));
 
         var token = _tokenService.GenerateToken(agent);
-        return Result<GenerateTokenResult>.Success(new GenerateTokenResult { AccessToken = token });
+        return await Result<GenerateTokenResult>.SuccessAsync(new GenerateTokenResult { AccessToken = token });
     }
 }

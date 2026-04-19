@@ -23,6 +23,6 @@ internal class DeleteAgentHandler : IActionHandler<DeleteAgentRequest, Result<Vo
     {
         var agentId = Guid.Parse(request.AgentId);
         await _agentRepository.DeleteAsync(agentId, cancellationToken);
-        return Result<Void>.Success(new Void());
+        return await Result<Void>.SuccessAsync(new Void());
     }
 }

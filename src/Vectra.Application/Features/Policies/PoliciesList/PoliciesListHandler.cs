@@ -24,6 +24,6 @@ internal class PoliciesListHandler : IActionHandler<PoliciesListRequest, Paginat
             Owner = p.Owner
         }).ToList();
 
-        return PaginatedResult<PoliciesListResult>.Success(items, request.Page, request.PageSize, totalCount);
+        return await PaginatedResult<PoliciesListResult>.SuccessAsync(items, request.Page, request.PageSize, totalCount);
     }
 }

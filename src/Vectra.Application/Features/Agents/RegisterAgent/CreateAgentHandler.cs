@@ -29,6 +29,6 @@ internal class CreateAgentHandler : IActionHandler<CreateAgentRequest, Result<Cr
         var agent = new Agent(request.Name, request.OwnerId, clientSecretHash);
         await _agentRepository.AddAsync(agent, cancellationToken);
 
-        return Result<CreateAgentResult>.Success(new CreateAgentResult { AgentId = agent.Id });
+        return await Result<CreateAgentResult>.SuccessAsync(new CreateAgentResult { AgentId = agent.Id });
     }
 }

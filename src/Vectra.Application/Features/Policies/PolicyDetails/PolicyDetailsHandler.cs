@@ -29,7 +29,7 @@ internal class PolicyDetailsHandler : IActionHandler<PolicyDetailsRequest, Resul
         if (policy is null)
         {
             _logger.LogWarning("Policy {PolicyName} was not found", request.Name);
-            return Result<PolicyDetailsResult>.Failure(
+            return await Result<PolicyDetailsResult>.FailureAsync(
                 Error.NotFound(ApplicationErrorCodes.PolicyNotFound, $"Policy '{request.Name}' was not found."));
         }
 
@@ -43,6 +43,6 @@ internal class PolicyDetailsHandler : IActionHandler<PolicyDetailsRequest, Resul
             Rules = policy.Rules
         };
 
-        return Result<PolicyDetailsResult>.Success(result);
+        return await Result<PolicyDetailsResult>.SuccessAsync(result);
     }
 }

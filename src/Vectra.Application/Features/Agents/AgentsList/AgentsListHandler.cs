@@ -31,6 +31,6 @@ internal class AgentsListHandler : IActionHandler<AgentsListRequest, PaginatedRe
             PolicyName = a.PolicyName
         }).ToList();
 
-        return PaginatedResult<AgentsListResult>.Success(items, request.Page, request.PageSize, totalCount);
+        return await PaginatedResult<AgentsListResult>.SuccessAsync(items, request.Page, request.PageSize, totalCount);
     }
 }

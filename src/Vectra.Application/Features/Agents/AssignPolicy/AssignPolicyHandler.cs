@@ -32,7 +32,7 @@ internal class AssignPolicyHandler : IActionHandler<AssignPolicyRequest, Result<
         {
             _logger.LogWarning("Agent with ID {AgentId} not found.", request.AgentId);
             var error = Error.NotFound(ApplicationErrorCodes.AgentNotFound, $"Agent with ID {request.AgentId} not found.");
-            return Result<Abstractions.Dispatchers.Void>.Failure(error);
+            return await Result<Abstractions.Dispatchers.Void>.FailureAsync(error);
         }
 
         var policyName = request.PolicyName;
@@ -41,11 +41,11 @@ internal class AssignPolicyHandler : IActionHandler<AssignPolicyRequest, Result<
         {
             _logger.LogWarning("Policy with name {PolicyName} not found.", request.PolicyName);
             var error = Error.NotFound(ApplicationErrorCodes.PolicyNotFound, $"Policy with name {request.PolicyName} not found.");
-            return Result<Abstractions.Dispatchers.Void>.Failure(error);
+            return await Result<Abstractions.Dispatchers.Void>.FailureAsync(error);
         }
 
         agent.PolicyName = policyName;
         await _agentRepository.UpdateAsync(agent, cancellationToken);
-        return Result<Abstractions.Dispatchers.Void>.Success(new Abstractions.Dispatchers.Void());
+        return await Result<Abstractions.Dispatchers.Void>.SuccessAsync(new Abstractions.Dispatchers.Void());
     }
 }
