@@ -40,7 +40,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
-        os_arch: [x64, arm, arm64]
+        os_arch: [x64, x86, arm, arm64]
         include:
           - os: ubuntu-latest
             kind: linux
@@ -56,6 +56,10 @@ jobs:
             os_arch: arm
           - os: macos-latest
             os_arch: arm
+          - os: macos-latest
+            os_arch: x86
+          - os: ubuntu-latest
+            os_arch: x86
     runs-on: ${{ matrix.os }}
     env:
       ARCHIVE_OUTDIR: dist/archives
