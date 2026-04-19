@@ -20,6 +20,13 @@
 		<DebugSymbols>False</DebugSymbols>
 		<DebugType>None</DebugType>
 	</PropertyGroup>
+
+	<ItemGroup>
+		<None Include="appsettings.Development.json">
+			<CopyToOutputDirectory>Never</CopyToOutputDirectory>
+			<CopyToPublishDirectory>Never</CopyToPublishDirectory>
+		</None>
+	</ItemGroup>
 	
 	<ItemGroup>
 		<PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.5" />
@@ -36,4 +43,11 @@
 		<ProjectReference Include="..\Vectra.Infrastructure\Vectra.Infrastructure.csproj" />
 	</ItemGroup>
 
+	<Target Name="RemoveDevAppSettingsFromPublish" AfterTargets="ComputeFilesToPublish">
+		<ItemGroup>
+			<ResolvedFileToPublish Remove="@(ResolvedFileToPublish)" Condition=" '%(ResolvedFileToPublish.RelativePath)' == 'appsettings.Development.json' " />
+		</ItemGroup>
+		<Message Text="Excluded appsettings.Development.json from publish output." Importance="Low" />
+	</Target>
+	
 </Project>
