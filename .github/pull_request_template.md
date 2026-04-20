@@ -28,6 +28,6 @@ Please make sure you've  completed the relevant tasks for this PR, out of the fo
 * [ ] Created/updated tests
 * [ ] Unit tests passing
 * [ ] End-to-end tests passing
-* [ ] Extended the documentation / Created issue in cortexium-labs/docs#<issue-number>
-* [ ] Specification has been updated / Created issue in cortexium-labs/docs#<issue-number>
-* [ ] Provided sample for the feature / Created issue in cortexium-labs/docs#<issue-number>
+* [ ] Extended the documentation / Created issue in cortexiumlabs/docs#<issue-number>
+* [ ] Specification has been updated / Created issue in cortexiumlabs/docs#<issue-number>
+* [ ] Provided sample for the feature / Created issue in cortexiumlabs/docs#<issue-number>
