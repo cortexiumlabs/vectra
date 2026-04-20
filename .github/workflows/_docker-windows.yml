@@ -45,11 +45,11 @@ jobs:
           docker build \
             --file ${{ matrix.dockerfile }} \
             --build-arg APP_VERSION="${{ inputs.release_version }}" \
-            --tag ${IMAGE}:windows-${{ matrix.suffix }}-tmp \
+            --tag ${IMAGE}:${{ inputs.release_version }}-windows-${{ matrix.suffix }} \
             .
-          docker push ${IMAGE}:windows-${{ matrix.suffix }}-tmp
+          docker push ${IMAGE}:${{ inputs.release_version }}-windows-${{ matrix.suffix }}
           mkdir -p "${{ runner.temp }}/digests"
-          docker inspect --format='{{index .RepoDigests 0}}' ${IMAGE}:windows-${{ matrix.suffix }}-tmp | awk -F@ '{print $2}' > "${{ runner.temp }}/digests/windows-${{ matrix.suffix }}"
+          docker inspect --format='{{index .RepoDigests 0}}' ${IMAGE}:${{ inputs.release_version }}-windows-${{ matrix.suffix }} | awk -F@ '{print $2}' > "${{ runner.temp }}/digests/windows-${{ matrix.suffix }}"
 
       - name: Upload Windows digest
         uses: actions/upload-artifact@v4

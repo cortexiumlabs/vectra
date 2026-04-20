@@ -43,11 +43,11 @@ jobs:
             --platform linux/amd64 \
             --file .docker/Dockerfile.linux \
             --build-arg APP_VERSION="${{ inputs.release_version }}" \
-            --tag ${IMAGE}:amd64-tmp \
+            --tag ${IMAGE}:${{ inputs.release_version }}-linux-amd64 \
             .
-          docker push ${IMAGE}:amd64-tmp
+          docker push ${IMAGE}:${{ inputs.release_version }}-linux-amd64
           mkdir -p /tmp/digests
-          docker inspect --format='{{index .RepoDigests 0}}' ${IMAGE}:amd64-tmp | awk -F@ '{print $2}' > /tmp/digests/linux-amd64
+          docker inspect --format='{{index .RepoDigests 0}}' ${IMAGE}:${{ inputs.release_version }}-linux-amd64 | awk -F@ '{print $2}' > /tmp/digests/linux-amd64
 
       - name: Build and push linux/arm64
         run: |
@@ -56,10 +56,10 @@ jobs:
             --platform linux/arm64 \
             --file .docker/Dockerfile.linux \
             --build-arg APP_VERSION="${{ inputs.release_version }}" \
-            --tag ${IMAGE}:arm64-tmp \
+            --tag ${IMAGE}:${{ inputs.release_version }}-linux-arm64 \
             .
-          docker push ${IMAGE}:arm64-tmp
-          docker inspect --format='{{index .RepoDigests 0}}' ${IMAGE}:arm64-tmp | awk -F@ '{print $2}' >> /tmp/digests/linux-arm64
+          docker push ${IMAGE}:${{ inputs.release_version }}-linux-arm64
+          docker inspect --format='{{index .RepoDigests 0}}' ${IMAGE}:${{ inputs.release_version }}-linux-arm64 | awk -F@ '{print $2}' >> /tmp/digests/linux-arm64
 
       - name: Upload linux digests
         uses: actions/upload-artifact@v4
