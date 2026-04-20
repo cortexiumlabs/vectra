@@ -38,8 +38,8 @@ All changes to the codebase are made through **Pull Requests (PRs)** — followi
 
 ## Reporting Bugs & Issues
 
-We use [GitHub Issues](https://github.com/cortexium-labs/vectra/issues) to track bugs, enhancements, and discussions.
-To report a bug, [open a new issue](https://github.com/cortexium-labs/vectra/issues/new) and include as much detail as possible:
+We use [GitHub Issues](https://github.com/cortexiumlabs/vectra/issues) to track bugs, enhancements, and discussions.
+To report a bug, [open a new issue](https://github.com/cortexiumlabs/vectra/issues/new) and include as much detail as possible:
 
 - **Summary** – A short description of the issue.  
 - **Steps to Reproduce** – Include exact steps or a minimal reproducible example (preferably in C#).  
