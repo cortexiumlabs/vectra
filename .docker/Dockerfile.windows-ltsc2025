@@ -1,6 +1,7 @@
 ARG APP_VERSION="1.0.0"
 
 FROM mcr.microsoft.com/dotnet/sdk:10.0-nanoserver-ltsc2025 AS build
+ARG APP_VERSION
 WORKDIR /src
 
 COPY Vectra.slnx .
@@ -18,7 +19,7 @@ COPY src/ src/
 RUN dotnet publish src/Vectra/Vectra.csproj -c Release -o /app/publish \
     /p:UseAppHost=false \
     /p:Version=%APP_VERSION% \
-    --runtime win-x64
+    --runtime "win-x64"
 
 FROM mcr.microsoft.com/dotnet/aspnet:10.0-nanoserver-ltsc2025 AS runtime
 WORKDIR /app
@@ -32,4 +33,4 @@ EXPOSE 7080
 
 USER ContainerUser
 
-ENTRYPOINT ["dotnet", "Vectra.dll"]
+ENTRYPOINT ["dotnet", "vectra.dll"]
