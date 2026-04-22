@@ -1,6 +1,6 @@
 ﻿namespace Vectra.BuildingBlocks.Configuration.Semantic;
 
-public class LocalOnnxConfiguration
+public class InternalOnnxConfiguration
 {
     public string ModelPath { get; set; } = string.Empty;
     public string VocabPath { get; set; } = string.Empty;

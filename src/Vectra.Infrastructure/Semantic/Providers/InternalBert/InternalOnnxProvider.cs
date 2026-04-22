@@ -9,26 +9,26 @@ using Vectra.Application.Abstractions.Executions;
 using Vectra.BuildingBlocks.Configuration.Semantic;
 using Vectra.Infrastructure.Caches;
 
-namespace Vectra.Infrastructure.Semantic.Providers.LocalBert;
+namespace Vectra.Infrastructure.Semantic.Providers.InternalBert;
 
-public class LocalOnnxProvider: ISemanticProvider
+public class InternalOnnxProvider : ISemanticProvider
 {
     private readonly InferenceSession _session;
     private readonly BertTokenizer _tokenizer;
     private readonly ICacheProvider _cacheProvider;
-    private readonly ILogger<LocalOnnxProvider> _logger;
+    private readonly ILogger<InternalOnnxProvider> _logger;
     private readonly string[] _intentLabels;
     private readonly int _maxLength;
 
-    public LocalOnnxProvider(
+    public InternalOnnxProvider(
         IOptions<SemanticConfiguration> options, 
         ICacheService cacheService, 
-        ILogger<LocalOnnxProvider> logger)
+        ILogger<InternalOnnxProvider> logger)
     {
-        var modelPath = options.Value.Providers.Local.ModelPath ?? "/Models/intent_model_onnx/model.onnx";
-        var vocabPath = options.Value.Providers.Local.VocabPath ?? "/Models/intent_model_onnx/vocab.txt";
-        var labelsPath = options.Value.Providers.Local.LabelsPath ?? "/Models/intent_model_onnx/labels.json";
-        _maxLength = options.Value.Providers.Local.MaxLength ?? 128;
+        var modelPath = options.Value.Providers.Internal.ModelPath ?? "/Models/intent_model_onnx/model.onnx";
+        var vocabPath = options.Value.Providers.Internal.VocabPath ?? "/Models/intent_model_onnx/vocab.txt";
+        var labelsPath = options.Value.Providers.Internal.LabelsPath ?? "/Models/intent_model_onnx/labels.json";
+        _maxLength = options.Value.Providers.Internal.MaxLength ?? 128;
 
         _session = new InferenceSession(modelPath);
         _tokenizer = new BertTokenizer(vocabPath);
@@ -46,7 +46,7 @@ public class LocalOnnxProvider: ISemanticProvider
             return new SemanticAnalysisResult { Intent = "unknown", Confidence = 0.5, FallbackSafe = true };
 
         // Cache by exact body
-        var cacheKey = $"semantic_local:{ComputeHash(requestBody)}";
+        var cacheKey = $"semantic_internal:{ComputeHash(requestBody)}";
         var (success, cached) = await _cacheProvider.TryGetValueAsync<SemanticAnalysisResult>(cacheKey);
         if (success)
             return cached!;
@@ -86,7 +86,7 @@ public class LocalOnnxProvider: ISemanticProvider
             Confidence = confidence,
             RiskTags = riskTags,
             FallbackSafe = confidence < 0.7,
-            Explanation = $"Local ONNX: {intent} ({confidence:F2})"
+            Explanation = $"Internal ONNX: {intent} ({confidence:F2})"
         };
 
         await _cacheProvider.SetAsync(cacheKey, result);

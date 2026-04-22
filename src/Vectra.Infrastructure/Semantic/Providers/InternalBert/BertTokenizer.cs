@@ -1,6 +1,6 @@
 ﻿using System.Text.RegularExpressions;
 
-namespace Vectra.Infrastructure.Semantic.Providers.LocalBert;
+namespace Vectra.Infrastructure.Semantic.Providers.InternalBert;
 
 public class BertTokenizer
 {
