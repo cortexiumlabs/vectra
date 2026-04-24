@@ -1,6 +1,8 @@
 ﻿using System.Text.Json;
+using Vectra.Application.Abstractions.CircuitBreaker;
 using Vectra.Application.Abstractions.Executions;
 using Vectra.Application.Abstractions.Persistence;
+using Vectra.Application.Abstractions.RateLimit;
 using Vectra.Application.Models;
 using Vectra.Domain.Agents;
 using Vectra.Infrastructure.Decision;
@@ -80,8 +82,26 @@ public class ProxyMiddleware
         }
 
         trustScore = agent.TrustScore;
-        
-        // 6. Build RequestContext for policy evaluation (read body)
+
+        // 6. Rate limiting – 429 if agent exceeded requests/min
+        var rateLimiter = context.RequestServices.GetRequiredService<IAgentRateLimiter>();
+        if (!await rateLimiter.IsAllowedAsync(agentId, context.RequestAborted))
+        {
+            context.Response.StatusCode = 429;
+            context.Response.Headers["Retry-After"] = "60";
+            await context.Response.WriteAsync("Rate limit exceeded. Try again in 60 seconds.");
+            return;
+        }
+
+        // 7. Circuit breaker – 503 if upstream is currently open
+        var circuitBreaker = context.RequestServices.GetRequiredService<ICircuitBreaker>();
+        var upstreamHost = targetUri.Host;
+        if (!circuitBreaker.IsAllowed(upstreamHost))
+        {
+            context.Response.StatusCode = 503;
+            await context.Response.WriteAsync($"Upstream '{upstreamHost}' is temporarily unavailable.");
+            return;
+        }
         context.Request.EnableBuffering();
         var requestContext = new RequestContext
         {
@@ -112,7 +132,7 @@ public class ProxyMiddleware
             return;
         }
 
-        // 7. Forward the request with CORRECT headers
+        // 8. Forward the request with CORRECT headers
         context.Request.Body.Position = 0;
 
         // Create a new HttpRequestMessage for manual forwarding (or use YARP with transforms)
@@ -142,10 +162,24 @@ public class ProxyMiddleware
         // proxyRequest.Headers.Add("X-API-Key", "your-secret-key");
 
         // Send the request
-        var response = await httpClient.SendAsync(proxyRequest, HttpCompletionOption.ResponseHeadersRead);
+        HttpResponseMessage response;
+        try
+        {
+            response = await httpClient.SendAsync(proxyRequest, HttpCompletionOption.ResponseHeadersRead);
+            circuitBreaker.RecordSuccess(upstreamHost);
+        }
+        catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException or TimeoutException)
+        {
+            circuitBreaker.RecordFailure(upstreamHost);
+            context.Response.StatusCode = 503;
+            await context.Response.WriteAsync($"Upstream '{upstreamHost}' is unavailable.");
+            return;
+        }
 
         // Copy response back
         context.Response.StatusCode = (int)response.StatusCode;
+        if ((int)response.StatusCode >= 500)
+            circuitBreaker.RecordFailure(upstreamHost);
         foreach (var header in response.Headers)
             context.Response.Headers[header.Key] = header.Value.ToString();
         foreach (var header in response.Content.Headers)

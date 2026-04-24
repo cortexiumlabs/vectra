@@ -27,6 +27,12 @@ using Vectra.Infrastructure.Semantic.Providers.Ollama;
 using Vectra.Infrastructure.Semantic.Providers.OpenAi;
 using Vectra.Infrastructure.Serializations.Json;
 using Vectra.Infrastructure.Semantic.Providers.InternalBert;
+using Vectra.Application.Abstractions.RateLimit;
+using Vectra.Application.Abstractions.CircuitBreaker;
+using Vectra.BuildingBlocks.Configuration.System.RateLimit;
+using Vectra.BuildingBlocks.Configuration.System.CircuitBreaker;
+using Vectra.Infrastructure.RateLimit;
+using Vectra.Infrastructure.CircuitBreaker;
 
 namespace Vectra.Infrastructure;
 
@@ -65,6 +71,12 @@ public static class DependencyInjection
         // YARP forwarder
         services.AddHttpForwarder();
         services.AddRiskScoring();
+
+        // Rate limiting
+        services.AddSingleton<IAgentRateLimiter, AgentRateLimiter>();
+
+        // Circuit breaker
+        services.AddSingleton<ICircuitBreaker, CircuitBreaker.CircuitBreaker>();
 
         return services;
     }
