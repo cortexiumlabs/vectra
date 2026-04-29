@@ -9,7 +9,6 @@ using Vectra.BuildingBlocks.Configuration.Policy;
 using Vectra.BuildingBlocks.Configuration.Security;
 using Vectra.BuildingBlocks.Configuration.Semantic;
 using Vectra.BuildingBlocks.Configuration.System;
-using Vectra.Exceptions;
 using Vectra.Infrastructure.Persistence.Sqlite;
 using Vectra.Services;
 
@@ -97,23 +96,6 @@ public static class ServiceCollectionExtensions
         });
 
         return services;
-    }
-
-    #endregion
-
-    #region Arguments / Version helpers
-
-    public static bool HandleVersionFlag(this string[] args)
-    {
-        if (args.Any(arg => arg.Equals("--version", StringComparison.OrdinalIgnoreCase) ||
-                            arg.Equals("-v", StringComparison.OrdinalIgnoreCase)))
-        {
-            var version = VectraVersion.GetApplicationVersion();
-            Console.WriteLine($"Vectra Version: {version}");
-            return true;
-        }
-
-        return false;
     }
 
     #endregion
