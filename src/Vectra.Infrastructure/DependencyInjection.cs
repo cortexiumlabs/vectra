@@ -29,10 +29,7 @@ using Vectra.Infrastructure.Serializations.Json;
 using Vectra.Infrastructure.Semantic.Providers.InternalBert;
 using Vectra.Application.Abstractions.RateLimit;
 using Vectra.Application.Abstractions.CircuitBreaker;
-using Vectra.BuildingBlocks.Configuration.System.RateLimit;
-using Vectra.BuildingBlocks.Configuration.System.CircuitBreaker;
 using Vectra.Infrastructure.RateLimit;
-using Vectra.Infrastructure.CircuitBreaker;
 
 namespace Vectra.Infrastructure;
 

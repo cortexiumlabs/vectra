@@ -8,13 +8,13 @@ public class BertTokenizer
     private readonly List<string> _tokenStrings;
     private readonly Regex _whitespaceRegex = new Regex(@"\s+", RegexOptions.None, TimeSpan.FromSeconds(3));
 
-    public BertTokenizer(string vocabPath)
+    /// <summary>Initializes the tokenizer from in-memory vocab lines.</summary>
+    public BertTokenizer(string[] vocabLines)
     {
-        var lines = File.ReadAllLines(vocabPath);
-        _vocab = new Dictionary<string, int>();
-        for (int i = 0; i < lines.Length; i++)
-            _vocab[lines[i]] = i;
-        _tokenStrings = lines.ToList();
+        _vocab = new Dictionary<string, int>(vocabLines.Length);
+        for (int i = 0; i < vocabLines.Length; i++)
+            _vocab[vocabLines[i]] = i;
+        _tokenStrings = vocabLines.ToList();
     }
 
     public (long[] InputIds, long[] AttentionMask) Tokenize(string text, int maxLength = 128)
