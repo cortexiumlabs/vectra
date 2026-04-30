@@ -16,10 +16,14 @@ internal static class ModelPackageLoader
         var packagePath = config.PackagePath
             ?? throw new InvalidOperationException("Internal ONNX model PackagePath is not configured.");
 
-        if (!File.Exists(packagePath))
-            throw new FileNotFoundException("Model package not found.", packagePath);
+        string fullPath = Path.IsPathRooted(packagePath)
+            ? packagePath
+            : Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, packagePath));
 
-        var packageBytes = File.ReadAllBytes(packagePath);
+        if (!File.Exists(fullPath))
+            throw new FileNotFoundException("Model package not found.", fullPath);
+
+        var packageBytes = File.ReadAllBytes(fullPath);
         var isPro = string.Equals(
             (config.ModelType ?? string.Empty).Trim(),
             "Pro",

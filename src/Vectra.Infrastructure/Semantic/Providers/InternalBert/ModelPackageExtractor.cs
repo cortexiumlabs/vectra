@@ -10,7 +10,7 @@ internal static class ModelPackageExtractor
 {
     internal const string OnnxEntryName    = "model.onnx";
     internal const string OnnxEncEntryName = "model.onnx.enc";
-    private  const string VocabEntry       = "vocabs.txt";
+    private  const string VocabEntry       = "vocab.txt";
     private  const string LabelsEntry      = "labels.json";
 
     /// <summary>
@@ -74,8 +74,8 @@ internal static class ModelPackageExtractor
     private static string[] ParseLabels(ZipArchiveEntry entry)
     {
         using var stream = entry.Open();
-        var dict = JsonSerializer.Deserialize<Dictionary<string, string>>(stream)
+        var list = JsonSerializer.Deserialize<List<string>>(stream)
                    ?? throw new InvalidOperationException("labels.json is empty or malformed.");
-        return dict.OrderBy(kv => int.Parse(kv.Key)).Select(kv => kv.Value).ToArray();
+        return list.ToArray();
     }
 }
