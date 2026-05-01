@@ -16,40 +16,46 @@ public static class WebApplicationBuilderExtensions
         using var scope = builder.Services.BuildServiceProvider().CreateScope();
         var serverConfig = scope.ServiceProvider.GetRequiredService<IOptions<SystemConfiguration>>();
 
-        ConfigureKestrelEndpoints(builder, serverConfig.Value.Server);
-        ConfigureKestrelSettings(builder);
+        builder.WebHost.ConfigureKestrel((context, options) =>
+        {
+            ConfigureKestrelLimits(options);
+
+            ConfigureKestrelEndpoints(options, serverConfig.Value.Server);
+
+            options.AddServerHeader = false;
+            options.Limits.MaxRequestBufferSize = null;
+        });
 
         return builder;
     }
 
-    private static void ConfigureKestrelEndpoints(
-        WebApplicationBuilder builder,
-        ServerConfiguration config)
+    private static void ConfigureKestrelLimits(KestrelServerOptions options)
     {
-        builder.WebHost.ConfigureKestrel((_, options) =>
-        {
-            var httpPort = config.Http?.Port ?? DefaultHttpPort;
-            int? httpsPort = GetHttpsPort(config, httpPort);
+        options.Limits.MaxConcurrentConnections = 1000;
+        options.Limits.MaxConcurrentUpgradedConnections = 1000;
 
-            options.ListenAnyIP(httpPort);
+        options.Limits.KeepAliveTimeout = TimeSpan.FromMinutes(2);
+        options.Limits.RequestHeadersTimeout = TimeSpan.FromSeconds(30);
 
-            if (!httpsPort.HasValue)
-            {
-                Log.Information($"Configuring HTTP endpoint only: HTTP {httpPort}");
-                return;
-            }
-
-            ConfigureHttps(options, httpsPort.Value, config.Https, httpPort);
-        });
+        options.Limits.MaxRequestBodySize = 50 * 1024 * 1024; // 50 MB
     }
 
-    private static void ConfigureKestrelSettings(WebApplicationBuilder builder)
+    private static void ConfigureKestrelEndpoints(
+        KestrelServerOptions options,
+        ServerConfiguration config)
     {
-        builder.WebHost.UseKestrel(options =>
+        var httpPort = config.Http?.Port ?? DefaultHttpPort;
+        int? httpsPort = GetHttpsPort(config, httpPort);
+
+        options.ListenAnyIP(httpPort);
+
+        if (!httpsPort.HasValue)
         {
-            options.AddServerHeader = false;
-            options.Limits.MaxRequestBufferSize = null;
-        });
+            Log.Information($"Configuring HTTP endpoint only: HTTP {httpPort}");
+            return;
+        }
+
+        ConfigureHttps(options, httpsPort.Value, config.Https, httpPort);
     }
 
     private static int? GetHttpsPort(
