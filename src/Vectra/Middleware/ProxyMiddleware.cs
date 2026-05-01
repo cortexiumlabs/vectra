@@ -181,10 +181,26 @@ public class ProxyMiddleware
         context.Response.StatusCode = (int)response.StatusCode;
         if ((int)response.StatusCode >= 500)
             circuitBreaker.RecordFailure(upstreamHost);
+
+        // Headers that must not be copied — ASP.NET Core / HttpClient manage these
+        static bool IsRestrictedHeader(string name) =>
+            name.Equals("Transfer-Encoding", StringComparison.OrdinalIgnoreCase) ||
+            name.Equals("Content-Length",    StringComparison.OrdinalIgnoreCase) ||
+            name.Equals("Connection",        StringComparison.OrdinalIgnoreCase) ||
+            name.Equals("Keep-Alive",        StringComparison.OrdinalIgnoreCase) ||
+            name.Equals("Upgrade",           StringComparison.OrdinalIgnoreCase) ||
+            name.Equals("Trailer",           StringComparison.OrdinalIgnoreCase);
+
         foreach (var header in response.Headers)
-            context.Response.Headers[header.Key] = header.Value.ToString();
+        {
+            if (!IsRestrictedHeader(header.Key))
+                context.Response.Headers[header.Key] = string.Join(", ", header.Value);
+        }
         foreach (var header in response.Content.Headers)
-            context.Response.Headers[header.Key] = header.Value.ToString();
+        {
+            if (!IsRestrictedHeader(header.Key))
+                context.Response.Headers[header.Key] = string.Join(", ", header.Value);
+        }
 
         await response.Content.CopyToAsync(context.Response.Body);
     }
