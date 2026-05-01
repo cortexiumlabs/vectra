@@ -16,26 +16,37 @@ namespace Vectra.Infrastructure.Semantic.Providers.InternalBert;
 /// </summary>
 public sealed class InternalOnnxProvider : ISemanticProvider, IDisposable
 {
-    private readonly InferenceSession _session;
-    private readonly BertTokenizer _tokenizer;
-    private readonly string[] _intentLabels;
+    private readonly InferenceSession? _session;
+    private readonly BertTokenizer? _tokenizer;
+    private readonly string[] _intentLabels = [];
     private readonly int _maxLength;
-    private readonly ICacheProvider _cacheProvider;
+    private readonly ICacheProvider? _cacheProvider;
     private readonly ILogger<InternalOnnxProvider> _logger;
+    private readonly bool _enabled;
 
     public InternalOnnxProvider(
         IOptions<SemanticConfiguration> options,
         ICacheService cacheService,
         ILogger<InternalOnnxProvider> logger)
     {
-        var config = options.Value.Providers.Internal;
-        _maxLength     = config.MaxLength ?? 128;
+        _logger  = logger ?? throw new ArgumentNullException(nameof(logger));
+        var config = options.Value;
+
+        _enabled = config.Enabled ?? false;
+
+        if (!_enabled)
+        {
+            _logger.LogInformation("Semantic is disabled — skipping Internal ONNX model loading.");
+            return;
+        }
+
+        var internalConfig = config.Providers.Internal;
+        _maxLength     = internalConfig.MaxLength ?? 128;
         _cacheProvider = cacheService.Current ?? throw new ArgumentNullException(nameof(cacheService));
-        _logger        = logger ?? throw new ArgumentNullException(nameof(logger));
 
-        _logger.LogInformation("Loading Internal ONNX model. Type={ModelType}", config.ModelType);
+        _logger.LogInformation("Loading Internal ONNX model. Type={ModelType}", internalConfig.ModelType);
 
-        var assets = ModelPackageLoader.Load(config);
+        var assets = ModelPackageLoader.Load(internalConfig);
 
         _session      = new InferenceSession(assets.OnnxBytes.ToArray(), new SessionOptions());
         _tokenizer    = new BertTokenizer(assets.VocabLines);
@@ -49,15 +60,18 @@ public sealed class InternalOnnxProvider : ISemanticProvider, IDisposable
         string metadata,
         CancellationToken cancellationToken)
     {
+        if (!_enabled)
+            return new SemanticAnalysisResult { Intent = "unknown", Confidence = 0.5, FallbackSafe = true };
+
         if (string.IsNullOrWhiteSpace(requestBody))
             return new SemanticAnalysisResult { Intent = "unknown", Confidence = 0.5, FallbackSafe = true };
 
         var cacheKey = $"semantic_internal:{ComputeHash(requestBody)}";
-        var (success, cached) = await _cacheProvider.TryGetValueAsync<SemanticAnalysisResult>(cacheKey);
+        var (success, cached) = await _cacheProvider!.TryGetValueAsync<SemanticAnalysisResult>(cacheKey);
         if (success)
             return cached!;
 
-        var (inputIds, attentionMask) = _tokenizer.Tokenize(requestBody, _maxLength);
+        var (inputIds, attentionMask) = _tokenizer!.Tokenize(requestBody, _maxLength);
         var inputTensor = new DenseTensor<long>(inputIds, new[] { 1, _maxLength });
         var maskTensor  = new DenseTensor<long>(attentionMask, new[] { 1, _maxLength });
 
@@ -67,7 +81,7 @@ public sealed class InternalOnnxProvider : ISemanticProvider, IDisposable
             NamedOnnxValue.CreateFromTensor("attention_mask", maskTensor)
         };
 
-        using var results = _session.Run(inputs);
+        using var results = _session!.Run(inputs);
         var logits     = results.First().AsTensor<float>().ToArray();
         var probs      = Softmax(logits);
         var maxIdx     = Array.IndexOf(probs, probs.Max());
@@ -107,5 +121,5 @@ public sealed class InternalOnnxProvider : ISemanticProvider, IDisposable
     private static string ComputeHash(string input) =>
         Convert.ToBase64String(System.Security.Cryptography.SHA256.HashData(Encoding.UTF8.GetBytes(input)));
 
-    public void Dispose() => _session.Dispose();
+    public void Dispose() => _session?.Dispose();
 }
