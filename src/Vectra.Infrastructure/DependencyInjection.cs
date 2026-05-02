@@ -30,6 +30,7 @@ using Vectra.Infrastructure.Semantic.Providers.InternalBert;
 using Vectra.Application.Abstractions.RateLimit;
 using Vectra.Application.Abstractions.CircuitBreaker;
 using Vectra.Infrastructure.RateLimit;
+using Vectra.Infrastructure.SecretManagement;
 
 namespace Vectra.Infrastructure;
 
@@ -127,6 +128,14 @@ public static class DependencyInjection
                 return new SerilogLoggerProvider(logger, dispose: true);
             });
         });
+
+        return services;
+    }
+
+    public static IServiceCollection AddSecretManagement(this IServiceCollection services)
+    {
+        services.AddSingleton<ISecretProviderFactory, SecretProviderFactory>();
+        services.AddSingleton<ISecretManagementService, SecretManagementService>();
 
         return services;
     }

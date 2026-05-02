@@ -1,5 +1,6 @@
 ﻿using System.CommandLine;
 using Vectra.Configuration;
+using Vectra.Extensions;
 using Vectra.Services;
 using Vectra.Utilities;
 
@@ -37,6 +38,8 @@ internal static class VectraCommandLine
 
             try
             {
+                builder.AddVectraSecretManagement();
+
                 StartupConfiguration.ConfigureServices(builder);
 
                 var app = builder.Build();

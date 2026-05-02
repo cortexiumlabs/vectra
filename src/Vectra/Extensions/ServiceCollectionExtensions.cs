@@ -6,6 +6,7 @@ using Vectra.BuildingBlocks.Clock;
 using Vectra.BuildingBlocks.Configuration.HumanInTheLoop;
 using Vectra.BuildingBlocks.Configuration.Observability;
 using Vectra.BuildingBlocks.Configuration.Policy;
+using Vectra.BuildingBlocks.Configuration.SecretManagement;
 using Vectra.BuildingBlocks.Configuration.Security;
 using Vectra.BuildingBlocks.Configuration.Semantic;
 using Vectra.BuildingBlocks.Configuration.System;
@@ -22,6 +23,7 @@ public static class ServiceCollectionExtensions
     private const string SemanticConfigurationName = "Semantic";
     private const string HumanInTheLoopConfigurationName = "HumanInTheLoop";
     private const string PolicyConfigurationName = "Policy";
+    private const string SecretManagementConfigurationName = "SecretManagement";
 
     #region Simple registrations
 
@@ -44,6 +46,7 @@ public static class ServiceCollectionExtensions
         services.Configure<SemanticConfiguration>(configuration.GetSection(SemanticConfigurationName));
         services.Configure<HumanInTheLoopConfiguration>(configuration.GetSection(HumanInTheLoopConfigurationName));
         services.Configure<PolicyConfiguration>(configuration.GetSection(PolicyConfigurationName));
+        services.Configure<SecretManagementConfiguration>(configuration.GetSection(SecretManagementConfigurationName));
 
         return services;
     }
