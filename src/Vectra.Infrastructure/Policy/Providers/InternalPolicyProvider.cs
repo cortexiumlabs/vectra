@@ -29,6 +29,9 @@ public class InternalPolicyProvider : IPolicyProvider
         Dictionary<string, object> input, 
         CancellationToken cancellationToken)
     {
+        if (string.IsNullOrEmpty(policyName))
+            return PolicyDecision.Allow("No policy assigned");
+
         var policy = await GetPolicyAsync(policyName, cancellationToken);
         if (policy == null)
             return PolicyDecision.Deny($"Policy {policyName} not found");
