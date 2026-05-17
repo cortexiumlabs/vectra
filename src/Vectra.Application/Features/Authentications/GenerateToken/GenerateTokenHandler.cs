@@ -1,5 +1,4 @@
-﻿using Microsoft.Extensions.Logging;
-using Vectra.Application.Abstractions.Dispatchers;
+﻿using Vectra.Application.Abstractions.Dispatchers;
 using Vectra.Application.Abstractions.Executions;
 using Vectra.Application.Abstractions.Persistence;
 using Vectra.Application.Abstractions.Security;
@@ -12,18 +11,15 @@ namespace Vectra.Application.Features.Authentications.GenerateToken;
 
 internal class GenerateTokenHandler : IActionHandler<GenerateTokenRequest, Result<GenerateTokenResult>>
 {
-    private readonly ILogger<GenerateTokenHandler> _logger;
     private readonly IAgentRepository _agentRepository;
     private readonly ITokenService _tokenService;
     private readonly ISecretHasher _secretHasher;
 
     public GenerateTokenHandler(
-        ILogger<GenerateTokenHandler> logger,
         IAgentRepository agentRepository,
         ITokenService tokenService,
         ISecretHasher secretHasher)
     {
-        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         _agentRepository = agentRepository ?? throw new ArgumentNullException(nameof(agentRepository));
         _tokenService = tokenService ?? throw new ArgumentNullException(nameof(tokenService));
         _secretHasher = secretHasher ?? throw new ArgumentNullException(nameof(secretHasher));
