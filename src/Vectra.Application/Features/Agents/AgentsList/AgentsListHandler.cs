@@ -20,7 +20,7 @@ internal class AgentsListHandler : IActionHandler<AgentsListRequest, PaginatedRe
         _agentRepository = agentRepository ?? throw new ArgumentNullException(nameof(agentRepository));
     }
 
-    public async Task<PaginatedResult<AgentsListResult>> Handle(AgentsListRequest request, CancellationToken cancellationToken)
+    public async Task<PaginatedResult<AgentsListResult>> Handle(AgentsListRequest request, CancellationToken cancellationToken = default)
     {
         try
         {
