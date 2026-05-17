@@ -1,5 +1,4 @@
 using FluentAssertions;
-using Microsoft.Extensions.Logging;
 using NSubstitute;
 using Vectra.Application.Abstractions.Executions;
 using Vectra.Application.Abstractions.Persistence;
@@ -11,7 +10,6 @@ namespace Vectra.Application.UnitTests.Features.Authentications;
 
 public class GenerateTokenHandlerTests
 {
-    private readonly ILogger<GenerateTokenHandler> _logger = Substitute.For<ILogger<GenerateTokenHandler>>();
     private readonly IAgentRepository _agentRepository = Substitute.For<IAgentRepository>();
     private readonly ITokenService _tokenService = Substitute.For<ITokenService>();
     private readonly ISecretHasher _secretHasher = Substitute.For<ISecretHasher>();
@@ -19,7 +17,7 @@ public class GenerateTokenHandlerTests
 
     public GenerateTokenHandlerTests()
     {
-        _sut = new GenerateTokenHandler(_logger, _agentRepository, _tokenService, _secretHasher);
+        _sut = new GenerateTokenHandler(_agentRepository, _tokenService, _secretHasher);
     }
 
     [Fact]
@@ -100,30 +98,23 @@ public class GenerateTokenHandlerTests
     }
 
     [Fact]
-    public void Constructor_ShouldThrowArgumentNullException_WhenLoggerIsNull()
-    {
-        var act = () => new GenerateTokenHandler(null!, _agentRepository, _tokenService, _secretHasher);
-        act.Should().Throw<ArgumentNullException>().WithParameterName("logger");
-    }
-
-    [Fact]
     public void Constructor_ShouldThrowArgumentNullException_WhenRepositoryIsNull()
     {
-        var act = () => new GenerateTokenHandler(_logger, null!, _tokenService, _secretHasher);
+        var act = () => new GenerateTokenHandler(null!, _tokenService, _secretHasher);
         act.Should().Throw<ArgumentNullException>().WithParameterName("agentRepository");
     }
 
     [Fact]
     public void Constructor_ShouldThrowArgumentNullException_WhenTokenServiceIsNull()
     {
-        var act = () => new GenerateTokenHandler(_logger, _agentRepository, null!, _secretHasher);
+        var act = () => new GenerateTokenHandler(_agentRepository, null!, _secretHasher);
         act.Should().Throw<ArgumentNullException>().WithParameterName("tokenService");
     }
 
     [Fact]
     public void Constructor_ShouldThrowArgumentNullException_WhenSecretHasherIsNull()
     {
-        var act = () => new GenerateTokenHandler(_logger, _agentRepository, _tokenService, null!);
+        var act = () => new GenerateTokenHandler(_agentRepository, _tokenService, null!);
         act.Should().Throw<ArgumentNullException>().WithParameterName("secretHasher");
     }
 }

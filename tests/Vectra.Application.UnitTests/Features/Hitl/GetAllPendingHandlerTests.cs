@@ -1,5 +1,4 @@
 using FluentAssertions;
-using Microsoft.Extensions.Logging;
 using NSubstitute;
 using Vectra.Application.Abstractions.Executions;
 using Vectra.Application.Features.Hitl.GetAllPending;
@@ -8,13 +7,12 @@ namespace Vectra.Application.UnitTests.Features.Hitl;
 
 public class GetAllPendingHandlerTests
 {
-    private readonly ILogger<GetAllPendingHandler> _logger = Substitute.For<ILogger<GetAllPendingHandler>>();
     private readonly IHitlService _hitlService = Substitute.For<IHitlService>();
     private readonly GetAllPendingHandler _sut;
 
     public GetAllPendingHandlerTests()
     {
-        _sut = new GetAllPendingHandler(_logger, _hitlService);
+        _sut = new GetAllPendingHandler(_hitlService);
     }
 
     private static PendingHitlRequest MakePending(string id) =>
@@ -79,16 +77,9 @@ public class GetAllPendingHandlerTests
     // ── Constructor ───────────────────────────────────────────────────────
 
     [Fact]
-    public void Constructor_ShouldThrowArgumentNullException_WhenLoggerIsNull()
-    {
-        var act = () => new GetAllPendingHandler(null!, _hitlService);
-        act.Should().Throw<ArgumentNullException>().WithParameterName("logger");
-    }
-
-    [Fact]
     public void Constructor_ShouldThrowArgumentNullException_WhenHitlServiceIsNull()
     {
-        var act = () => new GetAllPendingHandler(_logger, null!);
+        var act = () => new GetAllPendingHandler(null!);
         act.Should().Throw<ArgumentNullException>().WithParameterName("hitlService");
     }
 }

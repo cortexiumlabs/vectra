@@ -9,14 +9,13 @@ namespace Vectra.Application.UnitTests.Features.Agents;
 
 public class CreateAgentHandlerTests
 {
-    private readonly ILogger<CreateAgentHandler> _logger = Substitute.For<ILogger<CreateAgentHandler>>();
     private readonly IAgentRepository _agentRepository = Substitute.For<IAgentRepository>();
     private readonly ISecretHasher _secretHasher = Substitute.For<ISecretHasher>();
     private readonly CreateAgentHandler _sut;
 
     public CreateAgentHandlerTests()
     {
-        _sut = new CreateAgentHandler(_logger, _agentRepository, _secretHasher);
+        _sut = new CreateAgentHandler(_agentRepository, _secretHasher);
     }
 
     [Fact]
@@ -61,20 +60,10 @@ public class CreateAgentHandlerTests
     }
 
     [Fact]
-    public void Constructor_ShouldThrowArgumentNullException_WhenLoggerIsNull()
-    {
-        // Act
-        var act = () => new CreateAgentHandler(null!, _agentRepository, _secretHasher);
-
-        // Assert
-        act.Should().Throw<ArgumentNullException>().WithParameterName("logger");
-    }
-
-    [Fact]
     public void Constructor_ShouldThrowArgumentNullException_WhenRepositoryIsNull()
     {
         // Act
-        var act = () => new CreateAgentHandler(_logger, null!, _secretHasher);
+        var act = () => new CreateAgentHandler(null!, _secretHasher);
 
         // Assert
         act.Should().Throw<ArgumentNullException>().WithParameterName("agentRepository");
@@ -84,7 +73,7 @@ public class CreateAgentHandlerTests
     public void Constructor_ShouldThrowArgumentNullException_WhenSecretHasherIsNull()
     {
         // Act
-        var act = () => new CreateAgentHandler(_logger, _agentRepository, null!);
+        var act = () => new CreateAgentHandler(_agentRepository, null!);
 
         // Assert
         act.Should().Throw<ArgumentNullException>().WithParameterName("secretHasher");
