@@ -35,17 +35,17 @@ public class GeminiProvider : SemanticProviderBase, ISemanticProvider
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
-    public async Task<SemanticAnalysisResult> AnalyzeAsync(string? requestBody, string metadata, CancellationToken cancellationToken = default)
+    public async Task<SemanticAnalysisResult> AnalyzeAsync(string? body, string metadata, CancellationToken cancellationToken = default)
     {
-        if (string.IsNullOrWhiteSpace(requestBody))
+        if (string.IsNullOrWhiteSpace(body))
             return new SemanticAnalysisResult { Intent = "unknown", Confidence = 0.5, FallbackSafe = true };
 
-        var cacheKey = $"semantic_gemini:{ComputeHash(requestBody)}";
+        var cacheKey = $"semantic_gemini:{ComputeHash(body)}";
         var (success, cached) = await _cacheProvider.TryGetValueAsync<SemanticAnalysisResult>(cacheKey);
         if (success)
             return cached!;
 
-        var prompt = $"{SystemPrompt}\n\nMetadata: {metadata}\n\nRequest body:\n{requestBody}";
+        var prompt = $"{SystemPrompt}\n\nMetadata: {metadata}\n\nRequest body:\n{body}";
 
         SemanticAnalysisResult result;
         try
