@@ -1,4 +1,3 @@
-using Microsoft.Extensions.Logging;
 using Vectra.Application.Abstractions.Dispatchers;
 using Vectra.Application.Abstractions.Executions;
 using Vectra.BuildingBlocks.Results;
@@ -7,12 +6,10 @@ namespace Vectra.Application.Features.Hitl.GetAllPending;
 
 internal class GetAllPendingHandler : IActionHandler<GetAllPendingRequest, PaginatedResult<PendingHitlRequest>>
 {
-    private readonly ILogger<GetAllPendingHandler> _logger;
     private readonly IHitlService _hitlService;
 
-    public GetAllPendingHandler(ILogger<GetAllPendingHandler> logger, IHitlService hitlService)
+    public GetAllPendingHandler(IHitlService hitlService)
     {
-        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         _hitlService = hitlService ?? throw new ArgumentNullException(nameof(hitlService));
     }
 
