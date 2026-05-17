@@ -37,9 +37,9 @@ internal class AgentsListHandler : IActionHandler<AgentsListRequest, PaginatedRe
 
             return await PaginatedResult<AgentsListResult>.SuccessAsync(items, request.Page, request.PageSize, totalCount);
         }
-        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        catch (OperationCanceledException ex) when (cancellationToken.IsCancellationRequested)
         {
-            _logger.LogInformation("AgentsList request was cancelled by the client.");
+            _logger.LogInformation(ex, "AgentsList request was cancelled by the client.");
             return await PaginatedResult<AgentsListResult>.FailureAsync(
                 Error.Failure(ApplicationErrorCodes.RequestCancelled, "The request was cancelled."));
         }
