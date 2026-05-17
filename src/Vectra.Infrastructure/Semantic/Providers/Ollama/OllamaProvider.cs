@@ -29,12 +29,12 @@ public class OllamaProvider : SemanticProviderBase, ISemanticProvider
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
-    public async Task<SemanticAnalysisResult> AnalyzeAsync(string? requestBody, string metadata, CancellationToken cancellationToken = default)
+    public async Task<SemanticAnalysisResult> AnalyzeAsync(string? body, string metadata, CancellationToken cancellationToken = default)
     {
-        if (string.IsNullOrWhiteSpace(requestBody))
+        if (string.IsNullOrWhiteSpace(body))
             return new SemanticAnalysisResult { Intent = "unknown", Confidence = 0.5, FallbackSafe = true };
 
-        var cacheKey = $"semantic_ollama:{ComputeHash(requestBody)}";
+        var cacheKey = $"semantic_ollama:{ComputeHash(body)}";
         var (success, cached) = await _cacheProvider.TryGetValueAsync<SemanticAnalysisResult>(cacheKey);
         if (success)
             return cached!;
@@ -43,7 +43,7 @@ public class OllamaProvider : SemanticProviderBase, ISemanticProvider
         try
         {
             var chat = new Chat(_client, SystemPrompt);
-            var userMessage = $"Metadata: {metadata}\n\nRequest body:\n{requestBody}";
+            var userMessage = $"Metadata: {metadata}\n\nRequest body:\n{body}";
 
             var sb = new StringBuilder();
             await foreach (var token in chat.SendAsync(userMessage, cancellationToken))
