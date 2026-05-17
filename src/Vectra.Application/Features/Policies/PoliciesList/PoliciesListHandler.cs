@@ -13,7 +13,7 @@ internal class PoliciesListHandler : IActionHandler<PoliciesListRequest, Paginat
         _policyCacheService = policyCacheService ?? throw new ArgumentNullException(nameof(policyCacheService));
     }
 
-    public async Task<PaginatedResult<PoliciesListResult>> Handle(PoliciesListRequest request, CancellationToken cancellationToken)
+    public async Task<PaginatedResult<PoliciesListResult>> Handle(PoliciesListRequest request, CancellationToken cancellationToken = default)
     {
         var (policies, totalCount) = await _policyCacheService.GetPagedAsync(request.Page, request.PageSize, cancellationToken);
 
