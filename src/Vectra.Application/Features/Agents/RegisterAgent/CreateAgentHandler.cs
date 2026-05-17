@@ -23,7 +23,7 @@ internal class CreateAgentHandler : IActionHandler<CreateAgentRequest, Result<Cr
         _secretHasher = secretHasher ?? throw new ArgumentNullException(nameof(secretHasher));
     }
 
-    public async Task<Result<CreateAgentResult>> Handle(CreateAgentRequest request, CancellationToken cancellationToken)
+    public async Task<Result<CreateAgentResult>> Handle(CreateAgentRequest request, CancellationToken cancellationToken = default)
     {
         var clientSecretHash = _secretHasher.HashPassword(request.ClientSecret);
         var agent = new Agent(request.Name, request.OwnerId, clientSecretHash);

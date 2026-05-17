@@ -20,7 +20,7 @@ internal class PolicyDetailsHandler : IActionHandler<PolicyDetailsRequest, Resul
         _policyCacheService = policyCacheService ?? throw new ArgumentNullException(nameof(policyCacheService));
     }
 
-    public async Task<Result<PolicyDetailsResult>> Handle(PolicyDetailsRequest request, CancellationToken cancellationToken)
+    public async Task<Result<PolicyDetailsResult>> Handle(PolicyDetailsRequest request, CancellationToken cancellationToken = default)
     {
         var (policies, _) = await _policyCacheService.GetPagedAsync(1, int.MaxValue, cancellationToken);
 

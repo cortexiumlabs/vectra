@@ -29,7 +29,7 @@ internal class GenerateTokenHandler : IActionHandler<GenerateTokenRequest, Resul
         _secretHasher = secretHasher ?? throw new ArgumentNullException(nameof(secretHasher));
     }
 
-    public async Task<Result<GenerateTokenResult>> Handle(GenerateTokenRequest request, CancellationToken cancellationToken)
+    public async Task<Result<GenerateTokenResult>> Handle(GenerateTokenRequest request, CancellationToken cancellationToken = default)
     {
         var agent = await _agentRepository.GetByIdAsync(request.AgentId, cancellationToken);
         if (agent == null || agent.Status != AgentStatus.Active)
