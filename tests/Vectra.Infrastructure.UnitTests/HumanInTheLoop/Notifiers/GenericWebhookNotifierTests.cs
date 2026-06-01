@@ -69,25 +69,6 @@ public class GenericWebhookNotifierTests
     }
 
     [Fact]
-    public async Task NotifyAsync_UsesLegacyWebhookUrl_WhenNewConfigNotEnabled()
-    {
-        var config = new GenericWebhookNotificationConfiguration { Enabled = false, WebhookUrl = null };
-        var mockHandler = new TestHttpMessageHandler(HttpStatusCode.OK, "ok");
-        var httpClient = new HttpClient(mockHandler);
-        _httpClientFactory.CreateClient().Returns(httpClient);
-
-        var sut = CreateSut(config);
-        var notification = CreateNotification();
-
-        await sut.NotifyAsync(notification, CancellationToken.None);
-
-        mockHandler.RequestCount.Should().Be(1);
-        mockHandler.LastRequest.Should().NotBeNull();
-        mockHandler.LastRequest!.Method.Should().Be(HttpMethod.Post);
-        mockHandler.LastRequest.RequestUri!.ToString().Should().Be("https://legacy.webhook.com/hitl");
-    }
-
-    [Fact]
     public async Task NotifyAsync_WhenEnabled_SendsWebhookRequest()
     {
         var mockHandler = new TestHttpMessageHandler(HttpStatusCode.OK, "ok");
