@@ -14,6 +14,7 @@ using Vectra.Infrastructure.Caches;
 using Vectra.Infrastructure.Decision;
 using Vectra.Infrastructure.Dispatchers;
 using Vectra.Infrastructure.HumanInTheLoop;
+using Vectra.Infrastructure.HumanInTheLoop.Notifiers;
 using Vectra.Infrastructure.Policy;
 using Vectra.Infrastructure.Policy.Providers;
 using Vectra.Infrastructure.Risk;
@@ -59,6 +60,12 @@ public static class DependencyInjection
 
         // HITL provider selection (DI + factory method)
         services.AddDistributedMemoryCache();
+
+        // Register HITL notifiers
+        services.AddScoped<IHitlNotifier, SlackNotifier>();
+        services.AddScoped<IHitlNotifier, TeamsNotifier>();
+        services.AddScoped<IHitlNotifier, PagerDutyNotifier>();
+        services.AddScoped<IHitlNotifier, GenericWebhookNotifier>();
 
         services.AddScoped<IHitlService>(CreateHitlService);
 

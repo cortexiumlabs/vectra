@@ -40,13 +40,12 @@ public class HitlServiceTests
     private HitlService CreateSut(
         int timeoutSeconds = 300,
         int maxPending = 0,
-        string? webhookUrl = null) =>
+        IEnumerable<IHitlNotifier>? notifiers = null) =>
         new(_cacheService, _audit, _clock, Options.Create(new HumanInTheLoopConfiguration
         {
             TimeoutSeconds = timeoutSeconds,
             MaxPendingRequests = maxPending,
-            NotificationWebhookUrl = webhookUrl
-        }), _httpClientFactory, _logger);
+        }), _httpClientFactory, _logger, notifiers ?? Array.Empty<IHitlNotifier>());
 
     private RequestContext BuildContext(string method = "GET", string path = "/api/data") =>
         new()
@@ -141,14 +140,19 @@ public class HitlServiceTests
         var httpClient = new HttpClient(handler);
         _httpClientFactory.CreateClient().Returns(httpClient);
 
-        var sut = CreateSut(webhookUrl: "https://webhook.example.com/notify");
+        // Create a GenericWebhookNotifier to test legacy webhook URL support
+        var mockNotifier = Substitute.For<IHitlNotifier>();
+        mockNotifier.NotifyAsync(Arg.Any<HitlNotification>(), Arg.Any<CancellationToken>())
+            .Returns(Task.CompletedTask);
+
+        var sut = CreateSut(notifiers: new[] { mockNotifier });
         _cacheProvider.SetAsync(Arg.Any<string>(), Arg.Any<PendingHitlRequest>()).Returns(Task.FromResult<PendingHitlRequest>(null!));
         _cacheProvider.SetAsync(Arg.Any<string>(), Arg.Any<HashSet<string>>()).Returns(Task.FromResult<HashSet<string>>(null!));
 
         var act = async () => await sut.SuspendRequestAsync(BuildContext(), "test");
 
         await act.Should().NotThrowAsync();
-        handler.CallCount.Should().Be(1);
+        await mockNotifier.Received(1).NotifyAsync(Arg.Any<HitlNotification>(), Arg.Any<CancellationToken>());
     }
 
     [Fact]
@@ -158,7 +162,7 @@ public class HitlServiceTests
         var httpClient = new HttpClient(handler);
         _httpClientFactory.CreateClient().Returns(httpClient);
 
-        var sut = CreateSut(webhookUrl: "https://webhook.example.com/notify");
+        var sut = CreateSut();
         _cacheProvider.SetAsync(Arg.Any<string>(), Arg.Any<PendingHitlRequest>()).Returns(Task.FromResult<PendingHitlRequest>(null!));
         _cacheProvider.SetAsync(Arg.Any<string>(), Arg.Any<HashSet<string>>()).Returns(Task.FromResult<HashSet<string>>(null!));
 
@@ -525,7 +529,7 @@ public class HitlServiceTests
     public void Constructor_NullConfig_ThrowsArgumentNullException()
     {
         var act = () => new HitlService(_cacheService, _audit, _clock,
-            null!, _httpClientFactory, _logger);
+            null!, _httpClientFactory, _logger, Array.Empty<IHitlNotifier>());
 
         act.Should().Throw<ArgumentNullException>();
     }
@@ -605,7 +609,7 @@ public class HitlServiceTests
         var handler = new ThrowingHttpMessageHandler();
         _httpClientFactory.CreateClient().Returns(new HttpClient(handler));
 
-        var sut = CreateSut(webhookUrl: "https://webhook.example.com/notify");
+        var sut = CreateSut();
         _cacheProvider.SetAsync(Arg.Any<string>(), Arg.Any<PendingHitlRequest>())
             .Returns(x => Task.FromResult(x.Arg<PendingHitlRequest>()));
         _cacheProvider.SetAsync(Arg.Any<string>(), Arg.Any<HashSet<string>>())
@@ -645,6 +649,83 @@ public class HitlServiceTests
         protected override Task<HttpResponseMessage> SendAsync(
             HttpRequestMessage request, CancellationToken cancellationToken)
             => throw new TaskCanceledException("timeout");
+    }
+
+    // ── Notifier Integration Tests ──────────────────────────────────────
+
+    [Fact]
+    public async Task SuspendRequestAsync_CallsAllRegisteredNotifiers()
+    {
+        var notifier1 = Substitute.For<IHitlNotifier>();
+        var notifier2 = Substitute.For<IHitlNotifier>();
+        var notifiers = new[] { notifier1, notifier2 };
+
+        _cacheProvider.SetAsync(Arg.Any<string>(), Arg.Any<PendingHitlRequest>()).Returns(Task.FromResult<PendingHitlRequest>(null!));
+        _cacheProvider.SetAsync(Arg.Any<string>(), Arg.Any<HashSet<string>>()).Returns(Task.FromResult<HashSet<string>>(null!));
+
+        var sut = CreateSut(notifiers: notifiers);
+
+        await sut.SuspendRequestAsync(BuildContext(), "test reason", TestContext.Current.CancellationToken);
+
+        await notifier1.Received(1).NotifyAsync(
+            Arg.Any<HitlNotification>(),
+            Arg.Any<CancellationToken>());
+        await notifier2.Received(1).NotifyAsync(
+            Arg.Any<HitlNotification>(),
+            Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task SuspendRequestAsync_PassesCorrectNotificationData()
+    {
+        var notifier = Substitute.For<IHitlNotifier>();
+        HitlNotification? capturedNotification = null;
+        notifier.NotifyAsync(Arg.Do<HitlNotification>(n => capturedNotification = n), Arg.Any<CancellationToken>())
+            .Returns(Task.CompletedTask);
+
+        _cacheProvider.SetAsync(Arg.Any<string>(), Arg.Any<PendingHitlRequest>()).Returns(Task.FromResult<PendingHitlRequest>(null!));
+        _cacheProvider.SetAsync(Arg.Any<string>(), Arg.Any<HashSet<string>>()).Returns(Task.FromResult<HashSet<string>>(null!));
+
+        var sut = CreateSut(notifiers: new[] { notifier });
+        var context = BuildContext("POST", "/api/users");
+
+        await sut.SuspendRequestAsync(context, "test reason", TestContext.Current.CancellationToken);
+
+        capturedNotification.Should().NotBeNull();
+        capturedNotification!.AgentId.Should().Be(context.AgentId);
+        capturedNotification.Method.Should().Be("POST");
+        capturedNotification.Url.Should().Be("https://upstream.local/api/users");
+        capturedNotification.Reason.Should().Be("test reason");
+        capturedNotification.Timestamp.Should().Be(_now);
+    }
+
+    [Fact]
+    public async Task SuspendRequestAsync_ContinuesWhenNotifierThrows()
+    {
+        var failingNotifier = Substitute.For<IHitlNotifier>();
+        failingNotifier.NotifyAsync(Arg.Any<HitlNotification>(), Arg.Any<CancellationToken>())
+            .Returns(Task.FromException(new Exception("Notification failed")));
+
+        _cacheProvider.SetAsync(Arg.Any<string>(), Arg.Any<PendingHitlRequest>()).Returns(Task.FromResult<PendingHitlRequest>(null!));
+        _cacheProvider.SetAsync(Arg.Any<string>(), Arg.Any<HashSet<string>>()).Returns(Task.FromResult<HashSet<string>>(null!));
+
+        var sut = CreateSut(notifiers: new[] { failingNotifier });
+
+        // Should not throw even if notifier fails
+        var act = async () => await sut.SuspendRequestAsync(BuildContext(), "test", TestContext.Current.CancellationToken);
+        await act.Should().NotThrowAsync();
+    }
+
+    [Fact]
+    public async Task SuspendRequestAsync_WorksWithNoNotifiers()
+    {
+        _cacheProvider.SetAsync(Arg.Any<string>(), Arg.Any<PendingHitlRequest>()).Returns(Task.FromResult<PendingHitlRequest>(null!));
+        _cacheProvider.SetAsync(Arg.Any<string>(), Arg.Any<HashSet<string>>()).Returns(Task.FromResult<HashSet<string>>(null!));
+
+        var sut = CreateSut(notifiers: Array.Empty<IHitlNotifier>());
+
+        var act = async () => await sut.SuspendRequestAsync(BuildContext(), "test", TestContext.Current.CancellationToken);
+        await act.Should().NotThrowAsync();
     }
 }
 

@@ -1,12 +1,10 @@
 ﻿using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using System.Net.Http.Json;
 using Vectra.Application.Abstractions.Executions;
 using Vectra.Application.Abstractions.Persistence;
 using Vectra.Application.Models;
 using Vectra.BuildingBlocks.Clock;
 using Vectra.BuildingBlocks.Configuration.HumanInTheLoop;
-using Vectra.Domain.Agents;
 using Vectra.Domain.AuditTrails;
 using Vectra.Infrastructure.Caches;
 
@@ -25,6 +23,7 @@ public class HitlService : IHitlService
     private readonly HumanInTheLoopConfiguration _config;
     private readonly IHttpClientFactory _httpClientFactory;
     private readonly ILogger<HitlService> _logger;
+    private readonly IEnumerable<IHitlNotifier> _notifiers;
 
     public HitlService(
         ICacheService cache,
@@ -32,7 +31,8 @@ public class HitlService : IHitlService
         IClock clock,
         IOptions<HumanInTheLoopConfiguration> config,
         IHttpClientFactory httpClientFactory,
-        ILogger<HitlService> logger)
+        ILogger<HitlService> logger,
+        IEnumerable<IHitlNotifier> notifiers)
     {
         _cache = cache;
         _audit = audit;
@@ -40,6 +40,7 @@ public class HitlService : IHitlService
         _config = config?.Value ?? throw new ArgumentNullException(nameof(config));
         _httpClientFactory = httpClientFactory;
         _logger = logger;
+        _notifiers = notifiers ?? Array.Empty<IHitlNotifier>();
     }
 
     public async Task<string> SuspendRequestAsync(
@@ -84,7 +85,7 @@ public class HitlService : IHitlService
             id, context.AgentId, reason, expiresAt);
 
         await RecordAuditAsync(id, context.AgentId, context.Method, context.Path, "PENDING_HITL", reason, cancellationToken);
-        await SendWebhookNotificationAsync(pending, cancellationToken);
+        await SendNotificationsAsync(pending, cancellationToken);
 
         return id;
     }
@@ -333,36 +334,35 @@ public class HitlService : IHitlService
         return found && index is not null ? index : new HashSet<string>();
     }
 
-    private async Task SendWebhookNotificationAsync(
-        PendingHitlRequest pending, 
+    private async Task SendNotificationsAsync(
+        PendingHitlRequest pending,
         CancellationToken cancellationToken)
     {
-        if (string.IsNullOrWhiteSpace(_config.NotificationWebhookUrl))
-            return;
+        var notification = new HitlNotification(
+            pending.Id,
+            pending.AgentId,
+            pending.Method,
+            pending.Url,
+            pending.Reason,
+            pending.Timestamp,
+            pending.ExpiresAt);
 
-        try
+        // Send to all configured notifiers in parallel (fire-and-forget pattern)
+        // Wrap each notifier call to prevent one failing notifier from blocking others
+        var tasks = _notifiers.Select(async notifier =>
         {
-            var payload = new
+            try
             {
-                pending.Id,
-                AgentId = pending.AgentId.ToString(),
-                pending.Method,
-                pending.Url,
-                pending.Reason,
-                pending.Timestamp,
-                pending.ExpiresAt
-            };
+                await notifier.NotifyAsync(notification, cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Notifier {NotifierType} failed for HITL request {HitlId}", 
+                    notifier.GetType().Name, pending.Id);
+            }
+        });
 
-            var httpClient = _httpClientFactory.CreateClient();
-            var response = await httpClient.PostAsJsonAsync(_config.NotificationWebhookUrl, payload, cancellationToken);
-
-            if (!response.IsSuccessStatusCode)
-                _logger.LogWarning("HITL webhook notification for request {HitlId} returned {StatusCode}", pending.Id, (int)response.StatusCode);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Failed to send HITL webhook notification for request {HitlId}", pending.Id);
-        }
+        await Task.WhenAll(tasks);
     }
 
     private static Dictionary<string, string> RedactHeaders(Dictionary<string, string> headers)
