@@ -1,6 +1,5 @@
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using System.Net.Http.Json;
 using System.Text.Json.Serialization;
 using Vectra.Application.Abstractions.Executions;
 using Vectra.BuildingBlocks.Configuration.HumanInTheLoop;
@@ -10,56 +9,26 @@ namespace Vectra.Infrastructure.HumanInTheLoop.Notifiers;
 /// <summary>
 /// Sends HITL notifications to Microsoft Teams via incoming webhooks (MessageCard format).
 /// </summary>
-public class TeamsNotifier : IHitlNotifier
+public class TeamsNotifier : NotifierBase<TeamsNotifier.TeamsMessageCard>
 {
     private readonly TeamsNotificationConfiguration _config;
-    private readonly IHttpClientFactory _httpClientFactory;
-    private readonly ILogger<TeamsNotifier> _logger;
 
     public TeamsNotifier(
         IOptions<HumanInTheLoopConfiguration> config,
         IHttpClientFactory httpClientFactory,
         ILogger<TeamsNotifier> logger)
+        : base(httpClientFactory, logger)
     {
         _config = config?.Value?.Notifications?.Teams ?? throw new ArgumentNullException(nameof(config));
-        _httpClientFactory = httpClientFactory ?? throw new ArgumentNullException(nameof(httpClientFactory));
-        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
-    public async Task NotifyAsync(HitlNotification notification, CancellationToken cancellationToken = default)
-    {
-        if (!_config.Enabled || string.IsNullOrWhiteSpace(_config.WebhookUrl))
-        {
-            _logger.LogDebug("Teams notifications are disabled or webhook URL is not configured");
-            return;
-        }
+    protected override bool IsEnabled() => _config.Enabled && !string.IsNullOrWhiteSpace(_config.WebhookUrl);
 
-        try
-        {
-            var payload = BuildTeamsPayload(notification);
-            var httpClient = _httpClientFactory.CreateClient();
+    protected override string GetWebhookUrl() => _config.WebhookUrl!;
 
-            var response = await httpClient.PostAsJsonAsync(_config.WebhookUrl, payload, cancellationToken);
+    protected override string GetNotifierType() => "Teams";
 
-            if (!response.IsSuccessStatusCode)
-            {
-                var errorContent = await response.Content.ReadAsStringAsync(cancellationToken);
-                _logger.LogWarning(
-                    "Teams notification for HITL request {HitlId} failed with status {StatusCode}: {Error}",
-                    notification.Id, (int)response.StatusCode, errorContent);
-            }
-            else
-            {
-                _logger.LogInformation("Teams notification sent successfully for HITL request {HitlId}", notification.Id);
-            }
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Failed to send Teams notification for HITL request {HitlId}", notification.Id);
-        }
-    }
-
-    private TeamsMessageCard BuildTeamsPayload(HitlNotification notification)
+    protected override TeamsMessageCard BuildPayload(HitlNotification notification)
     {
         var expiresInMinutes = (int)(notification.ExpiresAt - notification.Timestamp).TotalMinutes;
 
@@ -89,7 +58,7 @@ public class TeamsNotifier : IHitlNotifier
         };
     }
 
-    private record TeamsMessageCard
+    public record TeamsMessageCard
     {
         [JsonPropertyName("@type")]
         public string? Type { get; init; }
@@ -108,7 +77,7 @@ public class TeamsNotifier : IHitlNotifier
         public TeamsSection[]? Sections { get; init; }
     }
 
-    private record TeamsSection
+    public record TeamsSection
     {
         [JsonPropertyName("activityTitle")]
         public string? ActivityTitle { get; init; }
@@ -121,7 +90,7 @@ public class TeamsNotifier : IHitlNotifier
         public TeamsFact[]? Facts { get; init; }
     }
 
-    private record TeamsFact
+    public record TeamsFact
     {
         [JsonPropertyName("name")]
         public string? Name { get; init; }

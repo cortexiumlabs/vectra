@@ -172,7 +172,7 @@ public class GenericWebhookNotifierTests
         _logger.Received().Log(
             LogLevel.Error,
             Arg.Any<EventId>(),
-            Arg.Is<object>(o => o.ToString()!.Contains("Failed to send generic webhook notification")),
+            Arg.Is<object>(o => o.ToString()!.Contains("Failed to send Generic webhook notification")),
             Arg.Any<Exception>(),
             Arg.Any<Func<object, Exception?, string>>());
     }

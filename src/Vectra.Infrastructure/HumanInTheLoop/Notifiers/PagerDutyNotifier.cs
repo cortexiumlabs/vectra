@@ -1,6 +1,5 @@
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using System.Net.Http.Json;
 using System.Text.Json.Serialization;
 using Vectra.Application.Abstractions.Executions;
 using Vectra.BuildingBlocks.Configuration.HumanInTheLoop;
@@ -10,56 +9,26 @@ namespace Vectra.Infrastructure.HumanInTheLoop.Notifiers;
 /// <summary>
 /// Sends HITL notifications to PagerDuty via Events API v2.
 /// </summary>
-public class PagerDutyNotifier : IHitlNotifier
+public class PagerDutyNotifier : NotifierBase<PagerDutyNotifier.PagerDutyEvent>
 {
     private readonly PagerDutyNotificationConfiguration _config;
-    private readonly IHttpClientFactory _httpClientFactory;
-    private readonly ILogger<PagerDutyNotifier> _logger;
 
     public PagerDutyNotifier(
         IOptions<HumanInTheLoopConfiguration> config,
         IHttpClientFactory httpClientFactory,
         ILogger<PagerDutyNotifier> logger)
+        : base(httpClientFactory, logger)
     {
         _config = config?.Value?.Notifications?.PagerDuty ?? throw new ArgumentNullException(nameof(config));
-        _httpClientFactory = httpClientFactory ?? throw new ArgumentNullException(nameof(httpClientFactory));
-        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
-    public async Task NotifyAsync(HitlNotification notification, CancellationToken cancellationToken = default)
-    {
-        if (!_config.Enabled || string.IsNullOrWhiteSpace(_config.RoutingKey))
-        {
-            _logger.LogDebug("PagerDuty notifications are disabled or routing key is not configured");
-            return;
-        }
+    protected override bool IsEnabled() => _config.Enabled && !string.IsNullOrWhiteSpace(_config.RoutingKey);
 
-        try
-        {
-            var payload = BuildPagerDutyPayload(notification);
-            var httpClient = _httpClientFactory.CreateClient();
+    protected override string GetWebhookUrl() => _config.ApiUrl;
 
-            var response = await httpClient.PostAsJsonAsync(_config.ApiUrl, payload, cancellationToken);
+    protected override string GetNotifierType() => "PagerDuty";
 
-            if (!response.IsSuccessStatusCode)
-            {
-                var errorContent = await response.Content.ReadAsStringAsync(cancellationToken);
-                _logger.LogWarning(
-                    "PagerDuty notification for HITL request {HitlId} failed with status {StatusCode}: {Error}",
-                    notification.Id, (int)response.StatusCode, errorContent);
-            }
-            else
-            {
-                _logger.LogInformation("PagerDuty notification sent successfully for HITL request {HitlId}", notification.Id);
-            }
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Failed to send PagerDuty notification for HITL request {HitlId}", notification.Id);
-        }
-    }
-
-    private PagerDutyEvent BuildPagerDutyPayload(HitlNotification notification)
+    protected override PagerDutyEvent BuildPayload(HitlNotification notification)
     {
         var expiresInMinutes = (int)(notification.ExpiresAt - notification.Timestamp).TotalMinutes;
 
@@ -91,7 +60,7 @@ public class PagerDutyNotifier : IHitlNotifier
         };
     }
 
-    private record PagerDutyEvent
+    public record PagerDutyEvent
     {
         [JsonPropertyName("routing_key")]
         public string? RoutingKey { get; init; }
@@ -107,7 +76,7 @@ public class PagerDutyNotifier : IHitlNotifier
         public PagerDutyPayload? Payload { get; init; }
     }
 
-    private record PagerDutyPayload
+    public record PagerDutyPayload
     {
         [JsonPropertyName("summary")]
         public string? Summary { get; init; }
