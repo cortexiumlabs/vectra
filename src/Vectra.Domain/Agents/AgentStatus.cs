@@ -3,5 +3,6 @@
 public enum AgentStatus
 {
     Active,
+    Quarantined,
     Revoked
 }

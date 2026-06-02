@@ -2,6 +2,7 @@
 using Vectra.Application.Features.Agents.AgentsList;
 using Vectra.Application.Features.Agents.AssignPolicy;
 using Vectra.Application.Features.Agents.DeleteAgent;
+using Vectra.Application.Features.Agents.LiftQuarantine;
 using Vectra.Application.Features.Agents.RegisterAgent;
 using Vectra.Application.Features.Authentications.GenerateToken;
 using Vectra.Application.Features.Hitl.Approve;
@@ -60,6 +61,14 @@ public static class DispatcherExtensions
     {
         var request = new DeleteAgentRequest { AgentId = agentId.ToString() };
         return dispatcher.Dispatch(request, cancellationToken);
+    }
+
+    public static Task<Result<Abstractions.Dispatchers.Void>> LiftAgentQuarantine(
+        this IDispatcher dispatcher,
+        string agentId,
+        CancellationToken cancellationToken)
+    {
+        return dispatcher.Dispatch(new LiftQuarantineRequest { AgentId = agentId }, cancellationToken);
     }
 
     #endregion

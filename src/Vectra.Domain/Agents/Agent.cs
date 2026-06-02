@@ -29,5 +29,14 @@ public class Agent: AuditableEntity<Guid>
         TrustScore = Math.Clamp(newScore, 0, 1);
     }
 
+    public void Quarantine()
+        => Status = AgentStatus.Quarantined;
+
+    public void LiftQuarantine()
+    {
+        if (Status == AgentStatus.Quarantined)
+            Status = AgentStatus.Active;
+    }
+
     public void Revoke() => Status = AgentStatus.Revoked;
 }

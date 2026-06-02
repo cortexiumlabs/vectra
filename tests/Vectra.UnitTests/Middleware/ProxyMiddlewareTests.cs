@@ -9,9 +9,11 @@ using Vectra.Application.Abstractions.Executions;
 using Vectra.Application.Abstractions.Persistence;
 using Vectra.Application.Abstractions.RateLimit;
 using Vectra.Application.Models;
+using Vectra.BuildingBlocks.Configuration.Security;
 using Vectra.Domain.Agents;
 using Vectra.Domain.Policies;
 using Vectra.Middleware;
+using Vectra.Services;
 
 namespace Vectra.UnitTests.Middleware;
 
@@ -69,13 +71,12 @@ public class ProxyMiddlewareTests
     {
         var decisionEngine = Substitute.For<IDecisionEngine>();
         var hitlService = Substitute.For<IHitlService>();
-        var agentRepo = Substitute.For<IAgentRepository>();
         var rateLimiter = Substitute.For<IAgentRateLimiter>();
         var circuitBreaker = Substitute.For<ICircuitBreaker>();
 
         var middleware = BuildMiddleware(_ => Task.CompletedTask);
         var context = BuildContext("/proxy/http://example.com/api",
-            decisionEngine, hitlService, agentRepo, rateLimiter, circuitBreaker);
+            decisionEngine, hitlService, rateLimiter: rateLimiter, circuitBreaker: circuitBreaker);
         context.Response.Body = new MemoryStream();
         // No AgentId in context.Items
 
@@ -88,12 +89,57 @@ public class ProxyMiddlewareTests
     public async Task InvokeAsync_AgentNotFound_Returns403()
     {
         var agentId = Guid.NewGuid();
-        var agentRepo = Substitute.For<IAgentRepository>();
-        agentRepo.GetByIdAsync(agentId).Returns((Agent?)null);
+        var accessService = Substitute.For<IAgentRequestAccessService>();
+        accessService.GetAgentAsync(agentId, Arg.Any<CancellationToken>())
+            .Returns(new AgentRequestAccessResult(false, null, "Agent is not active"));
 
         var middleware = BuildMiddleware(_ => Task.CompletedTask);
         var context = BuildContext("/proxy/http://example.com/api",
-            agentRepository: agentRepo);
+            accessService: accessService);
+        context.Items["AgentId"] = agentId;
+        context.Response.Body = new MemoryStream();
+
+        await middleware.InvokeAsync(context);
+
+        context.Response.StatusCode.Should().Be(403);
+    }
+
+    [Fact]
+    public async Task InvokeAsync_QuarantinedAgent_Returns403()
+    {
+        var agentId = Guid.NewGuid();
+        var agent = new Agent("test", "owner", "hash");
+        agent.Quarantine();
+
+        var accessService = Substitute.For<IAgentRequestAccessService>();
+        accessService.GetAgentAsync(agentId, Arg.Any<CancellationToken>())
+            .Returns(new AgentRequestAccessResult(false, agent, "Agent is quarantined"));
+
+        var middleware = BuildMiddleware(_ => Task.CompletedTask);
+        var context = BuildContext("/proxy/http://example.com/api",
+            accessService: accessService);
+        context.Items["AgentId"] = agentId;
+        context.Response.Body = new MemoryStream();
+
+        await middleware.InvokeAsync(context);
+
+        context.Response.StatusCode.Should().Be(403);
+    }
+
+    [Fact]
+    public async Task InvokeAsync_TrustScoreBelowFloor_AutoQuarantinesAndReturns403()
+    {
+        var agentId = Guid.NewGuid();
+        var agent = new Agent("test", "owner", "hash");
+        agent.UpdateTrustScore(0.1);
+
+        var accessService = Substitute.For<IAgentRequestAccessService>();
+        accessService.GetAgentAsync(agentId, Arg.Any<CancellationToken>())
+            .Returns(new AgentRequestAccessResult(false, agent, "Agent is quarantined"));
+
+        var middleware = BuildMiddleware(_ => Task.CompletedTask);
+        var context = BuildContext("/proxy/http://example.com/api",
+            accessService: accessService);
         context.Items["AgentId"] = agentId;
         context.Response.Body = new MemoryStream();
 
@@ -106,15 +152,13 @@ public class ProxyMiddlewareTests
     public async Task InvokeAsync_RevokedAgent_Returns403()
     {
         var agentId = Guid.NewGuid();
-        var agent = new Agent("test", "owner", "hash");
-        agent.Revoke();
-
-        var agentRepo = Substitute.For<IAgentRepository>();
-        agentRepo.GetByIdAsync(agentId).Returns(agent);
+        var accessService = Substitute.For<IAgentRequestAccessService>();
+        accessService.GetAgentAsync(agentId, Arg.Any<CancellationToken>())
+            .Returns(new AgentRequestAccessResult(false, null, "Agent is not active"));
 
         var middleware = BuildMiddleware(_ => Task.CompletedTask);
         var context = BuildContext("/proxy/http://example.com/api",
-            agentRepository: agentRepo);
+            accessService: accessService);
         context.Items["AgentId"] = agentId;
         context.Response.Body = new MemoryStream();
 
@@ -127,17 +171,16 @@ public class ProxyMiddlewareTests
     public async Task InvokeAsync_RateLimitExceeded_Returns429()
     {
         var agentId = Guid.NewGuid();
-        var agent = new Agent("test", "owner", "hash");
-
-        var agentRepo = Substitute.For<IAgentRepository>();
-        agentRepo.GetByIdAsync(agentId).Returns(agent);
+        var accessService = Substitute.For<IAgentRequestAccessService>();
+        accessService.GetAgentAsync(agentId, Arg.Any<CancellationToken>())
+            .Returns(new AgentRequestAccessResult(true, new Agent("test", "owner", "hash"), null));
 
         var rateLimiter = Substitute.For<IAgentRateLimiter>();
         rateLimiter.IsAllowedAsync(agentId, Arg.Any<CancellationToken>()).Returns(false);
 
         var middleware = BuildMiddleware(_ => Task.CompletedTask);
         var context = BuildContext("/proxy/http://example.com/api",
-            agentRepository: agentRepo, rateLimiter: rateLimiter);
+            accessService: accessService, rateLimiter: rateLimiter);
         context.Items["AgentId"] = agentId;
         context.Response.Body = new MemoryStream();
 
@@ -151,10 +194,9 @@ public class ProxyMiddlewareTests
     public async Task InvokeAsync_CircuitBreakerOpen_Returns503()
     {
         var agentId = Guid.NewGuid();
-        var agent = new Agent("test", "owner", "hash");
-
-        var agentRepo = Substitute.For<IAgentRepository>();
-        agentRepo.GetByIdAsync(agentId).Returns(agent);
+        var accessService = Substitute.For<IAgentRequestAccessService>();
+        accessService.GetAgentAsync(agentId, Arg.Any<CancellationToken>())
+            .Returns(new AgentRequestAccessResult(true, new Agent("test", "owner", "hash"), null));
 
         var rateLimiter = Substitute.For<IAgentRateLimiter>();
         rateLimiter.IsAllowedAsync(agentId, Arg.Any<CancellationToken>()).Returns(true);
@@ -164,7 +206,7 @@ public class ProxyMiddlewareTests
 
         var middleware = BuildMiddleware(_ => Task.CompletedTask);
         var context = BuildContext("/proxy/http://example.com/api",
-            agentRepository: agentRepo, rateLimiter: rateLimiter, circuitBreaker: circuitBreaker);
+            accessService: accessService, rateLimiter: rateLimiter, circuitBreaker: circuitBreaker);
         context.Items["AgentId"] = agentId;
         context.Response.Body = new MemoryStream();
 
@@ -177,10 +219,9 @@ public class ProxyMiddlewareTests
     public async Task InvokeAsync_DecisionDenied_Returns403()
     {
         var agentId = Guid.NewGuid();
-        var agent = new Agent("test", "owner", "hash");
-
-        var agentRepo = Substitute.For<IAgentRepository>();
-        agentRepo.GetByIdAsync(agentId).Returns(agent);
+        var accessService = Substitute.For<IAgentRequestAccessService>();
+        accessService.GetAgentAsync(agentId, Arg.Any<CancellationToken>())
+            .Returns(new AgentRequestAccessResult(true, new Agent("test", "owner", "hash"), null));
 
         var rateLimiter = Substitute.For<IAgentRateLimiter>();
         rateLimiter.IsAllowedAsync(agentId, Arg.Any<CancellationToken>()).Returns(true);
@@ -194,7 +235,7 @@ public class ProxyMiddlewareTests
 
         var middleware = BuildMiddleware(_ => Task.CompletedTask);
         var context = BuildContext("/proxy/http://example.com/api",
-            decisionEngine: decisionEngine, agentRepository: agentRepo,
+            decisionEngine: decisionEngine, accessService: accessService,
             rateLimiter: rateLimiter, circuitBreaker: circuitBreaker);
         context.Items["AgentId"] = agentId;
         context.Response.Body = new MemoryStream();
@@ -208,10 +249,9 @@ public class ProxyMiddlewareTests
     public async Task InvokeAsync_DecisionHitl_Returns202()
     {
         var agentId = Guid.NewGuid();
-        var agent = new Agent("test", "owner", "hash");
-
-        var agentRepo = Substitute.For<IAgentRepository>();
-        agentRepo.GetByIdAsync(agentId).Returns(agent);
+        var accessService = Substitute.For<IAgentRequestAccessService>();
+        accessService.GetAgentAsync(agentId, Arg.Any<CancellationToken>())
+            .Returns(new AgentRequestAccessResult(true, new Agent("test", "owner", "hash"), null));
 
         var rateLimiter = Substitute.For<IAgentRateLimiter>();
         rateLimiter.IsAllowedAsync(agentId, Arg.Any<CancellationToken>()).Returns(true);
@@ -230,7 +270,7 @@ public class ProxyMiddlewareTests
         var middleware = BuildMiddleware(_ => Task.CompletedTask);
         var context = BuildContext("/proxy/http://example.com/api",
             decisionEngine: decisionEngine, hitlService: hitlService,
-            agentRepository: agentRepo, rateLimiter: rateLimiter, circuitBreaker: circuitBreaker);
+            accessService: accessService, rateLimiter: rateLimiter, circuitBreaker: circuitBreaker);
         context.Items["AgentId"] = agentId;
         context.Response.Body = new MemoryStream();
 
@@ -244,10 +284,9 @@ public class ProxyMiddlewareTests
     public async Task InvokeAsync_UpstreamHttpError_Records503AndCircuitFailure()
     {
         var agentId = Guid.NewGuid();
-        var agent = new Agent("test", "owner", "hash");
-
-        var agentRepo = Substitute.For<IAgentRepository>();
-        agentRepo.GetByIdAsync(agentId).Returns(agent);
+        var accessService = Substitute.For<IAgentRequestAccessService>();
+        accessService.GetAgentAsync(agentId, Arg.Any<CancellationToken>())
+            .Returns(new AgentRequestAccessResult(true, new Agent("test", "owner", "hash"), null));
 
         var rateLimiter = Substitute.For<IAgentRateLimiter>();
         rateLimiter.IsAllowedAsync(agentId, Arg.Any<CancellationToken>()).Returns(true);
@@ -266,7 +305,7 @@ public class ProxyMiddlewareTests
 
         var middleware = BuildMiddleware(_ => Task.CompletedTask);
         var context = BuildContext("/proxy/http://example.com/api",
-            decisionEngine: decisionEngine, agentRepository: agentRepo,
+            decisionEngine: decisionEngine, accessService: accessService,
             rateLimiter: rateLimiter, circuitBreaker: circuitBreaker);
         context.Items["AgentId"] = agentId;
         context.Request.Body = new MemoryStream();
@@ -282,10 +321,9 @@ public class ProxyMiddlewareTests
     public async Task InvokeAsync_SuccessfulProxy_CopiesResponseStatusCode()
     {
         var agentId = Guid.NewGuid();
-        var agent = new Agent("test", "owner", "hash");
-
-        var agentRepo = Substitute.For<IAgentRepository>();
-        agentRepo.GetByIdAsync(agentId).Returns(agent);
+        var accessService = Substitute.For<IAgentRequestAccessService>();
+        accessService.GetAgentAsync(agentId, Arg.Any<CancellationToken>())
+            .Returns(new AgentRequestAccessResult(true, new Agent("test", "owner", "hash"), null));
 
         var rateLimiter = Substitute.For<IAgentRateLimiter>();
         rateLimiter.IsAllowedAsync(agentId, Arg.Any<CancellationToken>()).Returns(true);
@@ -303,7 +341,7 @@ public class ProxyMiddlewareTests
 
         var middleware = BuildMiddleware(_ => Task.CompletedTask);
         var context = BuildContext("/proxy/http://example.com/api",
-            decisionEngine: decisionEngine, agentRepository: agentRepo,
+            decisionEngine: decisionEngine, accessService: accessService,
             rateLimiter: rateLimiter, circuitBreaker: circuitBreaker);
         context.Items["AgentId"] = agentId;
         context.Request.Body = new MemoryStream();
@@ -319,10 +357,9 @@ public class ProxyMiddlewareTests
     public async Task InvokeAsync_Upstream500_RecordsCircuitFailure()
     {
         var agentId = Guid.NewGuid();
-        var agent = new Agent("test", "owner", "hash");
-
-        var agentRepo = Substitute.For<IAgentRepository>();
-        agentRepo.GetByIdAsync(agentId).Returns(agent);
+        var accessService = Substitute.For<IAgentRequestAccessService>();
+        accessService.GetAgentAsync(agentId, Arg.Any<CancellationToken>())
+            .Returns(new AgentRequestAccessResult(true, new Agent("test", "owner", "hash"), null));
 
         var rateLimiter = Substitute.For<IAgentRateLimiter>();
         rateLimiter.IsAllowedAsync(agentId, Arg.Any<CancellationToken>()).Returns(true);
@@ -340,7 +377,7 @@ public class ProxyMiddlewareTests
 
         var middleware = BuildMiddleware(_ => Task.CompletedTask);
         var context = BuildContext("/proxy/http://example.com/api",
-            decisionEngine: decisionEngine, agentRepository: agentRepo,
+            decisionEngine: decisionEngine, accessService: accessService,
             rateLimiter: rateLimiter, circuitBreaker: circuitBreaker);
         context.Items["AgentId"] = agentId;
         context.Request.Body = new MemoryStream();
@@ -360,12 +397,14 @@ public class ProxyMiddlewareTests
         string path,
         IDecisionEngine? decisionEngine = null,
         IHitlService? hitlService = null,
+        IAgentRequestAccessService? accessService = null,
         IAgentRepository? agentRepository = null,
         IAgentRateLimiter? rateLimiter = null,
         ICircuitBreaker? circuitBreaker = null)
     {
         decisionEngine ??= Substitute.For<IDecisionEngine>();
         hitlService ??= Substitute.For<IHitlService>();
+        accessService ??= Substitute.For<IAgentRequestAccessService>();
         agentRepository ??= Substitute.For<IAgentRepository>();
         rateLimiter ??= Substitute.For<IAgentRateLimiter>();
         circuitBreaker ??= Substitute.For<ICircuitBreaker>();
@@ -373,6 +412,7 @@ public class ProxyMiddlewareTests
         var services = new ServiceCollection();
         services.AddSingleton(decisionEngine);
         services.AddSingleton(hitlService);
+        services.AddSingleton(accessService);
         services.AddSingleton(agentRepository);
         services.AddSingleton(rateLimiter);
         services.AddSingleton(circuitBreaker);

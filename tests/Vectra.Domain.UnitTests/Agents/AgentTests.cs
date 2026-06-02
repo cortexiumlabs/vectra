@@ -62,6 +62,38 @@ public class AgentTests
     }
 
     [Fact]
+    public void Quarantine_ShouldSetStatusToQuarantined()
+    {
+        var agent = new Agent("TestAgent", "owner-1", "hash");
+
+        agent.Quarantine();
+
+        agent.Status.Should().Be(AgentStatus.Quarantined);
+    }
+
+    [Fact]
+    public void LiftQuarantine_WhenQuarantined_ShouldSetStatusToActive()
+    {
+        var agent = new Agent("TestAgent", "owner-1", "hash");
+        agent.Quarantine();
+
+        agent.LiftQuarantine();
+
+        agent.Status.Should().Be(AgentStatus.Active);
+    }
+
+    [Fact]
+    public void LiftQuarantine_WhenNotQuarantined_ShouldNotChangeStatus()
+    {
+        var agent = new Agent("TestAgent", "owner-1", "hash");
+        agent.Revoke();
+
+        agent.LiftQuarantine();
+
+        agent.Status.Should().Be(AgentStatus.Revoked);
+    }
+
+    [Fact]
     public void AgentHistories_ShouldBeEmptyByDefault()
     {
         var agent = new Agent("TestAgent", "owner-1", "hash");

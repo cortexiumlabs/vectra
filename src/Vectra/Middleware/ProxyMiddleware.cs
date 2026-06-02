@@ -6,6 +6,7 @@ using Vectra.Application.Abstractions.RateLimit;
 using Vectra.Application.Models;
 using Vectra.Domain.Agents;
 using Vectra.Infrastructure.Decision;
+using Vectra.Services;
 
 namespace Vectra.Middleware;
 
@@ -49,7 +50,7 @@ public class ProxyMiddleware
         // 4. Resolve services
         var decisionEngine = context.RequestServices.GetRequiredService<IDecisionEngine>();
         var hitlService = context.RequestServices.GetRequiredService<IHitlService>();
-        var agentRepository = context.RequestServices.GetRequiredService<IAgentRepository>();
+        var accessService = context.RequestServices.GetRequiredService<IAgentRequestAccessService>();
 
         Guid agentId;
         double trustScore;
@@ -64,14 +65,15 @@ public class ProxyMiddleware
 
         agentId = authenticatedId;
 
-        var agent = await agentRepository.GetByIdAsync(agentId);
-        if (agent == null || agent.Status != AgentStatus.Active)
+        var access = await accessService.GetAgentAsync(agentId, context.RequestAborted);
+        if (!access.IsAllowed || access.Agent is null)
         {
             context.Response.StatusCode = 403;
-            await context.Response.WriteAsync("Agent is not active");
+            await context.Response.WriteAsync(access.ForbiddenReason ?? "Agent is not active");
             return;
         }
 
+        var agent = access.Agent;
         trustScore = agent.TrustScore;
 
         // 6. Rate limiting – 429 if agent exceeded requests/min

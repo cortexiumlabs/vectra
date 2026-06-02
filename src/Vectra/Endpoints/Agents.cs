@@ -25,6 +25,10 @@ public class Agents : EndpointGroupBase
             .WithName("AssignPolicyToAgent")
             .WithSummary("Assign a policy to an AI agent");
 
+        group.MapPost("/{agentId}/lift-quarantine", LiftAgentQuarantine)
+            .WithName("LiftAgentQuarantine")
+            .WithSummary("Lift quarantine mode for an AI agent");
+
         group.MapDelete("/{agentId}", DeleteAgent)
             .WithName("DeleteAgent")
             .WithSummary("Delete an AI agent");
@@ -65,6 +69,15 @@ public class Agents : EndpointGroupBase
         CancellationToken cancellationToken)
     {
         var result = await dispatcher.DeleteAgent(Guid.Parse(agentId), cancellationToken);
+        return result.ToHttpResult();
+    }
+
+    public static async Task<IResult> LiftAgentQuarantine(
+        string agentId,
+        [FromServices] IDispatcher dispatcher,
+        CancellationToken cancellationToken)
+    {
+        var result = await dispatcher.LiftAgentQuarantine(agentId, cancellationToken);
         return result.ToHttpResult();
     }
 }
