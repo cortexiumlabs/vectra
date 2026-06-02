@@ -59,7 +59,9 @@ As organizations deploy more LLM-driven agents and complex microservices, establ
 * ✅**Semantic Intent Analysis:** Evaluates the underlying purpose of every request using natural language understanding, going far beyond simple endpoint matching.
 * ✅ **Dynamic Policy Enforcement:** Define and apply context-aware governance rules that adapt to agent behavior and request semantics in real time.
 * ✅ **Human-in-the-Loop (HITL):** Automatically intercepts high-risk or ambiguous requests and holds them for manual operator review before execution.
+* ✅ **HITL Notifications:** When a request is suspended for review, VECTRA can notify reviewers via Slack, Microsoft Teams, PagerDuty, or a generic webhook.
 * ✅ **Agent Governance:** Provides fine-grained controls to monitor, restrict, and audit autonomous AI agent actions across your systems.
+* ✅ **Agent Quarantine:** Automatically quarantine agents that fall below a trust score threshold, blocking all subsequent requests until manually lifted.
 * ✅ **Audit & Observability:** Maintains a full audit trail of agent intent classifications, policy decisions, and HITL review outcomes.
 * ✅ **High-Performance Gateway:** Designed for low-latency interception with minimal overhead, keeping your automated workflows fast and responsive.
 
