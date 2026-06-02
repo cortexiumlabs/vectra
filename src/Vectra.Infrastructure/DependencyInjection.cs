@@ -83,6 +83,9 @@ public static class DependencyInjection
         // Circuit breaker
         services.AddSingleton<ICircuitBreaker, CircuitBreaker.CircuitBreaker>();
 
+        // Agent request access
+        services.AddScoped<IAgentRequestAccessService, AgentRequestAccessService>();
+
         return services;
     }
 

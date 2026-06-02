@@ -1,19 +1,10 @@
 using Microsoft.Extensions.Options;
 using Vectra.Application.Abstractions.Persistence;
+using Vectra.Application.Abstractions.Security;
 using Vectra.BuildingBlocks.Configuration.Security;
 using Vectra.Domain.Agents;
 
-namespace Vectra.Services;
-
-public interface IAgentRequestAccessService
-{
-    Task<AgentRequestAccessResult> GetAgentAsync(Guid agentId, CancellationToken cancellationToken = default);
-}
-
-public readonly record struct AgentRequestAccessResult(
-    bool IsAllowed,
-    Agent? Agent,
-    string? ForbiddenReason);
+namespace Vectra.Infrastructure.Security;
 
 public sealed class AgentRequestAccessService : IAgentRequestAccessService
 {

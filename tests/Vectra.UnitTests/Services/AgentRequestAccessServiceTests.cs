@@ -1,11 +1,9 @@
-using FluentAssertions;
 using Microsoft.Extensions.Options;
-using NSubstitute;
 using Vectra.Application.Abstractions.Persistence;
 using Vectra.BuildingBlocks.Configuration.Security.AgentQuarantine;
 using Vectra.BuildingBlocks.Configuration.Security;
 using Vectra.Domain.Agents;
-using Vectra.Services;
+using Vectra.Infrastructure.Security;
 
 namespace Vectra.UnitTests.Services;
 

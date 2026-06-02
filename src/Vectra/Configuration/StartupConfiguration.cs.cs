@@ -35,7 +35,6 @@ internal static class StartupConfiguration
             .AddSystemClock()
             .AddJsonSerialization()
             .AddCache()
-            .AddScoped<IAgentRequestAccessService, AgentRequestAccessService>()
             .AddInfrastructure()
             .AddVectraPersistence()
             .AddVectraApiDocumentation()

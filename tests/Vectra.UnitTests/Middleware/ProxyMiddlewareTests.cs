@@ -8,6 +8,7 @@ using Vectra.Application.Abstractions.CircuitBreaker;
 using Vectra.Application.Abstractions.Executions;
 using Vectra.Application.Abstractions.Persistence;
 using Vectra.Application.Abstractions.RateLimit;
+using Vectra.Application.Abstractions.Security;
 using Vectra.Application.Models;
 using Vectra.BuildingBlocks.Configuration.Security;
 using Vectra.Domain.Agents;
