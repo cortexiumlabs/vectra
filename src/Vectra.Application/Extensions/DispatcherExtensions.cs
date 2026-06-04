@@ -11,6 +11,7 @@ using Vectra.Application.Features.Hitl.GetAllPending;
 using Vectra.Application.Features.Hitl.GetStatus;
 using Vectra.Application.Features.Policies.PolicyDetails;
 using Vectra.Application.Features.Policies.PoliciesList;
+using Vectra.Application.Features.Simulations.SimulateDecision;
 using Vectra.BuildingBlocks.Results;
 
 namespace Vectra.Application.Extensions;
@@ -147,6 +148,18 @@ public static class DispatcherExtensions
         CancellationToken cancellationToken)
     {
         return dispatcher.Dispatch(new DenyRequest { Id = id, ReviewerId = reviewerId, Comment = comment }, cancellationToken);
+    }
+
+    #endregion
+
+    #region Simulation
+
+    public static Task<Result<SimulateDecisionResult>> SimulateDecision(
+        this IDispatcher dispatcher,
+        SimulateDecisionRequest request,
+        CancellationToken cancellationToken)
+    {
+        return dispatcher.Dispatch(request, cancellationToken);
     }
 
     #endregion

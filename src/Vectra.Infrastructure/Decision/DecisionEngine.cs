@@ -73,6 +73,28 @@ public class DecisionEngine : IDecisionEngine
         return await FinalizeAsync(context, DecisionResult.Allow(riskScore), cancellationToken);
     }
 
+    public async Task<DecisionResult> SimulateAsync(RequestContext context, CancellationToken cancellationToken = default)
+    {
+        // 1. Policy
+        var policyDecision = await EvaluatePolicyAsync(context, cancellationToken);
+        if (policyDecision != null)
+            return policyDecision;
+
+        // 2. Risk
+        var riskScore = await _riskScoring.ComputeRiskScoreAsync(context, cancellationToken);
+        var riskDecision = EvaluateRisk(riskScore);
+        if (riskDecision != null)
+            return riskDecision;
+
+        // 3. Semantic
+        var semanticDecision = await EvaluateSemanticAsync(context, cancellationToken);
+        if (semanticDecision != null)
+            return semanticDecision;
+
+        // 4. Allow
+        return DecisionResult.Allow(riskScore);
+    }
+
     private async Task<DecisionResult?> EvaluatePolicyAsync(RequestContext context, CancellationToken cancellationToken = default)
     {
         if (_policy.Enabled == false)

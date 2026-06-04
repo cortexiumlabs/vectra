@@ -6,4 +6,6 @@ namespace Vectra.Application.Abstractions.Executions;
 public interface IDecisionEngine
 {
     Task<DecisionResult> EvaluateAsync(RequestContext context, CancellationToken cancellationToken = default);
+
+    Task<DecisionResult> SimulateAsync(RequestContext context, CancellationToken cancellationToken = default);
 }
