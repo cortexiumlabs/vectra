@@ -355,6 +355,44 @@ public class ProxyMiddlewareTests
     }
 
     [Fact]
+    public async Task InvokeAsync_SetsObservabilityItems_WhenDecisionMade()
+    {
+        var agentId = Guid.NewGuid();
+        var accessService = Substitute.For<IAgentRequestAccessService>();
+        accessService.GetAgentAsync(agentId, Arg.Any<CancellationToken>())
+            .Returns(new AgentRequestAccessResult(true, new Agent("test", "owner", "hash"), null));
+
+        var rateLimiter = Substitute.For<IAgentRateLimiter>();
+        rateLimiter.IsAllowedAsync(agentId, Arg.Any<CancellationToken>()).Returns(true);
+
+        var circuitBreaker = Substitute.For<ICircuitBreaker>();
+        circuitBreaker.IsAllowed(Arg.Any<string>()).Returns(true);
+
+        var decisionEngine = Substitute.For<IDecisionEngine>();
+        decisionEngine.EvaluateAsync(Arg.Any<RequestContext>(), Arg.Any<CancellationToken>())
+            .Returns(DecisionResult.Allow(0.73));
+
+        var handler = new FixedResponseHttpMessageHandler(HttpStatusCode.OK, "upstream-body");
+        var httpClient = new HttpClient(handler);
+        _httpClientFactory.CreateClient(Arg.Any<string>()).Returns(httpClient);
+
+        var middleware = BuildMiddleware(_ => Task.CompletedTask);
+        var context = BuildContext("/proxy/http://example.com/api",
+            decisionEngine: decisionEngine, accessService: accessService,
+            rateLimiter: rateLimiter, circuitBreaker: circuitBreaker);
+        context.Items["AgentId"] = agentId;
+        context.Request.Body = new MemoryStream();
+        context.Response.Body = new MemoryStream();
+
+        await middleware.InvokeAsync(context);
+
+        context.Items.Should().ContainKey("RiskScore");
+        context.Items["RiskScore"].Should().Be(0.73);
+        context.Items.Should().ContainKey("Decision");
+        context.Items["Decision"].Should().Be("allow");
+    }
+
+    [Fact]
     public async Task InvokeAsync_Upstream500_RecordsCircuitFailure()
     {
         var agentId = Guid.NewGuid();
