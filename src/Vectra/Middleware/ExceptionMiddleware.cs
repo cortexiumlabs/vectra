@@ -21,6 +21,7 @@ public class ExceptionMiddleware
         }
         catch (Exception ex)
         {
+            context.Items["ErrorType"] = ex.GetType().Name;
             _logger.LogError(ex, "Unhandled exception");
 
             context.Response.StatusCode = 500;

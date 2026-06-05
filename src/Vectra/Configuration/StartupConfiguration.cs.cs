@@ -5,7 +5,6 @@ using Vectra.Extensions;
 using Vectra.Infrastructure;
 using Vectra.Middleware;
 using Vectra.Application;
-using Vectra.Services;
 
 namespace Vectra.Configuration;
 
@@ -64,6 +63,7 @@ internal static class StartupConfiguration
 
         app.UseRouting();
         app.UseMiddleware<AgentAuthMiddleware>();
+        app.UseMiddleware<RequestLoggingMiddleware>();
 
         // Proxy branch
         app.MapWhen(

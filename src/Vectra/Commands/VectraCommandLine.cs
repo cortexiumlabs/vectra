@@ -40,6 +40,8 @@ internal static class VectraCommandLine
             {
                 builder.AddVectraSecretManagement();
 
+                builder.Logging.AddFilter("Microsoft.AspNetCore.Hosting.Diagnostics", LogLevel.Warning);
+
                 StartupConfiguration.ConfigureServices(builder);
 
                 var app = builder.Build();

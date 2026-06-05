@@ -106,7 +106,15 @@ public class ProxyMiddleware
             Body = await ReadBodyAsync(context.Request)
         };
 
+        context.Items["PolicyName"] = requestContext.PolicyName;
+        context.Items["PolicyVersion"] = requestContext.PolicyName;
+        context.Items["TargetUrl"] = requestContext.TargetUrl;
+
         var decision = await decisionEngine.EvaluateAsync(requestContext, context.RequestAborted);
+
+        context.Items["RiskScore"] = decision.TrustScore;
+        context.Items["Decision"] = decision.Type.ToString().ToLowerInvariant();
+        context.Items["DecisionReason"] = decision.Reason;
 
         if (decision.IsDenied)
         {
