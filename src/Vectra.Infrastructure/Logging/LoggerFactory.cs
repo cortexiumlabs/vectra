@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Options;
 using Serilog;
+using Serilog.Enrichers.Span;
 using Serilog.Events;
 using Vectra.BuildingBlocks.Configuration.Observability;
 using Vectra.BuildingBlocks.Configuration.Observability.Logging;
@@ -20,6 +21,7 @@ public class LoggerFactory: ILoggerFactory
         var configuration = options.Value.Logging;
         var config = new LoggerConfiguration()
             .Enrich.FromLogContext()
+            .Enrich.WithSpan()
             .MinimumLevel.Override("Microsoft.EntityFrameworkCore", Serilog.Events.LogEventLevel.Warning)
             .Enrich.WithMachineName()
             .Enrich.WithThreadId()
@@ -34,7 +36,23 @@ public class LoggerFactory: ILoggerFactory
         // Seq
         ConfigureSeqSink(config, configuration.Seq);
 
+        // OTLP
+        ConfigureOtlpSink(config, configuration.Otlp);
+
         return config.CreateLogger();
+    }
+
+    private static void ConfigureOtlpSink(LoggerConfiguration config, OtlpLoggingConfiguration? otlpConfig)
+    {
+        if (otlpConfig == null
+            || !otlpConfig.Enabled
+            || string.IsNullOrWhiteSpace(otlpConfig.Endpoint)) return;
+
+        config.WriteTo.OpenTelemetry(options =>
+        {
+            options.Endpoint = otlpConfig.Endpoint;
+            options.RestrictedToMinimumLevel = LogLevelMapper(otlpConfig.LogLevel);
+        });
     }
 
     private static void ConfigureFileSink(Serilog.LoggerConfiguration config, FileLoggingConfiguration? fileLoggingConfig)
