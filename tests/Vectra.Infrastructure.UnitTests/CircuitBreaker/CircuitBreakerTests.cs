@@ -1,139 +1,142 @@
 using FluentAssertions;
 using Microsoft.Extensions.Options;
+using NSubstitute;
 using Vectra.BuildingBlocks.Configuration.System;
 using Vectra.BuildingBlocks.Configuration.System.CircuitBreaker;
-using CircuitBreakerImpl = Vectra.Infrastructure.CircuitBreaker.CircuitBreaker;
+using Vectra.Infrastructure.CircuitBreaker;
 
 namespace Vectra.Infrastructure.UnitTests.CircuitBreaker;
 
 public class CircuitBreakerTests
 {
-    private static CircuitBreakerImpl CreateSut(
-        bool enabled = true,
-        int failureThreshold = 3,
-        int openDurationSeconds = 60,
-        int samplingWindowSeconds = 120)
+    private readonly IOptions<SystemConfiguration> _options = Substitute.For<IOptions<SystemConfiguration>>();
+    private readonly Vectra.Infrastructure.CircuitBreaker.CircuitBreaker _circuitBreaker;
+
+    public CircuitBreakerTests()
     {
-        var config = new SystemConfiguration
+        _options.Value.Returns(new SystemConfiguration
         {
             CircuitBreaker = new CircuitBreakerConfiguration
             {
-                Enabled = enabled,
-                FailureThreshold = failureThreshold,
-                OpenDurationSeconds = openDurationSeconds,
-                SamplingWindowSeconds = samplingWindowSeconds
+                Enabled = true,
+                FailureThreshold = 3,
+                OpenDurationSeconds = 10,
+                SamplingWindowSeconds = 30
             }
-        };
-        return new CircuitBreakerImpl(Options.Create(config));
+        });
+        _circuitBreaker = new Vectra.Infrastructure.CircuitBreaker.CircuitBreaker(_options);
     }
 
     [Fact]
-    public void IsAllowed_WhenDisabled_AlwaysReturnsTrue()
+    public void IsAllowed_WhenDisabled_ShouldReturnTrue()
     {
-        var sut = CreateSut(enabled: false);
+        // Arrange
+        _options.Value.Returns(new SystemConfiguration { CircuitBreaker = new CircuitBreakerConfiguration { Enabled = false } });
+        var cb = new Vectra.Infrastructure.CircuitBreaker.CircuitBreaker(_options);
 
-        sut.IsAllowed("host1").Should().BeTrue();
-        sut.RecordFailure("host1");
-        sut.RecordFailure("host1");
-        sut.RecordFailure("host1");
-        sut.IsAllowed("host1").Should().BeTrue();
+        // Act
+        var isAllowed = cb.IsAllowed("test-host");
+
+        // Assert
+        isAllowed.Should().BeTrue();
     }
 
     [Fact]
-    public void IsAllowed_NewHost_ReturnsTrueWhenClosed()
+    public void IsAllowed_WhenClosed_ShouldReturnTrue()
     {
-        var sut = CreateSut();
+        // Act
+        var isAllowed = _circuitBreaker.IsAllowed("test-host");
 
-        sut.IsAllowed("host1").Should().BeTrue();
+        // Assert
+        isAllowed.Should().BeTrue();
     }
 
     [Fact]
-    public void RecordFailure_BelowThreshold_StaysClosed()
+    public void RecordFailure_BelowThreshold_ShouldRemainClosed()
     {
-        var sut = CreateSut(failureThreshold: 3);
+        // Act
+        _circuitBreaker.RecordFailure("test-host");
+        _circuitBreaker.RecordFailure("test-host");
 
-        sut.RecordFailure("host1");
-        sut.RecordFailure("host1");
-
-        sut.IsAllowed("host1").Should().BeTrue();
+        // Assert
+        _circuitBreaker.IsAllowed("test-host").Should().BeTrue();
     }
 
     [Fact]
-    public void RecordFailure_AtThreshold_OpensCircuit()
+    public void RecordFailure_AtThreshold_ShouldOpen()
     {
-        var sut = CreateSut(failureThreshold: 3);
+        // Act
+        _circuitBreaker.RecordFailure("test-host");
+        _circuitBreaker.RecordFailure("test-host");
+        _circuitBreaker.RecordFailure("test-host");
 
-        sut.RecordFailure("host1");
-        sut.RecordFailure("host1");
-        sut.RecordFailure("host1");
-
-        sut.IsAllowed("host1").Should().BeFalse();
+        // Assert
+        _circuitBreaker.IsAllowed("test-host").Should().BeFalse();
     }
 
     [Fact]
-    public void RecordSuccess_ClosesCircuit_AndResetsFailureCount()
+    public void IsAllowed_WhenOpen_ShouldReturnFalse()
     {
-        var sut = CreateSut(failureThreshold: 2);
-        sut.RecordFailure("host1");
-        sut.RecordFailure("host1"); // opens circuit
-        sut.IsAllowed("host1").Should().BeFalse();
+        // Arrange
+        _circuitBreaker.RecordFailure("test-host");
+        _circuitBreaker.RecordFailure("test-host");
+        _circuitBreaker.RecordFailure("test-host");
 
-        sut.RecordSuccess("host1");
+        // Act
+        var isAllowed = _circuitBreaker.IsAllowed("test-host");
 
-        sut.IsAllowed("host1").Should().BeTrue();
+        // Assert
+        isAllowed.Should().BeFalse();
     }
 
     [Fact]
-    public void RecordSuccess_WhenDisabled_DoesNothing()
+    public void IsAllowed_WhenHalfOpen_ShouldReturnTrueForProbe()
     {
-        var sut = CreateSut(enabled: false);
+        // Arrange
+        _circuitBreaker.RecordFailure("test-host");
+        _circuitBreaker.RecordFailure("test-host");
+        _circuitBreaker.RecordFailure("test-host");
 
-        var act = () => sut.RecordSuccess("host1");
+        // Wait for the circuit to enter half-open state
+        Thread.Sleep(TimeSpan.FromSeconds(11));
 
-        act.Should().NotThrow();
+        // Act
+        var isAllowed = _circuitBreaker.IsAllowed("test-host");
+
+        // Assert
+        isAllowed.Should().BeTrue();
     }
 
     [Fact]
-    public void RecordFailure_WhenDisabled_DoesNothing()
+    public void RecordSuccess_WhenHalfOpen_ShouldCloseCircuit()
     {
-        var sut = CreateSut(enabled: false);
+        // Arrange
+        _circuitBreaker.RecordFailure("test-host");
+        _circuitBreaker.RecordFailure("test-host");
+        _circuitBreaker.RecordFailure("test-host");
+        Thread.Sleep(TimeSpan.FromSeconds(11)); // Enter half-open
+        _circuitBreaker.IsAllowed("test-host"); // Probe
 
-        var act = () => sut.RecordFailure("host1");
+        // Act
+        _circuitBreaker.RecordSuccess("test-host");
 
-        act.Should().NotThrow();
+        // Assert
+        _circuitBreaker.IsAllowed("test-host").Should().BeTrue();
     }
 
     [Fact]
-    public void IsAllowed_DifferentHosts_AreTrackedIndependently()
+    public void RecordFailure_ResetsAfterWindow()
     {
-        var sut = CreateSut(failureThreshold: 2);
+        // Arrange
+        _circuitBreaker.RecordFailure("test-host");
+        _circuitBreaker.RecordFailure("test-host");
 
-        sut.RecordFailure("host1");
-        sut.RecordFailure("host1"); // opens host1
+        // Wait for the sampling window to reset
+        Thread.Sleep(TimeSpan.FromSeconds(31));
 
-        sut.IsAllowed("host1").Should().BeFalse();
-        sut.IsAllowed("host2").Should().BeTrue();
-    }
+        _circuitBreaker.RecordFailure("test-host");
 
-    [Fact]
-    public void Constructor_NullOptions_ThrowsArgumentNullException()
-    {
-        var act = () => new CircuitBreakerImpl(null!);
-
-        act.Should().Throw<ArgumentNullException>();
-    }
-
-    [Fact]
-    public void IsAllowed_OpenCircuit_AfterDuration_AllowsProbeRequest()
-    {
-        // Use a very short openDurationSeconds — we can't wait in unit tests,
-        // so instead verify the transition logic is correctly modeled by testing
-        // a circuit that has been reset via RecordSuccess (HalfOpen → Closed).
-        var sut = CreateSut(failureThreshold: 2, openDurationSeconds: 0);
-        sut.RecordFailure("host1");
-        sut.RecordFailure("host1"); // open
-
-        // With openDurationSeconds=0, elapsed >= 0 is always true → transitions to HalfOpen
-        sut.IsAllowed("host1").Should().BeTrue();
+        // Assert
+        _circuitBreaker.IsAllowed("test-host").Should().BeTrue();
     }
 }

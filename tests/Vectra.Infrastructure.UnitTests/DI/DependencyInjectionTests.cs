@@ -1,4 +1,5 @@
 using FluentAssertions;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
@@ -11,6 +12,7 @@ using Vectra.Application.Abstractions.Executions;
 using Vectra.Application.Abstractions.RateLimit;
 using Vectra.Application.Abstractions.Serializations;
 using Vectra.BuildingBlocks.Configuration.HumanInTheLoop;
+using Vectra.BuildingBlocks.Configuration.Observability;
 using Vectra.BuildingBlocks.Configuration.Policy;
 using Vectra.BuildingBlocks.Configuration.SecretManagement;
 using Vectra.BuildingBlocks.Configuration.Security;
@@ -137,14 +139,21 @@ public class DependencyInjectionTests
         deserializer.Should().NotBeNull();
     }
 
-    // ── AddVectraLogging ──────────────────────────────────────────────────
+    // ── AddVectraObservability ────────────────────────────────────────────
 
     [Fact]
-    public void AddVectraLogging_RegistersLoggerFactory()
+    public void AddVectraObservability_RegistersLoggerFactory()
     {
-        var services = new ServiceCollection();
-        services.AddVectraLogging();
-        var sp = services.BuildServiceProvider();
+        var builder = WebApplication.CreateBuilder();
+        builder.Configuration.AddInMemoryCollection(new Dictionary<string, string?>
+        {
+            ["Observability:OpenTelemetry:Enabled"] = "false"
+        });
+        builder.Services.AddOptions<ObservabilityConfiguration>().Bind(builder.Configuration.GetSection("Observability"));
+
+        builder.AddVectraObservability();
+
+        var sp = builder.Services.BuildServiceProvider();
 
         var loggerFactory = sp.GetService<Vectra.Infrastructure.Logging.ILoggerFactory>();
 
