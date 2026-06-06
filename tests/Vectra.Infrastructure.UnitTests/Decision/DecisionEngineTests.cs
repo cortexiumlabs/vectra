@@ -28,8 +28,8 @@ public class DecisionEngineTests
     private DecisionEngine CreateSut(
         bool policyEnabled = true,
         bool semanticEnabled = false,
-        double hitlThreshold = 0.8,
-        double semanticConfidenceThreshold = 0.7,
+        double? hitlThreshold = 0.8,
+        double? semanticConfidenceThreshold = 0.7,
         bool allowLowConfidence = false)
     {
         _clock.UtcNow.Returns(DateTime.UtcNow);
@@ -92,6 +92,12 @@ public class DecisionEngineTests
         var result = await sut.EvaluateAsync(context, TestContext.Current.CancellationToken);
 
         result.IsHitl.Should().BeTrue();
+
+        await _history.Received(1).RecordRequestAsync(
+            context.AgentId,
+            true, // violation
+            Arg.Any<double>(),
+            TestContext.Current.CancellationToken);
     }
 
     [Fact]
@@ -216,6 +222,45 @@ public class DecisionEngineTests
             Options.Create(new HumanInTheLoopConfiguration()),
             Options.Create(new PolicyConfiguration()),
             null!, _riskScoring, _semanticProvider,
+            _history, _audit, _clock, _logger);
+
+        act.Should().Throw<ArgumentNullException>();
+    }
+
+    [Fact]
+    public void Constructor_NullHitlOptions_ThrowsArgumentNullException()
+    {
+        var act = () => new DecisionEngine(
+            Options.Create(new SemanticConfiguration()),
+            null!,
+            Options.Create(new PolicyConfiguration()),
+            _policyProvider, _riskScoring, _semanticProvider,
+            _history, _audit, _clock, _logger);
+
+        act.Should().Throw<ArgumentNullException>();
+    }
+
+    [Fact]
+    public void Constructor_NullPolicyOptions_ThrowsArgumentNullException()
+    {
+        var act = () => new DecisionEngine(
+            Options.Create(new SemanticConfiguration()),
+            Options.Create(new HumanInTheLoopConfiguration()),
+            null!,
+            _policyProvider, _riskScoring, _semanticProvider,
+            _history, _audit, _clock, _logger);
+
+        act.Should().Throw<ArgumentNullException>();
+    }
+
+    [Fact]
+    public void Constructor_NullSemanticProvider_ThrowsArgumentNullException()
+    {
+        var act = () => new DecisionEngine(
+            Options.Create(new SemanticConfiguration()),
+            Options.Create(new HumanInTheLoopConfiguration()),
+            Options.Create(new PolicyConfiguration()),
+            _policyProvider, _riskScoring, null!,
             _history, _audit, _clock, _logger);
 
         act.Should().Throw<ArgumentNullException>();
@@ -352,6 +397,92 @@ public class DecisionEngineTests
             Arg.Any<CancellationToken>());
     }
 
+    #region SimulateAsync Tests
+
+    [Fact]
+    public async Task SimulateAsync_PolicyDeny_ReturnsDeny()
+    {
+        var sut = CreateSut();
+        _policyProvider.EvaluateAsync(Arg.Any<string>(), Arg.Any<Dictionary<string, object>>(), Arg.Any<CancellationToken>())
+            .Returns(PolicyDecision.Deny("blocked by policy"));
+        var context = BuildContext();
+
+        var result = await sut.SimulateAsync(context, TestContext.Current.CancellationToken);
+
+        result.IsDenied.Should().BeTrue();
+        result.Reason.Should().NotBeNullOrEmpty();
+        await _audit.DidNotReceive().AddAsync(Arg.Any<AuditTrail>(), Arg.Any<CancellationToken>());
+        await _history.DidNotReceive().RecordRequestAsync(Arg.Any<Guid>(), Arg.Any<bool>(), Arg.Any<double>(), Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task SimulateAsync_PolicyHitl_ReturnsHitl()
+    {
+        var sut = CreateSut();
+        _policyProvider.EvaluateAsync(Arg.Any<string>(), Arg.Any<Dictionary<string, object>>(), Arg.Any<CancellationToken>())
+            .Returns(PolicyDecision.Hitl("review required"));
+        var context = BuildContext();
+
+        var result = await sut.SimulateAsync(context, TestContext.Current.CancellationToken);
+
+        result.IsHitl.Should().BeTrue();
+        await _audit.DidNotReceive().AddAsync(Arg.Any<AuditTrail>(), Arg.Any<CancellationToken>());
+        await _history.DidNotReceive().RecordRequestAsync(Arg.Any<Guid>(), Arg.Any<bool>(), Arg.Any<double>(), Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task SimulateAsync_HighRiskScore_ReturnsHitl()
+    {
+        var sut = CreateSut(hitlThreshold: 0.7);
+        _policyProvider.EvaluateAsync(Arg.Any<string>(), Arg.Any<Dictionary<string, object>>(), Arg.Any<CancellationToken>())
+            .Returns(PolicyDecision.Allow());
+        _riskScoring.ComputeRiskScoreAsync(Arg.Any<RequestContext>(), Arg.Any<CancellationToken>())
+            .Returns(0.9); // above threshold
+        var context = BuildContext();
+
+        var result = await sut.SimulateAsync(context, TestContext.Current.CancellationToken);
+
+        result.IsHitl.Should().BeTrue();
+        result.Reason.Should().Contain("risk score");
+        await _audit.DidNotReceive().AddAsync(Arg.Any<AuditTrail>(), Arg.Any<CancellationToken>());
+        await _history.DidNotReceive().RecordRequestAsync(Arg.Any<Guid>(), Arg.Any<bool>(), Arg.Any<double>(), Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task SimulateAsync_LowConfidence_ReturnsHitl()
+    {
+        var sut = CreateSut(semanticEnabled: true, semanticConfidenceThreshold: 0.7);
+        _policyProvider.EvaluateAsync(Arg.Any<string>(), Arg.Any<Dictionary<string, object>>(), Arg.Any<CancellationToken>())
+            .Returns(PolicyDecision.Allow());
+        _riskScoring.ComputeRiskScoreAsync(Arg.Any<RequestContext>(), Arg.Any<CancellationToken>())
+            .Returns(0.1);
+        _semanticProvider.AnalyzeAsync(Arg.Any<string?>(), Arg.Any<string>(), Arg.Any<CancellationToken>())
+            .Returns(new SemanticAnalysisResult { Confidence = 0.4 }); // below threshold
+
+        var result = await sut.SimulateAsync(BuildContext(), TestContext.Current.CancellationToken);
+
+        result.IsHitl.Should().BeTrue();
+        result.Reason.Should().Contain("semantic confidence");
+        await _audit.DidNotReceive().AddAsync(Arg.Any<AuditTrail>(), Arg.Any<CancellationToken>());
+        await _history.DidNotReceive().RecordRequestAsync(Arg.Any<Guid>(), Arg.Any<bool>(), Arg.Any<double>(), Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task SimulateAsync_Allow_ReturnsAllow()
+    {
+        var sut = CreateSut();
+        SetupAllow();
+        var context = BuildContext();
+
+        var result = await sut.SimulateAsync(context, TestContext.Current.CancellationToken);
+
+        result.IsAllowed.Should().BeTrue();
+        await _audit.DidNotReceive().AddAsync(Arg.Any<AuditTrail>(), Arg.Any<CancellationToken>());
+        await _history.DidNotReceive().RecordRequestAsync(Arg.Any<Guid>(), Arg.Any<bool>(), Arg.Any<double>(), Arg.Any<CancellationToken>());
+    }
+
+    #endregion
+
     private static RequestContext BuildContext() => new()
     {
         AgentId = Guid.NewGuid(),
@@ -361,5 +492,87 @@ public class DecisionEngineTests
         PolicyName = "default-policy",
         TrustScore = 0.8
     };
+
+    [Fact]
+    public async Task EvaluateAsync_PolicyDenyWithNullReason_UsesDefaultReason()
+    {
+        var sut = CreateSut();
+        _policyProvider.EvaluateAsync(Arg.Any<string>(), Arg.Any<Dictionary<string, object>>(), Arg.Any<CancellationToken>())
+            .Returns(PolicyDecision.Deny(null)); // Null reason
+        var context = BuildContext();
+
+        var result = await sut.EvaluateAsync(context, TestContext.Current.CancellationToken);
+
+        result.IsDenied.Should().BeTrue();
+        result.Reason.Should().Be("Policy denied");
+    }
+
+    [Fact]
+    public async Task EvaluateAsync_PolicyHitlWithNullReason_UsesDefaultReason()
+    {
+        var sut = CreateSut();
+        _policyProvider.EvaluateAsync(Arg.Any<string>(), Arg.Any<Dictionary<string, object>>(), Arg.Any<CancellationToken>())
+            .Returns(PolicyDecision.Hitl(null)); // Null reason
+        var context = BuildContext();
+
+        var result = await sut.EvaluateAsync(context, TestContext.Current.CancellationToken);
+
+        result.IsHitl.Should().BeTrue();
+        result.Reason.Should().Be("Policy requires HITL");
+    }
+
+    [Fact]
+    public async Task EvaluateAsync_NullHitlThreshold_UsesDefault()
+    {
+        var sut = CreateSut(hitlThreshold: null);
+        _policyProvider.EvaluateAsync(Arg.Any<string>(), Arg.Any<Dictionary<string, object>>(), Arg.Any<CancellationToken>())
+            .Returns(PolicyDecision.Allow());
+        _riskScoring.ComputeRiskScoreAsync(Arg.Any<RequestContext>(), Arg.Any<CancellationToken>())
+            .Returns(0.85); // Above default of 0.8
+        var context = BuildContext();
+
+        var result = await sut.EvaluateAsync(context, TestContext.Current.CancellationToken);
+
+        result.IsHitl.Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task EvaluateAsync_NullSemanticConfidenceThreshold_UsesDefault()
+    {
+        var sut = CreateSut(semanticEnabled: true, semanticConfidenceThreshold: null);
+        _policyProvider.EvaluateAsync(Arg.Any<string>(), Arg.Any<Dictionary<string, object>>(), Arg.Any<CancellationToken>())
+            .Returns(PolicyDecision.Allow());
+        _riskScoring.ComputeRiskScoreAsync(Arg.Any<RequestContext>(), Arg.Any<CancellationToken>())
+            .Returns(0.1);
+        _semanticProvider.AnalyzeAsync(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<CancellationToken>())
+            .Returns(new SemanticAnalysisResult { Confidence = 0.6 }); // Below default of 0.7
+
+        var result = await sut.EvaluateAsync(BuildContext(), TestContext.Current.CancellationToken);
+
+        result.IsHitl.Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task EvaluateAsync_PolicyInput_IsBuiltCorrectly()
+    {
+        var sut = CreateSut();
+        var context = BuildContext();
+        context.Headers.Add("X-Test", "value");
+        Dictionary<string, object> capturedInput = null;
+
+        _policyProvider.EvaluateAsync(Arg.Any<string>(), Arg.Do<Dictionary<string, object>>(x => capturedInput = x), Arg.Any<CancellationToken>())
+            .Returns(PolicyDecision.Allow());
+
+        await sut.EvaluateAsync(context, TestContext.Current.CancellationToken);
+
+        capturedInput.Should().NotBeNull();
+        capturedInput["method"].Should().Be(context.Method);
+        capturedInput["path"].Should().Be(context.Path);
+        capturedInput["headers"].Should().Be(context.Headers);
+        var agent = capturedInput["agent"] as Dictionary<string, object>;
+        agent.Should().NotBeNull();
+        agent["id"].Should().Be(context.AgentId);
+        agent["trust_score"].Should().Be(context.TrustScore);
+    }
 }
 
