@@ -1,5 +1,4 @@
 using Microsoft.AspNetCore.Http;
-using NSubstitute;
 using Vectra.Application.Abstractions.Dispatchers;
 using VectraVoid = Vectra.Application.Abstractions.Dispatchers.Void;
 using Vectra.Application.Features.Agents.AgentsList;
@@ -127,6 +126,32 @@ public class AgentsEndpointTests
             new AssignPolicyRequestModel { PolicyName = "default" },
             _dispatcher,
             CancellationToken.None);
+
+        AssertStatusCode(result, 404);
+    }
+
+    // ── LiftAgentQuarantine ───────────────────────────────────────────────────────
+
+    [Fact]
+    public async Task LiftAgentQuarantine_Success_Returns204()
+    {
+        _dispatcher.Dispatch(Arg.Any<IAction<Result<VectraVoid>>>(), Arg.Any<CancellationToken>())
+                   .Returns(Result<VectraVoid>.Success(VectraVoid.Value));
+
+        var result = await Agents.LiftAgentQuarantine(Guid.NewGuid().ToString(), _dispatcher, CancellationToken.None);
+
+        // ToHttpResult for Result<Void> success maps to 200 Ok
+        AssertStatusCode(result, 200);
+    }
+
+    [Fact]
+    public async Task LiftAgentQuarantine_NotFound_Returns404()
+    {
+        var error = Error.NotFound(TestCode, "not found");
+        _dispatcher.Dispatch(Arg.Any<IAction<Result<VectraVoid>>>(), Arg.Any<CancellationToken>())
+                   .Returns(Result<VectraVoid>.Failure(error));
+
+        var result = await Agents.LiftAgentQuarantine(Guid.NewGuid().ToString(), _dispatcher, CancellationToken.None);
 
         AssertStatusCode(result, 404);
     }
