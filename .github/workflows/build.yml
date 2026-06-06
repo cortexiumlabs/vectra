@@ -43,7 +43,10 @@ jobs:
         run: dotnet build --no-incremental
 
       - name: Run Tests with Coverage
-        run: dotnet test --no-build --settings coverage.runsettings --collect:"Code Coverage" --results-directory ./coverage
+        run: dotnet test --no-build `
+            --collect:"XPlat Code Coverage" `
+            --results-directory ./coverage `
+            -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover
 
       - name: End SonarCloud Analysis
         if: ${{ env.SONAR_TOKEN != '' }}
