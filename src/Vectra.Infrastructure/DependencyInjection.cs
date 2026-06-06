@@ -1,14 +1,23 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using OpenTelemetry.Metrics;
+using OpenTelemetry.Resources;
+using OpenTelemetry.Trace;
 using Serilog;
 using Serilog.Extensions.Logging;
 using StackExchange.Redis;
+using Vectra.Application.Abstractions.CircuitBreaker;
 using Vectra.Application.Abstractions.Dispatchers;
 using Vectra.Application.Abstractions.Executions;
+using Vectra.Application.Abstractions.RateLimit;
 using Vectra.Application.Abstractions.Security;
 using Vectra.Application.Abstractions.Serializations;
+using Vectra.BuildingBlocks.Configuration.Observability;
 using Vectra.BuildingBlocks.Configuration.Policy;
+using Vectra.BuildingBlocks.Configuration.Semantic;
 using Vectra.BuildingBlocks.Configuration.System;
 using Vectra.Infrastructure.Caches;
 using Vectra.Infrastructure.Decision;
@@ -17,21 +26,18 @@ using Vectra.Infrastructure.HumanInTheLoop;
 using Vectra.Infrastructure.HumanInTheLoop.Notifiers;
 using Vectra.Infrastructure.Policy;
 using Vectra.Infrastructure.Policy.Providers;
+using Vectra.Infrastructure.RateLimit;
 using Vectra.Infrastructure.Risk;
 using Vectra.Infrastructure.Risk.Calculators;
+using Vectra.Infrastructure.SecretManagement;
 using Vectra.Infrastructure.Security;
-using Vectra.BuildingBlocks.Configuration.Semantic;
 using Vectra.Infrastructure.Semantic;
 using Vectra.Infrastructure.Semantic.Providers.AzureAi;
 using Vectra.Infrastructure.Semantic.Providers.Gemini;
+using Vectra.Infrastructure.Semantic.Providers.InternalBert;
 using Vectra.Infrastructure.Semantic.Providers.Ollama;
 using Vectra.Infrastructure.Semantic.Providers.OpenAi;
 using Vectra.Infrastructure.Serializations.Json;
-using Vectra.Infrastructure.Semantic.Providers.InternalBert;
-using Vectra.Application.Abstractions.RateLimit;
-using Vectra.Application.Abstractions.CircuitBreaker;
-using Vectra.Infrastructure.RateLimit;
-using Vectra.Infrastructure.SecretManagement;
 
 namespace Vectra.Infrastructure;
 
@@ -197,5 +203,54 @@ public static class DependencyInjection
             .AddSingleton<IDeserializer, JsonDeserializer>();
 
         return services;
+    }
+
+    public static WebApplicationBuilder AddVectraObservability(this WebApplicationBuilder builder)
+    {
+        var observabilityConfiguration = builder.Services
+            .BuildServiceProvider()
+            .GetRequiredService<IOptions<ObservabilityConfiguration>>().Value;
+
+        var resourceBuilder = ResourceBuilder
+            .CreateDefault()
+            .AddService(builder.Environment.ApplicationName);
+
+        builder.Services.AddOpenTelemetry()
+            .WithTracing(tracerProviderBuilder =>
+            {
+                tracerProviderBuilder
+                    .SetResourceBuilder(resourceBuilder)
+                    .AddAspNetCoreInstrumentation()
+                    .AddHttpClientInstrumentation()
+                    .AddSource(builder.Environment.ApplicationName);
+
+                if (observabilityConfiguration.OpenTelemetry?.Enabled == true &&
+                    !string.IsNullOrWhiteSpace(observabilityConfiguration.OpenTelemetry.Endpoint))
+                {
+                    tracerProviderBuilder.AddOtlpExporter(options =>
+                    {
+                        options.Endpoint = new Uri(observabilityConfiguration.OpenTelemetry.Endpoint);
+                    });
+                }
+            })
+            .WithMetrics(meterProviderBuilder =>
+            {
+                meterProviderBuilder
+                    .SetResourceBuilder(resourceBuilder)
+                    .AddAspNetCoreInstrumentation()
+                    .AddHttpClientInstrumentation()
+                    .AddRuntimeInstrumentation();
+
+                if (observabilityConfiguration.OpenTelemetry?.Enabled == true &&
+                    !string.IsNullOrWhiteSpace(observabilityConfiguration.OpenTelemetry.Endpoint))
+                {
+                    meterProviderBuilder.AddOtlpExporter(options =>
+                    {
+                        options.Endpoint = new Uri(observabilityConfiguration.OpenTelemetry.Endpoint);
+                    });
+                }
+            });
+
+        return builder;
     }
 }

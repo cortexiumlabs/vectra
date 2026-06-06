@@ -43,6 +43,8 @@ internal static class StartupConfiguration
             .AddVectraApplication()
             .AddVectraLogging();
 
+        builder.AddVectraObservability();
+
         // HTTP server configuration (Kestrel, etc.)
         builder.ConfigureVectraHttpServer();
     }

@@ -1,7 +1,6 @@
 ﻿using System.CommandLine;
 using Vectra.Configuration;
 using Vectra.Extensions;
-using Vectra.Infrastructure.Observability;
 using Vectra.Services;
 using Vectra.Utilities;
 
@@ -36,7 +35,6 @@ internal static class VectraCommandLine
             SplashScreen.Render();
 
             var builder = WebApplication.CreateBuilder(args);
-            builder.AddObservability();
 
             try
             {
