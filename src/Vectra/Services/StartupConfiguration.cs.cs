@@ -6,12 +6,12 @@ using Vectra.Infrastructure;
 using Vectra.Middleware;
 using Vectra.Application;
 
-namespace Vectra.Configuration;
+namespace Vectra.Services;
 
 [ExcludeFromCodeCoverage]
-internal static class StartupConfiguration
+internal sealed class StartupConfiguration : IStartupConfiguration
 {
-    public static void ConfigureServices(WebApplicationBuilder builder)
+    public void ConfigureServices(WebApplicationBuilder builder)
     {
         var services = builder.Services;
         var configuration = builder.Configuration;
@@ -48,7 +48,7 @@ internal static class StartupConfiguration
         builder.ConfigureVectraHttpServer();
     }
 
-    public static async Task ConfigurePipelineAsync(WebApplication app)
+    public async Task ConfigurePipelineAsync(WebApplication app)
     {
         if (app.Environment.IsDevelopment())
         {

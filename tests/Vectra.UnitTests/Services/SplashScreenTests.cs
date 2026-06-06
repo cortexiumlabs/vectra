@@ -1,6 +1,6 @@
-using Vectra.Utilities;
+using Vectra.Services;
 
-namespace Vectra.UnitTests.Utilities;
+namespace Vectra.UnitTests.Services;
 
 public class SplashScreenTests
 {
@@ -14,7 +14,8 @@ public class SplashScreenTests
         try
         {
             Console.SetOut(TextWriter.Null);
-            var act = SplashScreen.Render;
+            var splash = Substitute.For<ISplashScreen>();
+            Action act = () => splash.Render();
             act.Should().NotThrow();
         }
         finally
@@ -34,7 +35,8 @@ public class SplashScreenTests
         try
         {
             Console.SetOut(writer);
-            SplashScreen.Render();
+            var splash = new SplashScreen();
+            splash.Render();
         }
         finally
         {
@@ -56,7 +58,8 @@ public class SplashScreenTests
         try
         {
             Console.SetOut(writer);
-            SplashScreen.Render();
+            var splash = new SplashScreen();
+            splash.Render();
         }
         finally
         {

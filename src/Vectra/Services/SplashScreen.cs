@@ -1,13 +1,12 @@
 ﻿using System.Reflection;
-using Vectra.Services;
 
-namespace Vectra.Utilities;
+namespace Vectra.Services;
 
-internal static class SplashScreen
+internal class SplashScreen: ISplashScreen
 {
     private const string ResourceName = "Vectra.Resources.splash.txt";
 
-    public static void Render()
+    public void Render()
     {
         var version = VectraVersion.GetApplicationVersion();
         var assembly = Assembly.GetExecutingAssembly();
