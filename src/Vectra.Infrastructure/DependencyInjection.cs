@@ -130,24 +130,6 @@ public static class DependencyInjection
         return ActivatorUtilities.CreateInstance<HitlService>(sp);
     }
 
-    public static IServiceCollection AddVectraLogging(this IServiceCollection services)
-    {
-        services.AddSingleton<Logging.ILoggerFactory, Logging.LoggerFactory>();
-
-        services.AddLogging(builder =>
-        {
-            builder.ClearProviders();
-            builder.Services.AddSingleton<ILoggerProvider>(sp =>
-            {
-                var logger = sp.GetRequiredService<Logging.ILoggerFactory>().CreateLogger();
-                Log.Logger = logger;
-                return new SerilogLoggerProvider(logger, dispose: true);
-            });
-        });
-
-        return services;
-    }
-
     public static IServiceCollection AddSecretManagement(this IServiceCollection services)
     {
         services.AddSingleton<ISecretProviderFactory, SecretProviderFactory>();
@@ -210,6 +192,19 @@ public static class DependencyInjection
         var observabilityConfiguration = builder.Services
             .BuildServiceProvider()
             .GetRequiredService<IOptions<ObservabilityConfiguration>>().Value;
+
+        builder.Services.AddSingleton<Logging.ILoggerFactory, Logging.LoggerFactory>();
+
+        builder.Services.AddLogging(builder =>
+        {
+            builder.ClearProviders();
+            builder.Services.AddSingleton<ILoggerProvider>(sp =>
+            {
+                var logger = sp.GetRequiredService<Logging.ILoggerFactory>().CreateLogger();
+                Log.Logger = logger;
+                return new SerilogLoggerProvider(logger, dispose: true);
+            });
+        });
 
         var resourceBuilder = ResourceBuilder
             .CreateDefault()

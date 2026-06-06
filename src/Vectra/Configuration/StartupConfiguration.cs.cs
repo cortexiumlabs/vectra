@@ -40,8 +40,7 @@ internal static class StartupConfiguration
             .AddVectraProxyForwarder()
             .AddVectraHealthChecker()
             .AddVectraVersion()
-            .AddVectraApplication()
-            .AddVectraLogging();
+            .AddVectraApplication();
 
         builder.AddVectraObservability();
 
