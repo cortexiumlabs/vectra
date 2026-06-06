@@ -8,6 +8,8 @@ namespace Vectra.Commands;
 
 internal static class VectraCommandLine
 {
+    internal static Action<int> ExitAction = Environment.Exit;
+
     public static RootCommand Create(string[] args)
     {
         var versionOption = new Option<bool>("--version", "-v")
@@ -58,7 +60,7 @@ internal static class VectraCommandLine
         return rootCommand;
     }
 
-    private static async Task HandleStartupFailureAsync(WebApplicationBuilder builder, Exception ex)
+    internal static async Task HandleStartupFailureAsync(WebApplicationBuilder builder, Exception ex)
     {
         try
         {
