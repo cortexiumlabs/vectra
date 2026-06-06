@@ -1,6 +1,7 @@
 using FluentAssertions;
 using Vectra.BuildingBlocks.Configuration.Observability;
 using Vectra.BuildingBlocks.Configuration.Observability.Logging;
+using Vectra.BuildingBlocks.Configuration.Observability.OpenTelemetry;
 using Xunit;
 
 namespace Vectra.BuildingBlocks.UnitTests.Configuration.Observability;
@@ -13,6 +14,32 @@ public class ObservabilityConfigurationTests
         var config = new ObservabilityConfiguration();
 
         config.Logging.Should().NotBeNull();
+    }
+
+    [Fact]
+    public void OpenTelemetryConfiguration_DefaultValues_ShouldBeCorrect()
+    {
+        // Arrange
+        var config = new OpenTelemetryConfiguration();
+
+        // Assert
+        config.Enabled.Should().BeFalse();
+        config.Endpoint.Should().BeNull();
+    }
+
+    [Fact]
+    public void OpenTelemetryConfiguration_SettingProperties_ShouldBeCorrect()
+    {
+        // Arrange
+        var config = new OpenTelemetryConfiguration
+        {
+            Enabled = true,
+            Endpoint = "http://localhost:4317"
+        };
+
+        // Assert
+        config.Enabled.Should().BeTrue();
+        config.Endpoint.Should().Be("http://localhost:4317");
     }
 
     [Fact]
@@ -73,5 +100,31 @@ public class ObservabilityConfigurationTests
         config.LogLevel.Should().Be("Information");
         config.ApiKey.Should().BeNull();
         config.Url.Should().BeNull();
+    }
+
+    [Fact]
+    public void OtlpLoggingConfiguration_Create_ShouldReturnConfiguredInstance()
+    {
+        var config = OtlpLoggingConfiguration.Create();
+
+        config.LogLevel.Should().Be("Information");
+        config.Endpoint.Should().BeNull();
+    }
+
+    [Fact]
+    public void OtlpLoggingConfiguration_Should_Allow_Setting_Properties()
+    {
+        // Arrange
+        var config = new OtlpLoggingConfiguration
+        {
+            Enabled = true,
+            Endpoint = "http://localhost:4317",
+            LogLevel = "Debug"
+        };
+
+        // Assert
+        config.Enabled.Should().BeTrue();
+        config.Endpoint.Should().Be("http://localhost:4317");
+        config.LogLevel.Should().Be("Debug");
     }
 }
