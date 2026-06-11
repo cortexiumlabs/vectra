@@ -1,8 +1,8 @@
 using FluentAssertions;
-using Vectra.BuildingBlocks.Configuration.HumanInTheLoop;
+using Synentra.BuildingBlocks.Configuration.HumanInTheLoop;
 using Xunit;
 
-namespace Vectra.BuildingBlocks.UnitTests.Configuration.HumanInTheLoop;
+namespace Synentra.BuildingBlocks.UnitTests.Configuration.HumanInTheLoop;
 
 public class HumanInTheLoopConfigurationTests
 {

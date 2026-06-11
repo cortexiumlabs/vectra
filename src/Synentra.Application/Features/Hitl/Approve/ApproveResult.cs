@@ -1,4 +1,4 @@
-namespace Vectra.Application.Features.Hitl.Approve;
+namespace Synentra.Application.Features.Hitl.Approve;
 
 public record ApproveResult(
     int StatusCode,

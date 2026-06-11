@@ -1,8 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Vectra.Domain.Agents;
-using Vectra.Domain.AuditTrails;
+using Synentra.Domain.Agents;
+using Synentra.Domain.AuditTrails;
 
-namespace Vectra.Infrastructure.Persistence.Common;
+namespace Synentra.Infrastructure.Persistence.Common;
 
 public interface IDatabaseContext
 {

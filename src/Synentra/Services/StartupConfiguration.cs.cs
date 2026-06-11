@@ -1,12 +1,12 @@
 ﻿using Microsoft.AspNetCore.DataProtection;
 using System.Diagnostics.CodeAnalysis;
 using System.Text.Json.Serialization;
-using Vectra.Extensions;
-using Vectra.Infrastructure;
-using Vectra.Middleware;
-using Vectra.Application;
+using Synentra.Extensions;
+using Synentra.Infrastructure;
+using Synentra.Middleware;
+using Synentra.Application;
 
-namespace Vectra.Services;
+namespace Synentra.Services;
 
 [ExcludeFromCodeCoverage]
 internal sealed class StartupConfiguration : IStartupConfiguration
@@ -19,7 +19,7 @@ internal sealed class StartupConfiguration : IStartupConfiguration
 
         // Data Protection
         services.AddDataProtection()
-                .SetApplicationName("VectraGateway");
+                .SetApplicationName("SynentraGateway");
 
         // JSON options
         services.ConfigureHttpJsonOptions(options =>
@@ -28,24 +28,24 @@ internal sealed class StartupConfiguration : IStartupConfiguration
             options.SerializerOptions.Converters.Add(new JsonStringEnumConverter());
         });
 
-        // Vectra-specific service registrations
+        // Synentra-specific service registrations
         services
-            .AddVectraConfiguration(configuration)
+            .AddSynentraConfiguration(configuration)
             .AddSystemClock()
             .AddJsonSerialization()
             .AddCache()
             .AddInfrastructure()
-            .AddVectraPersistence()
-            .AddVectraApiDocumentation()
-            .AddVectraProxyForwarder()
-            .AddVectraHealthChecker()
-            .AddVectraVersion()
-            .AddVectraApplication();
+            .AddSynentraPersistence()
+            .AddSynentraApiDocumentation()
+            .AddSynentraProxyForwarder()
+            .AddSynentraHealthChecker()
+            .AddSynentraVersion()
+            .AddSynentraApplication();
 
-        builder.AddVectraObservability();
+        builder.AddSynentraObservability();
 
         // HTTP server configuration (Kestrel, etc.)
-        builder.ConfigureVectraHttpServer();
+        builder.ConfigureSynentraHttpServer();
     }
 
     public async Task ConfigurePipelineAsync(WebApplication app)
@@ -56,11 +56,11 @@ internal sealed class StartupConfiguration : IStartupConfiguration
         }
         else
         {
-            app.UseVectraCustomException();
+            app.UseSynentraCustomException();
         }
 
-        app.UseVectraHttps();
-        app.UseVectraCustomHeaders();
+        app.UseSynentraHttps();
+        app.UseSynentraCustomHeaders();
 
         app.UseRouting();
         app.UseMiddleware<AgentAuthMiddleware>();
@@ -80,8 +80,8 @@ internal sealed class StartupConfiguration : IStartupConfiguration
             await context.Response.WriteAsync($"No endpoint found for {context.Request.Path}");
         });
 
-        app.UseVectraApiDocumentation();
-        app.UseVectraHealthCheck();
+        app.UseSynentraApiDocumentation();
+        app.UseSynentraHealthCheck();
 
         // Ensure database is created/migrated
         await app.EnsureApplicationDatabaseCreated();

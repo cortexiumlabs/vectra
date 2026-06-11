@@ -1,10 +1,10 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Vectra.BuildingBlocks.Configuration.SecretManagement;
-using Vectra.Infrastructure.SecretManagement.Providers;
+using Synentra.BuildingBlocks.Configuration.SecretManagement;
+using Synentra.Infrastructure.SecretManagement.Providers;
 
-namespace Vectra.Infrastructure.SecretManagement;
+namespace Synentra.Infrastructure.SecretManagement;
 
 public class SecretProviderFactory : ISecretProviderFactory
 {

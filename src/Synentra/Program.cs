@@ -1,4 +1,4 @@
-using Vectra.Commands;
+using Synentra.Commands;
 
-var rootCommand = VectraCommandLine.Create(args);
+var rootCommand = SynentraCommandLine.Create(args);
 return await rootCommand.Parse(args).InvokeAsync();

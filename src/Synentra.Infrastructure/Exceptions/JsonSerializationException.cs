@@ -1,12 +1,12 @@
-﻿using Vectra.BuildingBlocks.Errors;
+﻿using Synentra.BuildingBlocks.Errors;
 
-namespace Vectra.Infrastructure.Exceptions;
+namespace Synentra.Infrastructure.Exceptions;
 
 public sealed class JsonSerializationException : SerializationException
 {
     public JsonSerializationException(string message)
     : base(
-        VectraErrors.SerializationFailed,
+        SynentraErrors.SerializationFailed,
         message
     )
     {
@@ -14,7 +14,7 @@ public sealed class JsonSerializationException : SerializationException
 
     public JsonSerializationException(string message, Exception ex)
         : base(
-            VectraErrors.SerializationFailed,
+            SynentraErrors.SerializationFailed,
             message,
             ex
         )

@@ -1,13 +1,13 @@
 ﻿using System.Reflection;
-using Vectra.Application.Abstractions.Versioning;
+using Synentra.Application.Abstractions.Versioning;
 
-namespace Vectra.Services;
+namespace Synentra.Services;
 
-public class VectraVersion : IVersion
+public class SynentraVersion : IVersion
 {
-    private readonly ILogger<VectraVersion> _logger;
+    private readonly ILogger<SynentraVersion> _logger;
 
-    public VectraVersion(ILogger<VectraVersion> logger)
+    public SynentraVersion(ILogger<SynentraVersion> logger)
     {
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }

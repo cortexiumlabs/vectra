@@ -1,7 +1,7 @@
-using Vectra.Application.Abstractions.Dispatchers;
-using Vectra.BuildingBlocks.Results;
+using Synentra.Application.Abstractions.Dispatchers;
+using Synentra.BuildingBlocks.Results;
 
-namespace Vectra.Application.Features.Hitl.Approve;
+namespace Synentra.Application.Features.Hitl.Approve;
 
 public class ApproveRequest : IRequest<Result<ApproveResult>>
 {

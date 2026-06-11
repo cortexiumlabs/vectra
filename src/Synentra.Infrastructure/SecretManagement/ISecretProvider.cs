@@ -1,6 +1,6 @@
 using Microsoft.Extensions.Configuration;
 
-namespace Vectra.Infrastructure.SecretManagement;
+namespace Synentra.Infrastructure.SecretManagement;
 
 public interface ISecretProvider
 {

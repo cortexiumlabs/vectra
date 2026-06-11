@@ -3,9 +3,9 @@ using FluentValidation.Results;
 using Microsoft.Extensions.DependencyInjection;
 using System.Collections.Concurrent;
 using System.Linq.Expressions;
-using Vectra.Application.Abstractions.Dispatchers;
+using Synentra.Application.Abstractions.Dispatchers;
 
-namespace Vectra.Infrastructure.Dispatchers;
+namespace Synentra.Infrastructure.Dispatchers;
 
 public class Dispatcher : IDispatcher
 {

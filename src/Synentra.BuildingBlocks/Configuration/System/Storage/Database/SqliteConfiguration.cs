@@ -1,6 +1,6 @@
-﻿namespace Vectra.BuildingBlocks.Configuration.System.Storage.Database;
+﻿namespace Synentra.BuildingBlocks.Configuration.System.Storage.Database;
 
 public class SqliteConfiguration
 {
-    public string ConnectionString { get; set; } = "Data Source=vectra.db";
+    public string ConnectionString { get; set; } = "Data Source=synentra.db";
 }

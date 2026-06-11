@@ -4,19 +4,19 @@ using Microsoft.Extensions.Logging;
 using NSubstitute;
 using NSubstitute.ExceptionExtensions;
 using System.Net;
-using Vectra.Application.Abstractions.CircuitBreaker;
-using Vectra.Application.Abstractions.Executions;
-using Vectra.Application.Abstractions.Persistence;
-using Vectra.Application.Abstractions.RateLimit;
-using Vectra.Application.Abstractions.Security;
-using Vectra.Application.Models;
-using Vectra.BuildingBlocks.Configuration.Security;
-using Vectra.Domain.Agents;
-using Vectra.Domain.Policies;
-using Vectra.Middleware;
-using Vectra.Services;
+using Synentra.Application.Abstractions.CircuitBreaker;
+using Synentra.Application.Abstractions.Executions;
+using Synentra.Application.Abstractions.Persistence;
+using Synentra.Application.Abstractions.RateLimit;
+using Synentra.Application.Abstractions.Security;
+using Synentra.Application.Models;
+using Synentra.BuildingBlocks.Configuration.Security;
+using Synentra.Domain.Agents;
+using Synentra.Domain.Policies;
+using Synentra.Middleware;
+using Synentra.Services;
 
-namespace Vectra.UnitTests.Middleware;
+namespace Synentra.UnitTests.Middleware;
 
 public class ProxyMiddlewareTests
 {

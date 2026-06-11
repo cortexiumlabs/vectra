@@ -1,10 +1,10 @@
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System.Text.Json.Serialization;
-using Vectra.Application.Abstractions.Executions;
-using Vectra.BuildingBlocks.Configuration.HumanInTheLoop;
+using Synentra.Application.Abstractions.Executions;
+using Synentra.BuildingBlocks.Configuration.HumanInTheLoop;
 
-namespace Vectra.Infrastructure.HumanInTheLoop.Notifiers;
+namespace Synentra.Infrastructure.HumanInTheLoop.Notifiers;
 
 /// <summary>
 /// Sends HITL notifications to Microsoft Teams via incoming webhooks (MessageCard format).

@@ -1,11 +1,11 @@
 using FluentAssertions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
-using Vectra.BuildingBlocks.Configuration.System;
-using Vectra.BuildingBlocks.Configuration.System.Storage.Cache;
-using Vectra.Infrastructure.Caches;
+using Synentra.BuildingBlocks.Configuration.System;
+using Synentra.BuildingBlocks.Configuration.System.Storage.Cache;
+using Synentra.Infrastructure.Caches;
 
-namespace Vectra.Infrastructure.UnitTests.Caches;
+namespace Synentra.Infrastructure.UnitTests.Caches;
 
 public class CacheProviderFactoryTests
 {
@@ -80,7 +80,7 @@ public class CacheProviderFactoryTests
 
         var config = new SystemConfiguration();
         config.Storage.Cache.DefaultProvider = "redis";
-        config.Storage.Cache.Providers.Redis = new Vectra.BuildingBlocks.Configuration.System.Storage.Cache.RedisCacheConfiguration
+        config.Storage.Cache.Providers.Redis = new Synentra.BuildingBlocks.Configuration.System.Storage.Cache.RedisCacheConfiguration
         {
             Address = "localhost:6379"
         };
@@ -90,6 +90,6 @@ public class CacheProviderFactoryTests
         var provider = sut.Create();
 
         provider.Should().NotBeNull();
-        provider.Should().BeOfType<Vectra.Infrastructure.Caches.Providers.RedisCacheProvider>();
+        provider.Should().BeOfType<Synentra.Infrastructure.Caches.Providers.RedisCacheProvider>();
     }
 }

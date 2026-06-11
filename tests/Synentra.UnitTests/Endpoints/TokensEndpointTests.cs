@@ -1,12 +1,12 @@
 using Microsoft.AspNetCore.Http;
 using NSubstitute;
-using Vectra.Application.Abstractions.Dispatchers;
-using Vectra.Application.Features.Authentications.GenerateToken;
-using Vectra.BuildingBlocks.Errors;
-using Vectra.BuildingBlocks.Results;
-using Vectra.Endpoints;
+using Synentra.Application.Abstractions.Dispatchers;
+using Synentra.Application.Features.Authentications.GenerateToken;
+using Synentra.BuildingBlocks.Errors;
+using Synentra.BuildingBlocks.Results;
+using Synentra.Endpoints;
 
-namespace Vectra.UnitTests.Endpoints;
+namespace Synentra.UnitTests.Endpoints;
 
 public class TokensEndpointTests
 {

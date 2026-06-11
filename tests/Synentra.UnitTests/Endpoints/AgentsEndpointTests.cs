@@ -1,15 +1,15 @@
 using Microsoft.AspNetCore.Http;
-using Vectra.Application.Abstractions.Dispatchers;
-using VectraVoid = Vectra.Application.Abstractions.Dispatchers.Void;
-using Vectra.Application.Features.Agents.AgentsList;
-using Vectra.Application.Features.Agents.AssignPolicy;
-using Vectra.Application.Features.Agents.RegisterAgent;
-using Vectra.BuildingBlocks.Errors;
-using Vectra.BuildingBlocks.Results;
-using Vectra.Domain.Agents;
-using Vectra.Endpoints;
+using Synentra.Application.Abstractions.Dispatchers;
+using SynentraVoid = Synentra.Application.Abstractions.Dispatchers.Void;
+using Synentra.Application.Features.Agents.AgentsList;
+using Synentra.Application.Features.Agents.AssignPolicy;
+using Synentra.Application.Features.Agents.RegisterAgent;
+using Synentra.BuildingBlocks.Errors;
+using Synentra.BuildingBlocks.Results;
+using Synentra.Domain.Agents;
+using Synentra.Endpoints;
 
-namespace Vectra.UnitTests.Endpoints;
+namespace Synentra.UnitTests.Endpoints;
 
 public class AgentsEndpointTests
 {
@@ -63,8 +63,8 @@ public class AgentsEndpointTests
 
         await _dispatcher.Received(1).Dispatch(
             Arg.Is<IAction<PaginatedResult<AgentsListResult>>>(r =>
-                ((Vectra.Application.Features.Agents.AgentsList.AgentsListRequest)r).Page == 2 &&
-                ((Vectra.Application.Features.Agents.AgentsList.AgentsListRequest)r).PageSize == 10),
+                ((Synentra.Application.Features.Agents.AgentsList.AgentsListRequest)r).Page == 2 &&
+                ((Synentra.Application.Features.Agents.AgentsList.AgentsListRequest)r).PageSize == 10),
             Arg.Any<CancellationToken>());
     }
 
@@ -102,8 +102,8 @@ public class AgentsEndpointTests
     [Fact]
     public async Task AssignPolicyToAgent_Success_Returns200()
     {
-        _dispatcher.Dispatch(Arg.Any<IAction<Result<VectraVoid>>>(), Arg.Any<CancellationToken>())
-                   .Returns(Result<VectraVoid>.Success(VectraVoid.Value));
+        _dispatcher.Dispatch(Arg.Any<IAction<Result<SynentraVoid>>>(), Arg.Any<CancellationToken>())
+                   .Returns(Result<SynentraVoid>.Success(SynentraVoid.Value));
 
         var result = await Agents.AssignPolicyToAgent(
             Guid.NewGuid().ToString(),
@@ -118,8 +118,8 @@ public class AgentsEndpointTests
     public async Task AssignPolicyToAgent_NotFound_Returns404()
     {
         var error = Error.NotFound(TestCode, "not found");
-        _dispatcher.Dispatch(Arg.Any<IAction<Result<VectraVoid>>>(), Arg.Any<CancellationToken>())
-                   .Returns(Result<VectraVoid>.Failure(error));
+        _dispatcher.Dispatch(Arg.Any<IAction<Result<SynentraVoid>>>(), Arg.Any<CancellationToken>())
+                   .Returns(Result<SynentraVoid>.Failure(error));
 
         var result = await Agents.AssignPolicyToAgent(
             Guid.NewGuid().ToString(),
@@ -135,8 +135,8 @@ public class AgentsEndpointTests
     [Fact]
     public async Task LiftAgentQuarantine_Success_Returns204()
     {
-        _dispatcher.Dispatch(Arg.Any<IAction<Result<VectraVoid>>>(), Arg.Any<CancellationToken>())
-                   .Returns(Result<VectraVoid>.Success(VectraVoid.Value));
+        _dispatcher.Dispatch(Arg.Any<IAction<Result<SynentraVoid>>>(), Arg.Any<CancellationToken>())
+                   .Returns(Result<SynentraVoid>.Success(SynentraVoid.Value));
 
         var result = await Agents.LiftAgentQuarantine(Guid.NewGuid().ToString(), _dispatcher, CancellationToken.None);
 
@@ -148,8 +148,8 @@ public class AgentsEndpointTests
     public async Task LiftAgentQuarantine_NotFound_Returns404()
     {
         var error = Error.NotFound(TestCode, "not found");
-        _dispatcher.Dispatch(Arg.Any<IAction<Result<VectraVoid>>>(), Arg.Any<CancellationToken>())
-                   .Returns(Result<VectraVoid>.Failure(error));
+        _dispatcher.Dispatch(Arg.Any<IAction<Result<SynentraVoid>>>(), Arg.Any<CancellationToken>())
+                   .Returns(Result<SynentraVoid>.Failure(error));
 
         var result = await Agents.LiftAgentQuarantine(Guid.NewGuid().ToString(), _dispatcher, CancellationToken.None);
 
@@ -161,8 +161,8 @@ public class AgentsEndpointTests
     [Fact]
     public async Task DeleteAgent_Success_Returns204()
     {
-        _dispatcher.Dispatch(Arg.Any<IAction<Result<VectraVoid>>>(), Arg.Any<CancellationToken>())
-                   .Returns(Result<VectraVoid>.Success(VectraVoid.Value));
+        _dispatcher.Dispatch(Arg.Any<IAction<Result<SynentraVoid>>>(), Arg.Any<CancellationToken>())
+                   .Returns(Result<SynentraVoid>.Success(SynentraVoid.Value));
 
         var result = await Agents.DeleteAgent(Guid.NewGuid().ToString(), _dispatcher, CancellationToken.None);
 
@@ -174,8 +174,8 @@ public class AgentsEndpointTests
     public async Task DeleteAgent_NotFound_Returns404()
     {
         var error = Error.NotFound(TestCode, "not found");
-        _dispatcher.Dispatch(Arg.Any<IAction<Result<VectraVoid>>>(), Arg.Any<CancellationToken>())
-                   .Returns(Result<VectraVoid>.Failure(error));
+        _dispatcher.Dispatch(Arg.Any<IAction<Result<SynentraVoid>>>(), Arg.Any<CancellationToken>())
+                   .Returns(Result<SynentraVoid>.Failure(error));
 
         var result = await Agents.DeleteAgent(Guid.NewGuid().ToString(), _dispatcher, CancellationToken.None);
 

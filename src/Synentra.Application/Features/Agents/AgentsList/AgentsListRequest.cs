@@ -1,7 +1,7 @@
-﻿using Vectra.Application.Abstractions.Dispatchers;
-using Vectra.BuildingBlocks.Results;
+﻿using Synentra.Application.Abstractions.Dispatchers;
+using Synentra.BuildingBlocks.Results;
 
-namespace Vectra.Application.Features.Agents.AgentsList;
+namespace Synentra.Application.Features.Agents.AgentsList;
 
 public class AgentsListRequest : IRequest<PaginatedResult<AgentsListResult>>
 {

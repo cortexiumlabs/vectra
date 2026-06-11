@@ -1,8 +1,8 @@
-﻿using Vectra.Application.Models;
-using Vectra.Domain.Agents;
-using Vectra.Infrastructure.Semantic;
+﻿using Synentra.Application.Models;
+using Synentra.Domain.Agents;
+using Synentra.Infrastructure.Semantic;
 
-namespace Vectra.Infrastructure.Risk.Calculators;
+namespace Synentra.Infrastructure.Risk.Calculators;
 
 public class AnomalyDetectionCalculator : IRiskCalculator
 {

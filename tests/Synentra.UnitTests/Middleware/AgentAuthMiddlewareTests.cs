@@ -3,18 +3,18 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
-using Vectra.Application.Abstractions.Security;
+using Synentra.Application.Abstractions.Security;
 
-namespace Vectra.UnitTests.Middleware;
+namespace Synentra.UnitTests.Middleware;
 
 public class AgentAuthMiddlewareTests
 {
-    private readonly ILogger<Vectra.Middleware.AgentAuthMiddleware> _logger;
+    private readonly ILogger<Synentra.Middleware.AgentAuthMiddleware> _logger;
     private readonly IAgentAuthenticator _authenticator;
 
     public AgentAuthMiddlewareTests()
     {
-        _logger = Substitute.For<ILogger<Vectra.Middleware.AgentAuthMiddleware>>();
+        _logger = Substitute.For<ILogger<Synentra.Middleware.AgentAuthMiddleware>>();
         _authenticator = Substitute.For<IAgentAuthenticator>();
     }
 
@@ -40,7 +40,7 @@ public class AgentAuthMiddlewareTests
     {
         var next = Substitute.For<RequestDelegate>();
         next(Arg.Any<HttpContext>()).Returns(Task.CompletedTask);
-        var middleware = new Vectra.Middleware.AgentAuthMiddleware(next, _logger);
+        var middleware = new Synentra.Middleware.AgentAuthMiddleware(next, _logger);
 
         var context = BuildContext();
         await middleware.InvokeAsync(context);
@@ -54,7 +54,7 @@ public class AgentAuthMiddlewareTests
     {
         var next = Substitute.For<RequestDelegate>();
         next(Arg.Any<HttpContext>()).Returns(Task.CompletedTask);
-        var middleware = new Vectra.Middleware.AgentAuthMiddleware(next, _logger);
+        var middleware = new Synentra.Middleware.AgentAuthMiddleware(next, _logger);
 
         var context = BuildContext("   ");
         await middleware.InvokeAsync(context);
@@ -70,7 +70,7 @@ public class AgentAuthMiddlewareTests
 
         var next = Substitute.For<RequestDelegate>();
         next(Arg.Any<HttpContext>()).Returns(Task.CompletedTask);
-        var middleware = new Vectra.Middleware.AgentAuthMiddleware(next, _logger);
+        var middleware = new Synentra.Middleware.AgentAuthMiddleware(next, _logger);
 
         var context = BuildContext("Basic sometoken");
         await middleware.InvokeAsync(context);
@@ -93,7 +93,7 @@ public class AgentAuthMiddlewareTests
 
         var next = Substitute.For<RequestDelegate>();
         next(Arg.Any<HttpContext>()).Returns(Task.CompletedTask);
-        var middleware = new Vectra.Middleware.AgentAuthMiddleware(next, _logger);
+        var middleware = new Synentra.Middleware.AgentAuthMiddleware(next, _logger);
 
         var context = BuildContext("Bearer valid-token");
         await middleware.InvokeAsync(context);
@@ -117,7 +117,7 @@ public class AgentAuthMiddlewareTests
 
         var next = Substitute.For<RequestDelegate>();
         next(Arg.Any<HttpContext>()).Returns(Task.CompletedTask);
-        var middleware = new Vectra.Middleware.AgentAuthMiddleware(next, _logger);
+        var middleware = new Synentra.Middleware.AgentAuthMiddleware(next, _logger);
 
         var context = BuildContext("Bearer valid-token");
         await middleware.InvokeAsync(context);
@@ -133,7 +133,7 @@ public class AgentAuthMiddlewareTests
 
         var next = Substitute.For<RequestDelegate>();
         next(Arg.Any<HttpContext>()).Returns(Task.CompletedTask);
-        var middleware = new Vectra.Middleware.AgentAuthMiddleware(next, _logger);
+        var middleware = new Synentra.Middleware.AgentAuthMiddleware(next, _logger);
 
         var context = BuildContext("Bearer invalid-token");
         await middleware.InvokeAsync(context);
@@ -152,7 +152,7 @@ public class AgentAuthMiddlewareTests
 
         var next = Substitute.For<RequestDelegate>();
         next(Arg.Any<HttpContext>()).Returns(Task.CompletedTask);
-        var middleware = new Vectra.Middleware.AgentAuthMiddleware(next, _logger);
+        var middleware = new Synentra.Middleware.AgentAuthMiddleware(next, _logger);
 
         var context = BuildContext("Bearer some-token");
         await middleware.InvokeAsync(context);
@@ -172,7 +172,7 @@ public class AgentAuthMiddlewareTests
 
         var next = Substitute.For<RequestDelegate>();
         next(Arg.Any<HttpContext>()).Returns(Task.CompletedTask);
-        var middleware = new Vectra.Middleware.AgentAuthMiddleware(next, _logger);
+        var middleware = new Synentra.Middleware.AgentAuthMiddleware(next, _logger);
 
         var context = BuildContext("Bearer some-token");
         await middleware.InvokeAsync(context);
@@ -185,7 +185,7 @@ public class AgentAuthMiddlewareTests
     {
         var next = Substitute.For<RequestDelegate>();
         next(Arg.Any<HttpContext>()).Returns(Task.CompletedTask);
-        var middleware = new Vectra.Middleware.AgentAuthMiddleware(next, _logger);
+        var middleware = new Synentra.Middleware.AgentAuthMiddleware(next, _logger);
 
         var context = BuildContext();
         await middleware.InvokeAsync(context);

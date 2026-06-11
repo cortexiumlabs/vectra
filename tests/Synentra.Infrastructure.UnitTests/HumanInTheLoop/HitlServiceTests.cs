@@ -3,17 +3,17 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using NSubstitute;
 using System.Net;
-using Vectra.Application.Abstractions.Caches;
-using Vectra.Application.Abstractions.Executions;
-using Vectra.Application.Abstractions.Persistence;
-using Vectra.Application.Models;
-using Vectra.BuildingBlocks.Clock;
-using Vectra.BuildingBlocks.Configuration.HumanInTheLoop;
-using Vectra.Domain.AuditTrails;
-using Vectra.Infrastructure.Caches;
-using Vectra.Infrastructure.HumanInTheLoop;
+using Synentra.Application.Abstractions.Caches;
+using Synentra.Application.Abstractions.Executions;
+using Synentra.Application.Abstractions.Persistence;
+using Synentra.Application.Models;
+using Synentra.BuildingBlocks.Clock;
+using Synentra.BuildingBlocks.Configuration.HumanInTheLoop;
+using Synentra.Domain.AuditTrails;
+using Synentra.Infrastructure.Caches;
+using Synentra.Infrastructure.HumanInTheLoop;
 
-namespace Vectra.Infrastructure.UnitTests.HumanInTheLoop;
+namespace Synentra.Infrastructure.UnitTests.HumanInTheLoop;
 
 public class HitlServiceTests
 {

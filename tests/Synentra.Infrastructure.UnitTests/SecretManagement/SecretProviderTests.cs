@@ -1,9 +1,9 @@
 using FluentAssertions;
 using Microsoft.Extensions.Configuration;
-using Vectra.BuildingBlocks.Configuration.SecretManagement;
-using Vectra.Infrastructure.SecretManagement;
+using Synentra.BuildingBlocks.Configuration.SecretManagement;
+using Synentra.Infrastructure.SecretManagement;
 
-namespace Vectra.Infrastructure.UnitTests.SecretManagement;
+namespace Synentra.Infrastructure.UnitTests.SecretManagement;
 
 public class EnvironmentVariablesSecretProviderTests
 {
@@ -11,7 +11,7 @@ public class EnvironmentVariablesSecretProviderTests
     private static ISecretProvider? CreateEnvProvider(EnvironmentVariablesSecretConfiguration config)
     {
         var type = typeof(SecretProviderFactory).Assembly
-            .GetType("Vectra.Infrastructure.SecretManagement.Providers.EnvironmentVariablesSecretProvider");
+            .GetType("Synentra.Infrastructure.SecretManagement.Providers.EnvironmentVariablesSecretProvider");
         if (type == null) return null;
         return (ISecretProvider?)Activator.CreateInstance(
             type,
@@ -67,7 +67,7 @@ public class UserSecretsSecretProviderTests
     private static ISecretProvider? CreateUserSecretsProvider()
     {
         var type = typeof(SecretProviderFactory).Assembly
-            .GetType("Vectra.Infrastructure.SecretManagement.Providers.UserSecretsSecretProvider");
+            .GetType("Synentra.Infrastructure.SecretManagement.Providers.UserSecretsSecretProvider");
         if (type == null) return null;
         return (ISecretProvider?)Activator.CreateInstance(
             type,

@@ -1,4 +1,4 @@
-﻿namespace Vectra.BuildingBlocks.Configuration.System.Storage.Database;
+﻿namespace Synentra.BuildingBlocks.Configuration.System.Storage.Database;
 
 public class PostgreSqlConfiguration
 {

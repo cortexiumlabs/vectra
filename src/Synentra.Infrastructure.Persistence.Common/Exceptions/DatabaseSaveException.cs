@@ -1,6 +1,6 @@
-﻿using Vectra.Infrastructure.Persistence.Common.Errors;
+﻿using Synentra.Infrastructure.Persistence.Common.Errors;
 
-namespace Vectra.Infrastructure.Persistence.Common.Exceptions;
+namespace Synentra.Infrastructure.Persistence.Common.Exceptions;
 
 public sealed class DatabaseSaveException : PersistenceException
 {

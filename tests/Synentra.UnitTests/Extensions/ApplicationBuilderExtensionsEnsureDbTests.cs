@@ -1,10 +1,10 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using NSubstitute;
-using Vectra.Extensions;
-using Vectra.Infrastructure.Persistence.Common;
+using Synentra.Extensions;
+using Synentra.Infrastructure.Persistence.Common;
 
-namespace Vectra.UnitTests.Extensions;
+namespace Synentra.UnitTests.Extensions;
 
 public class ApplicationBuilderExtensionsEnsureDbTests
 {

@@ -1,4 +1,4 @@
-﻿namespace Vectra.Application.Abstractions.Executions;
+﻿namespace Synentra.Application.Abstractions.Executions;
 
 public interface ISemanticProvider
 {

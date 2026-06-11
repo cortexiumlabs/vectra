@@ -1,8 +1,8 @@
 using FluentAssertions;
-using Vectra.BuildingBlocks.Errors;
+using Synentra.BuildingBlocks.Errors;
 using Xunit;
 
-namespace Vectra.BuildingBlocks.UnitTests.Errors;
+namespace Synentra.BuildingBlocks.UnitTests.Errors;
 
 public class ErrorCodeTests
 {
@@ -11,7 +11,7 @@ public class ErrorCodeTests
     {
         var errorCode = new ErrorCode(1, ErrorCategory.System);
 
-        errorCode.ToString().Should().Be("VEC000001");
+        errorCode.ToString().Should().Be("SYN000001");
     }
 
     [Fact]
@@ -19,13 +19,13 @@ public class ErrorCodeTests
     {
         var errorCode = new ErrorCode(12345, ErrorCategory.Core);
 
-        errorCode.ToString().Should().Be("VEC012345");
+        errorCode.ToString().Should().Be("SYN012345");
     }
 
     [Fact]
-    public void Prefix_ShouldBeVEC()
+    public void Prefix_ShouldBeSYN()
     {
-        ErrorCode.Prefix.Should().Be("VEC");
+        ErrorCode.Prefix.Should().Be("SYN");
     }
 
     [Fact]
@@ -40,15 +40,15 @@ public class ErrorCodeTests
     }
 
     [Fact]
-    public void VectraErrors_SystemFailure_ShouldHaveCorrectCode()
+    public void SynentraErrors_SystemFailure_ShouldHaveCorrectCode()
     {
-        VectraErrors.SystemFailure.Value.Should().Be(1);
-        VectraErrors.SystemFailure.Category.Should().Be(ErrorCategory.System);
+        SynentraErrors.SystemFailure.Value.Should().Be(1);
+        SynentraErrors.SystemFailure.Category.Should().Be(ErrorCategory.System);
     }
 
     [Fact]
-    public void VectraErrors_ValidationFailed_ShouldHaveCoreCategory()
+    public void SynentraErrors_ValidationFailed_ShouldHaveCoreCategory()
     {
-        VectraErrors.ValidationFailed.Category.Should().Be(ErrorCategory.Core);
+        SynentraErrors.ValidationFailed.Category.Should().Be(ErrorCategory.Core);
     }
 }

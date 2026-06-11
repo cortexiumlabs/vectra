@@ -1,4 +1,4 @@
-namespace Vectra.BuildingBlocks.Configuration.System.CircuitBreaker;
+namespace Synentra.BuildingBlocks.Configuration.System.CircuitBreaker;
 
 public class CircuitBreakerConfiguration
 {

@@ -1,6 +1,6 @@
-﻿using Vectra.Domain.Primitives;
+﻿using Synentra.Domain.Primitives;
 
-namespace Vectra.Domain.AuditTrails;
+namespace Synentra.Domain.AuditTrails;
 
 public class AuditTrail : Entity<long>, IAggregateRoot
 {

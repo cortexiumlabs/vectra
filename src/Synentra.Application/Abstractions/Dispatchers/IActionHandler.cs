@@ -1,4 +1,4 @@
-﻿namespace Vectra.Application.Abstractions.Dispatchers;
+﻿namespace Synentra.Application.Abstractions.Dispatchers;
 
 public interface IActionHandler<TAction, TResult>
     where TAction : IAction<TResult>

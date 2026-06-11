@@ -2,10 +2,10 @@
 using Serilog;
 using Serilog.Enrichers.Span;
 using Serilog.Events;
-using Vectra.BuildingBlocks.Configuration.Observability;
-using Vectra.BuildingBlocks.Configuration.Observability.Logging;
+using Synentra.BuildingBlocks.Configuration.Observability;
+using Synentra.BuildingBlocks.Configuration.Observability.Logging;
 
-namespace Vectra.Infrastructure.Logging;
+namespace Synentra.Infrastructure.Logging;
 
 public class LoggerFactory: ILoggerFactory
 {

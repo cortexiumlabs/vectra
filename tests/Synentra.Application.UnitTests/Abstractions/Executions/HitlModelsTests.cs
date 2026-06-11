@@ -1,7 +1,7 @@
 using FluentAssertions;
-using Vectra.Application.Abstractions.Executions;
+using Synentra.Application.Abstractions.Executions;
 
-namespace Vectra.Application.UnitTests.Abstractions.Executions;
+namespace Synentra.Application.UnitTests.Abstractions.Executions;
 
 public class HitlModelsTests
 {

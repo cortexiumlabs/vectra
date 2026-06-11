@@ -1,8 +1,8 @@
-using Vectra.BuildingBlocks.Errors;
-using Vectra.BuildingBlocks.Results;
-using Vectra.Errors;
+using Synentra.BuildingBlocks.Errors;
+using Synentra.BuildingBlocks.Results;
+using Synentra.Errors;
 
-namespace Vectra.UnitTests.Errors;
+namespace Synentra.UnitTests.Errors;
 
 public class SystemErrorCodesTests
 {

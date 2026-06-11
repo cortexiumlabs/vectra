@@ -3,12 +3,12 @@ using Microsoft.Extensions.Options;
 using Microsoft.ML.OnnxRuntime;
 using Microsoft.ML.OnnxRuntime.Tensors;
 using System.Text;
-using Vectra.Application.Abstractions.Caches;
-using Vectra.Application.Abstractions.Executions;
-using Vectra.BuildingBlocks.Configuration.Semantic;
-using Vectra.Infrastructure.Caches;
+using Synentra.Application.Abstractions.Caches;
+using Synentra.Application.Abstractions.Executions;
+using Synentra.BuildingBlocks.Configuration.Semantic;
+using Synentra.Infrastructure.Caches;
 
-namespace Vectra.Infrastructure.Semantic.Providers.InternalBert;
+namespace Synentra.Infrastructure.Semantic.Providers.InternalBert;
 
 /// <summary>
 /// ONNX-based semantic provider. Reads the model ZIP (Community or Pro) from the local

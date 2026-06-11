@@ -1,12 +1,12 @@
 using FluentAssertions;
 using NSubstitute;
-using Vectra.Application.Abstractions.Executions;
-using Vectra.Application.Abstractions.Persistence;
-using Vectra.Application.Abstractions.Security;
-using Vectra.Application.Features.Authentications.GenerateToken;
-using Vectra.Domain.Agents;
+using Synentra.Application.Abstractions.Executions;
+using Synentra.Application.Abstractions.Persistence;
+using Synentra.Application.Abstractions.Security;
+using Synentra.Application.Features.Authentications.GenerateToken;
+using Synentra.Domain.Agents;
 
-namespace Vectra.Application.UnitTests.Features.Authentications;
+namespace Synentra.Application.UnitTests.Features.Authentications;
 
 public class GenerateTokenHandlerTests
 {

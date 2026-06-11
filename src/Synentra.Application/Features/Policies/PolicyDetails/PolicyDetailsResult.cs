@@ -1,6 +1,6 @@
-using Vectra.Domain.Policies;
+using Synentra.Domain.Policies;
 
-namespace Vectra.Application.Features.Policies.PolicyDetails;
+namespace Synentra.Application.Features.Policies.PolicyDetails;
 
 public class PolicyDetailsResult
 {

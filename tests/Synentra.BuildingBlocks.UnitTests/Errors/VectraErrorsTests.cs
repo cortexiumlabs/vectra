@@ -1,63 +1,63 @@
 using FluentAssertions;
-using Vectra.BuildingBlocks.Errors;
+using Synentra.BuildingBlocks.Errors;
 using Xunit;
 
-namespace Vectra.BuildingBlocks.UnitTests.Errors;
+namespace Synentra.BuildingBlocks.UnitTests.Errors;
 
-public class VectraErrorsTests
+public class SynentraErrorsTests
 {
     [Fact]
     public void SystemFailure_ShouldHaveSystemCategory()
     {
-        VectraErrors.SystemFailure.Category.Should().Be(ErrorCategory.System);
-        VectraErrors.SystemFailure.Value.Should().Be(1);
+        SynentraErrors.SystemFailure.Category.Should().Be(ErrorCategory.System);
+        SynentraErrors.SystemFailure.Value.Should().Be(1);
     }
 
     [Fact]
     public void FileNotFound_ShouldHaveInfrastructureCategory()
     {
-        VectraErrors.FileNotFound.Category.Should().Be(ErrorCategory.Infrastructure);
+        SynentraErrors.FileNotFound.Category.Should().Be(ErrorCategory.Infrastructure);
     }
 
     [Fact]
     public void SerializationErrors_ShouldHaveSerializationCategory()
     {
-        VectraErrors.SerializationFailed.Category.Should().Be(ErrorCategory.Serialization);
-        VectraErrors.DeserializationFailed.Category.Should().Be(ErrorCategory.Serialization);
-        VectraErrors.InvalidJson.Category.Should().Be(ErrorCategory.Serialization);
+        SynentraErrors.SerializationFailed.Category.Should().Be(ErrorCategory.Serialization);
+        SynentraErrors.DeserializationFailed.Category.Should().Be(ErrorCategory.Serialization);
+        SynentraErrors.InvalidJson.Category.Should().Be(ErrorCategory.Serialization);
     }
 
     [Fact]
     public void Unauthorized_ShouldHaveSecurityCategory()
     {
-        VectraErrors.Unauthorized.Category.Should().Be(ErrorCategory.Security);
+        SynentraErrors.Unauthorized.Category.Should().Be(ErrorCategory.Security);
     }
 
     [Fact]
     public void ValidationErrors_ShouldHaveCoreCategory()
     {
-        VectraErrors.ValidationFailed.Category.Should().Be(ErrorCategory.Core);
-        VectraErrors.RequiredFieldMissing.Category.Should().Be(ErrorCategory.Core);
+        SynentraErrors.ValidationFailed.Category.Should().Be(ErrorCategory.Core);
+        SynentraErrors.RequiredFieldMissing.Category.Should().Be(ErrorCategory.Core);
     }
 
     [Fact]
     public void ResourceNotFound_ShouldHavePersistenceCategory()
     {
-        VectraErrors.ResourceNotFound.Category.Should().Be(ErrorCategory.Persistence);
+        SynentraErrors.ResourceNotFound.Category.Should().Be(ErrorCategory.Persistence);
     }
 
     [Fact]
     public void DuplicateResource_ShouldHavePersistenceCategory()
     {
-        VectraErrors.DuplicateResource.Category.Should().Be(ErrorCategory.Persistence);
+        SynentraErrors.DuplicateResource.Category.Should().Be(ErrorCategory.Persistence);
     }
 
     [Fact]
     public void SecurityErrors_ShouldHaveSecurityCategory()
     {
-        VectraErrors.AccessDenied.Category.Should().Be(ErrorCategory.Security);
-        VectraErrors.MissingCredentials.Category.Should().Be(ErrorCategory.Security);
-        VectraErrors.ExpiredSession.Category.Should().Be(ErrorCategory.Security);
+        SynentraErrors.AccessDenied.Category.Should().Be(ErrorCategory.Security);
+        SynentraErrors.MissingCredentials.Category.Should().Be(ErrorCategory.Security);
+        SynentraErrors.ExpiredSession.Category.Should().Be(ErrorCategory.Security);
     }
 
     [Fact]
@@ -65,19 +65,19 @@ public class VectraErrorsTests
     {
         var codes = new[]
         {
-            VectraErrors.SystemFailure.Value,
-            VectraErrors.FileNotFound.Value,
-            VectraErrors.SerializationFailed.Value,
-            VectraErrors.DeserializationFailed.Value,
-            VectraErrors.InvalidJson.Value,
-            VectraErrors.Unauthorized.Value,
-            VectraErrors.ValidationFailed.Value,
-            VectraErrors.RequiredFieldMissing.Value,
-            VectraErrors.ResourceNotFound.Value,
-            VectraErrors.DuplicateResource.Value,
-            VectraErrors.AccessDenied.Value,
-            VectraErrors.MissingCredentials.Value,
-            VectraErrors.ExpiredSession.Value
+            SynentraErrors.SystemFailure.Value,
+            SynentraErrors.FileNotFound.Value,
+            SynentraErrors.SerializationFailed.Value,
+            SynentraErrors.DeserializationFailed.Value,
+            SynentraErrors.InvalidJson.Value,
+            SynentraErrors.Unauthorized.Value,
+            SynentraErrors.ValidationFailed.Value,
+            SynentraErrors.RequiredFieldMissing.Value,
+            SynentraErrors.ResourceNotFound.Value,
+            SynentraErrors.DuplicateResource.Value,
+            SynentraErrors.AccessDenied.Value,
+            SynentraErrors.MissingCredentials.Value,
+            SynentraErrors.ExpiredSession.Value
         };
 
         codes.Should().OnlyHaveUniqueItems();

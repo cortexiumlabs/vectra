@@ -1,9 +1,9 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using Vectra.Domain.Agents;
+using Synentra.Domain.Agents;
 
-namespace Vectra.Infrastructure.Persistence.Sqlite.EntityConfigurations;
+namespace Synentra.Infrastructure.Persistence.Sqlite.EntityConfigurations;
 
 public class AgentConfiguration : IEntityTypeConfiguration<Agent>
 {

@@ -1,8 +1,8 @@
 using FluentAssertions;
-using Vectra.Infrastructure.Persistence.Common.Errors;
-using Vectra.Infrastructure.Persistence.Common.Exceptions;
+using Synentra.Infrastructure.Persistence.Common.Errors;
+using Synentra.Infrastructure.Persistence.Common.Exceptions;
 
-namespace Vectra.Infrastructure.Persistence.Common.UnitTests.Exceptions;
+namespace Synentra.Infrastructure.Persistence.Common.UnitTests.Exceptions;
 
 public class DatabaseInitializerExceptionTests
 {

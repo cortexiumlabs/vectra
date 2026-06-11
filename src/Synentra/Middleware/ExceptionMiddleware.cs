@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 
-namespace Vectra.Middleware;
+namespace Synentra.Middleware;
 
 public class ExceptionMiddleware
 {

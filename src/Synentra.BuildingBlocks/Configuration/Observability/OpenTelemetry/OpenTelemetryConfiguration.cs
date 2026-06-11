@@ -1,4 +1,4 @@
-namespace Vectra.BuildingBlocks.Configuration.Observability.OpenTelemetry;
+namespace Synentra.BuildingBlocks.Configuration.Observability.OpenTelemetry;
 
 public class OpenTelemetryConfiguration
 {

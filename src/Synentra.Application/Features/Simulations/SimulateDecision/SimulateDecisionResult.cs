@@ -1,6 +1,6 @@
-using Vectra.Domain.Policies;
+using Synentra.Domain.Policies;
 
-namespace Vectra.Application.Features.Simulations.SimulateDecision;
+namespace Synentra.Application.Features.Simulations.SimulateDecision;
 
 public sealed record SimulateDecisionResult(
     DecisionType Type,

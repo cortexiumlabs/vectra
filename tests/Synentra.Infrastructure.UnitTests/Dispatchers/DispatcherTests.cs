@@ -1,10 +1,10 @@
 using FluentAssertions;
 using FluentValidation;
 using Microsoft.Extensions.DependencyInjection;
-using Vectra.Application.Abstractions.Dispatchers;
-using Vectra.Infrastructure.Dispatchers;
+using Synentra.Application.Abstractions.Dispatchers;
+using Synentra.Infrastructure.Dispatchers;
 
-namespace Vectra.Infrastructure.UnitTests.Dispatchers;
+namespace Synentra.Infrastructure.UnitTests.Dispatchers;
 
 public class DispatcherTests
 {

@@ -1,20 +1,20 @@
-﻿using Vectra.Application.Abstractions.Dispatchers;
-using Vectra.Application.Features.Agents.AgentsList;
-using Vectra.Application.Features.Agents.AssignPolicy;
-using Vectra.Application.Features.Agents.DeleteAgent;
-using Vectra.Application.Features.Agents.LiftQuarantine;
-using Vectra.Application.Features.Agents.RegisterAgent;
-using Vectra.Application.Features.Authentications.GenerateToken;
-using Vectra.Application.Features.Hitl.Approve;
-using Vectra.Application.Features.Hitl.Deny;
-using Vectra.Application.Features.Hitl.GetAllPending;
-using Vectra.Application.Features.Hitl.GetStatus;
-using Vectra.Application.Features.Policies.PolicyDetails;
-using Vectra.Application.Features.Policies.PoliciesList;
-using Vectra.Application.Features.Simulations.SimulateDecision;
-using Vectra.BuildingBlocks.Results;
+﻿using Synentra.Application.Abstractions.Dispatchers;
+using Synentra.Application.Features.Agents.AgentsList;
+using Synentra.Application.Features.Agents.AssignPolicy;
+using Synentra.Application.Features.Agents.DeleteAgent;
+using Synentra.Application.Features.Agents.LiftQuarantine;
+using Synentra.Application.Features.Agents.RegisterAgent;
+using Synentra.Application.Features.Authentications.GenerateToken;
+using Synentra.Application.Features.Hitl.Approve;
+using Synentra.Application.Features.Hitl.Deny;
+using Synentra.Application.Features.Hitl.GetAllPending;
+using Synentra.Application.Features.Hitl.GetStatus;
+using Synentra.Application.Features.Policies.PolicyDetails;
+using Synentra.Application.Features.Policies.PoliciesList;
+using Synentra.Application.Features.Simulations.SimulateDecision;
+using Synentra.BuildingBlocks.Results;
 
-namespace Vectra.Application.Extensions;
+namespace Synentra.Application.Extensions;
 
 public static class DispatcherExtensions
 {

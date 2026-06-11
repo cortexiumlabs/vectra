@@ -3,9 +3,9 @@ using NSubstitute;
 using System.IO.Compression;
 using System.Text;
 using System.Text.Json;
-using Vectra.Infrastructure.Semantic.Providers.InternalBert;
+using Synentra.Infrastructure.Semantic.Providers.InternalBert;
 
-namespace Vectra.Infrastructure.UnitTests.Semantic;
+namespace Synentra.Infrastructure.UnitTests.Semantic;
 
 public class BertTokenizerTests
 {
@@ -167,17 +167,17 @@ public class ModelPackageLoaderViaProviderTests
     [Fact]
     public void Constructor_EnabledWithMissingPackagePath_ThrowsInvalidOperationException()
     {
-        var cacheProvider = Substitute.For<Vectra.Application.Abstractions.Caches.ICacheProvider>();
-        var cacheService = Substitute.For<Vectra.Infrastructure.Caches.ICacheService>();
+        var cacheProvider = Substitute.For<Synentra.Application.Abstractions.Caches.ICacheProvider>();
+        var cacheService = Substitute.For<Synentra.Infrastructure.Caches.ICacheService>();
         cacheService.Current.Returns(cacheProvider);
 
         var options = Microsoft.Extensions.Options.Options.Create(
-            new Vectra.BuildingBlocks.Configuration.Semantic.SemanticConfiguration
+            new Synentra.BuildingBlocks.Configuration.Semantic.SemanticConfiguration
             {
                 Enabled = true,
-                Providers = new Vectra.BuildingBlocks.Configuration.Semantic.SemanticProviders
+                Providers = new Synentra.BuildingBlocks.Configuration.Semantic.SemanticProviders
                 {
-                    Internal = new Vectra.BuildingBlocks.Configuration.Semantic.InternalOnnxConfiguration
+                    Internal = new Synentra.BuildingBlocks.Configuration.Semantic.InternalOnnxConfiguration
                     {
                         PackagePath = null
                     }
@@ -192,17 +192,17 @@ public class ModelPackageLoaderViaProviderTests
     [Fact]
     public void Constructor_EnabledWithNonExistentFile_ThrowsFileNotFoundException()
     {
-        var cacheProvider = Substitute.For<Vectra.Application.Abstractions.Caches.ICacheProvider>();
-        var cacheService = Substitute.For<Vectra.Infrastructure.Caches.ICacheService>();
+        var cacheProvider = Substitute.For<Synentra.Application.Abstractions.Caches.ICacheProvider>();
+        var cacheService = Substitute.For<Synentra.Infrastructure.Caches.ICacheService>();
         cacheService.Current.Returns(cacheProvider);
 
         var options = Microsoft.Extensions.Options.Options.Create(
-            new Vectra.BuildingBlocks.Configuration.Semantic.SemanticConfiguration
+            new Synentra.BuildingBlocks.Configuration.Semantic.SemanticConfiguration
             {
                 Enabled = true,
-                Providers = new Vectra.BuildingBlocks.Configuration.Semantic.SemanticProviders
+                Providers = new Synentra.BuildingBlocks.Configuration.Semantic.SemanticProviders
                 {
-                    Internal = new Vectra.BuildingBlocks.Configuration.Semantic.InternalOnnxConfiguration
+                    Internal = new Synentra.BuildingBlocks.Configuration.Semantic.InternalOnnxConfiguration
                     {
                         PackagePath = "does_not_exist_xyz.zip"
                     }
@@ -331,7 +331,7 @@ public class ModelPackageLoaderDirectTests
         try
         {
             File.WriteAllBytes(tmpPath, CreateCommunityPackage());
-            var config = new Vectra.BuildingBlocks.Configuration.Semantic.InternalOnnxConfiguration
+            var config = new Synentra.BuildingBlocks.Configuration.Semantic.InternalOnnxConfiguration
             {
                 PackagePath = tmpPath,
                 ModelType = "Community"
@@ -355,7 +355,7 @@ public class ModelPackageLoaderDirectTests
         try
         {
             File.WriteAllBytes(tmpPath, CreateCommunityPackage());
-            var config = new Vectra.BuildingBlocks.Configuration.Semantic.InternalOnnxConfiguration
+            var config = new Synentra.BuildingBlocks.Configuration.Semantic.InternalOnnxConfiguration
             {
                 PackagePath = tmpPath,
                 ModelType = "Community"
@@ -385,7 +385,7 @@ public class ModelPackageLoaderDirectTests
         try
         {
             File.WriteAllBytes(tmpPath, ms.ToArray());
-            var config = new Vectra.BuildingBlocks.Configuration.Semantic.InternalOnnxConfiguration
+            var config = new Synentra.BuildingBlocks.Configuration.Semantic.InternalOnnxConfiguration
             {
                 PackagePath = tmpPath,
                 ModelType = "Pro",

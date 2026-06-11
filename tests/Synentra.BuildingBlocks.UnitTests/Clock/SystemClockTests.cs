@@ -1,8 +1,8 @@
 using FluentAssertions;
-using Vectra.BuildingBlocks.Clock;
+using Synentra.BuildingBlocks.Clock;
 using Xunit;
 
-namespace Vectra.BuildingBlocks.UnitTests.Clock;
+namespace Synentra.BuildingBlocks.UnitTests.Clock;
 
 public class SystemClockTests
 {

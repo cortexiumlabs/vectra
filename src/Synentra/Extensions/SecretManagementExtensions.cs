@@ -1,13 +1,13 @@
 using System.Diagnostics.CodeAnalysis;
-using Vectra.Infrastructure;
-using Vectra.Infrastructure.SecretManagement;
+using Synentra.Infrastructure;
+using Synentra.Infrastructure.SecretManagement;
 
-namespace Vectra.Extensions;
+namespace Synentra.Extensions;
 
 [ExcludeFromCodeCoverage]
 public static class SecretManagementExtensions
 {
-    public static WebApplicationBuilder AddVectraSecretManagement(this WebApplicationBuilder builder)
+    public static WebApplicationBuilder AddSynentraSecretManagement(this WebApplicationBuilder builder)
     {
         builder.Services.AddSecretManagement();
         var secretManager = builder.Services.BuildServiceProvider().GetRequiredService<ISecretManagementService>();

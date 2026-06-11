@@ -1,4 +1,4 @@
-namespace Vectra.BuildingBlocks.Configuration.SecretManagement;
+namespace Synentra.BuildingBlocks.Configuration.SecretManagement;
 
 public class SecretManagementConfiguration
 {

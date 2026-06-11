@@ -2,12 +2,12 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Mscc.GenerativeAI;
 using Mscc.GenerativeAI.Types;
-using Vectra.Application.Abstractions.Caches;
-using Vectra.Application.Abstractions.Executions;
-using Vectra.BuildingBlocks.Configuration.Semantic;
-using Vectra.Infrastructure.Caches;
+using Synentra.Application.Abstractions.Caches;
+using Synentra.Application.Abstractions.Executions;
+using Synentra.BuildingBlocks.Configuration.Semantic;
+using Synentra.Infrastructure.Caches;
 
-namespace Vectra.Infrastructure.Semantic.Providers.Gemini;
+namespace Synentra.Infrastructure.Semantic.Providers.Gemini;
 
 public class GeminiProvider : SemanticProviderBase, ISemanticProvider
 {

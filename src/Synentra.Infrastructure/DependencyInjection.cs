@@ -9,37 +9,37 @@ using OpenTelemetry.Trace;
 using Serilog;
 using Serilog.Extensions.Logging;
 using StackExchange.Redis;
-using Vectra.Application.Abstractions.CircuitBreaker;
-using Vectra.Application.Abstractions.Dispatchers;
-using Vectra.Application.Abstractions.Executions;
-using Vectra.Application.Abstractions.RateLimit;
-using Vectra.Application.Abstractions.Security;
-using Vectra.Application.Abstractions.Serializations;
-using Vectra.BuildingBlocks.Configuration.Observability;
-using Vectra.BuildingBlocks.Configuration.Policy;
-using Vectra.BuildingBlocks.Configuration.Semantic;
-using Vectra.BuildingBlocks.Configuration.System;
-using Vectra.Infrastructure.Caches;
-using Vectra.Infrastructure.Decision;
-using Vectra.Infrastructure.Dispatchers;
-using Vectra.Infrastructure.HumanInTheLoop;
-using Vectra.Infrastructure.HumanInTheLoop.Notifiers;
-using Vectra.Infrastructure.Policy;
-using Vectra.Infrastructure.Policy.Providers;
-using Vectra.Infrastructure.RateLimit;
-using Vectra.Infrastructure.Risk;
-using Vectra.Infrastructure.Risk.Calculators;
-using Vectra.Infrastructure.SecretManagement;
-using Vectra.Infrastructure.Security;
-using Vectra.Infrastructure.Semantic;
-using Vectra.Infrastructure.Semantic.Providers.AzureAi;
-using Vectra.Infrastructure.Semantic.Providers.Gemini;
-using Vectra.Infrastructure.Semantic.Providers.InternalBert;
-using Vectra.Infrastructure.Semantic.Providers.Ollama;
-using Vectra.Infrastructure.Semantic.Providers.OpenAi;
-using Vectra.Infrastructure.Serializations.Json;
+using Synentra.Application.Abstractions.CircuitBreaker;
+using Synentra.Application.Abstractions.Dispatchers;
+using Synentra.Application.Abstractions.Executions;
+using Synentra.Application.Abstractions.RateLimit;
+using Synentra.Application.Abstractions.Security;
+using Synentra.Application.Abstractions.Serializations;
+using Synentra.BuildingBlocks.Configuration.Observability;
+using Synentra.BuildingBlocks.Configuration.Policy;
+using Synentra.BuildingBlocks.Configuration.Semantic;
+using Synentra.BuildingBlocks.Configuration.System;
+using Synentra.Infrastructure.Caches;
+using Synentra.Infrastructure.Decision;
+using Synentra.Infrastructure.Dispatchers;
+using Synentra.Infrastructure.HumanInTheLoop;
+using Synentra.Infrastructure.HumanInTheLoop.Notifiers;
+using Synentra.Infrastructure.Policy;
+using Synentra.Infrastructure.Policy.Providers;
+using Synentra.Infrastructure.RateLimit;
+using Synentra.Infrastructure.Risk;
+using Synentra.Infrastructure.Risk.Calculators;
+using Synentra.Infrastructure.SecretManagement;
+using Synentra.Infrastructure.Security;
+using Synentra.Infrastructure.Semantic;
+using Synentra.Infrastructure.Semantic.Providers.AzureAi;
+using Synentra.Infrastructure.Semantic.Providers.Gemini;
+using Synentra.Infrastructure.Semantic.Providers.InternalBert;
+using Synentra.Infrastructure.Semantic.Providers.Ollama;
+using Synentra.Infrastructure.Semantic.Providers.OpenAi;
+using Synentra.Infrastructure.Serializations.Json;
 
-namespace Vectra.Infrastructure;
+namespace Synentra.Infrastructure;
 
 public static class DependencyInjection
 {
@@ -187,7 +187,7 @@ public static class DependencyInjection
         return services;
     }
 
-    public static WebApplicationBuilder AddVectraObservability(this WebApplicationBuilder builder)
+    public static WebApplicationBuilder AddSynentraObservability(this WebApplicationBuilder builder)
     {
         var observabilityConfiguration = builder.Services
             .BuildServiceProvider()

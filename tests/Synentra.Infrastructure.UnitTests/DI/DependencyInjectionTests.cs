@@ -5,25 +5,25 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using NSubstitute;
 using StackExchange.Redis;
-using Vectra.Application.Abstractions.Caches;
-using Vectra.Application.Abstractions.CircuitBreaker;
-using Vectra.Application.Abstractions.Dispatchers;
-using Vectra.Application.Abstractions.Executions;
-using Vectra.Application.Abstractions.RateLimit;
-using Vectra.Application.Abstractions.Serializations;
-using Vectra.BuildingBlocks.Configuration.HumanInTheLoop;
-using Vectra.BuildingBlocks.Configuration.Observability;
-using Vectra.BuildingBlocks.Configuration.Policy;
-using Vectra.BuildingBlocks.Configuration.SecretManagement;
-using Vectra.BuildingBlocks.Configuration.Security;
-using Vectra.BuildingBlocks.Configuration.Security.AgentAuth;
-using Vectra.BuildingBlocks.Configuration.Semantic;
-using Vectra.BuildingBlocks.Configuration.System;
-using Vectra.BuildingBlocks.Configuration.System.Storage.Cache;
-using Vectra.Infrastructure.Caches;
-using Vectra.Infrastructure.SecretManagement;
+using Synentra.Application.Abstractions.Caches;
+using Synentra.Application.Abstractions.CircuitBreaker;
+using Synentra.Application.Abstractions.Dispatchers;
+using Synentra.Application.Abstractions.Executions;
+using Synentra.Application.Abstractions.RateLimit;
+using Synentra.Application.Abstractions.Serializations;
+using Synentra.BuildingBlocks.Configuration.HumanInTheLoop;
+using Synentra.BuildingBlocks.Configuration.Observability;
+using Synentra.BuildingBlocks.Configuration.Policy;
+using Synentra.BuildingBlocks.Configuration.SecretManagement;
+using Synentra.BuildingBlocks.Configuration.Security;
+using Synentra.BuildingBlocks.Configuration.Security.AgentAuth;
+using Synentra.BuildingBlocks.Configuration.Semantic;
+using Synentra.BuildingBlocks.Configuration.System;
+using Synentra.BuildingBlocks.Configuration.System.Storage.Cache;
+using Synentra.Infrastructure.Caches;
+using Synentra.Infrastructure.SecretManagement;
 
-namespace Vectra.Infrastructure.UnitTests.DI;
+namespace Synentra.Infrastructure.UnitTests.DI;
 
 public class DependencyInjectionTests
 {
@@ -75,7 +75,7 @@ public class DependencyInjectionTests
                 Cache = new CacheConfiguration
                 {
                     DefaultProvider = "memory",
-                    Providers = new CatchProviders
+                    Providers = new CacheProviders
                     {
                         Memory = new MemoryCacheConfiguration { TimeToLive = TimeSpan.FromMinutes(5) },
                         Redis = new RedisCacheConfiguration { Address = "localhost:6379" }
@@ -113,10 +113,10 @@ public class DependencyInjectionTests
         });
 
         // Required repositories and services
-        services.AddSingleton(Substitute.For<Vectra.Application.Abstractions.Persistence.IAuditRepository>());
-        services.AddSingleton(Substitute.For<Vectra.Application.Abstractions.Persistence.IAgentHistoryRepository>());
-        services.AddSingleton(Substitute.For<Vectra.Application.Abstractions.Persistence.IAgentRepository>());
-        services.AddSingleton(Substitute.For<Vectra.BuildingBlocks.Clock.IClock>());
+        services.AddSingleton(Substitute.For<Synentra.Application.Abstractions.Persistence.IAuditRepository>());
+        services.AddSingleton(Substitute.For<Synentra.Application.Abstractions.Persistence.IAgentHistoryRepository>());
+        services.AddSingleton(Substitute.For<Synentra.Application.Abstractions.Persistence.IAgentRepository>());
+        services.AddSingleton(Substitute.For<Synentra.BuildingBlocks.Clock.IClock>());
 
         extra?.Invoke(services);
 
@@ -139,10 +139,10 @@ public class DependencyInjectionTests
         deserializer.Should().NotBeNull();
     }
 
-    // ── AddVectraObservability ────────────────────────────────────────────
+    // ── AddSynentraObservability ────────────────────────────────────────────
 
     [Fact]
-    public void AddVectraObservability_RegistersLoggerFactory()
+    public void AddSynentraObservability_RegistersLoggerFactory()
     {
         var builder = WebApplication.CreateBuilder();
         builder.Configuration.AddInMemoryCollection(new Dictionary<string, string?>
@@ -151,11 +151,11 @@ public class DependencyInjectionTests
         });
         builder.Services.AddOptions<ObservabilityConfiguration>().Bind(builder.Configuration.GetSection("Observability"));
 
-        builder.AddVectraObservability();
+        builder.AddSynentraObservability();
 
         var sp = builder.Services.BuildServiceProvider();
 
-        var loggerFactory = sp.GetService<Vectra.Infrastructure.Logging.ILoggerFactory>();
+        var loggerFactory = sp.GetService<Synentra.Infrastructure.Logging.ILoggerFactory>();
 
         loggerFactory.Should().NotBeNull();
     }
@@ -246,10 +246,10 @@ public class DependencyInjectionTests
             };
         });
         infrastructure.Configure<HumanInTheLoopConfiguration>(cfg => cfg.TimeoutSeconds = 300);
-        infrastructure.AddSingleton(Substitute.For<Vectra.Application.Abstractions.Persistence.IAuditRepository>());
-        infrastructure.AddSingleton(Substitute.For<Vectra.Application.Abstractions.Persistence.IAgentHistoryRepository>());
-        infrastructure.AddSingleton(Substitute.For<Vectra.Application.Abstractions.Persistence.IAgentRepository>());
-        infrastructure.AddSingleton(Substitute.For<Vectra.BuildingBlocks.Clock.IClock>());
+        infrastructure.AddSingleton(Substitute.For<Synentra.Application.Abstractions.Persistence.IAuditRepository>());
+        infrastructure.AddSingleton(Substitute.For<Synentra.Application.Abstractions.Persistence.IAgentHistoryRepository>());
+        infrastructure.AddSingleton(Substitute.For<Synentra.Application.Abstractions.Persistence.IAgentRepository>());
+        infrastructure.AddSingleton(Substitute.For<Synentra.BuildingBlocks.Clock.IClock>());
         infrastructure.AddCache();
         infrastructure.AddJsonSerialization();
         infrastructure.AddInfrastructure();
@@ -305,7 +305,7 @@ public class DependencyInjectionTests
     {
         var services = BuildServices(policyProvider: "opa");
 
-        var provider = services.GetService<Vectra.Application.Abstractions.Executions.IPolicyProvider>();
+        var provider = services.GetService<Synentra.Application.Abstractions.Executions.IPolicyProvider>();
 
         provider.Should().NotBeNull();
     }
@@ -315,7 +315,7 @@ public class DependencyInjectionTests
     {
         var services = BuildServices(policyProvider: "internal");
 
-        var provider = services.GetService<Vectra.Application.Abstractions.Executions.IPolicyProvider>();
+        var provider = services.GetService<Synentra.Application.Abstractions.Executions.IPolicyProvider>();
 
         provider.Should().NotBeNull();
     }
@@ -415,10 +415,10 @@ public class DependencyInjectionTests
             };
         });
         services.Configure<HumanInTheLoopConfiguration>(cfg => cfg.TimeoutSeconds = 300);
-        services.AddSingleton(Substitute.For<Vectra.Application.Abstractions.Persistence.IAuditRepository>());
-        services.AddSingleton(Substitute.For<Vectra.Application.Abstractions.Persistence.IAgentHistoryRepository>());
-        services.AddSingleton(Substitute.For<Vectra.Application.Abstractions.Persistence.IAgentRepository>());
-        services.AddSingleton(Substitute.For<Vectra.BuildingBlocks.Clock.IClock>());
+        services.AddSingleton(Substitute.For<Synentra.Application.Abstractions.Persistence.IAuditRepository>());
+        services.AddSingleton(Substitute.For<Synentra.Application.Abstractions.Persistence.IAgentHistoryRepository>());
+        services.AddSingleton(Substitute.For<Synentra.Application.Abstractions.Persistence.IAgentRepository>());
+        services.AddSingleton(Substitute.For<Synentra.BuildingBlocks.Clock.IClock>());
         services.AddCache();
         services.AddJsonSerialization();
         services.AddInfrastructure();

@@ -1,13 +1,13 @@
 using FluentAssertions;
-using Vectra.BuildingBlocks.Configuration.System;
-using Vectra.BuildingBlocks.Configuration.System.CircuitBreaker;
-using Vectra.BuildingBlocks.Configuration.System.RateLimit;
-using Vectra.BuildingBlocks.Configuration.System.Server;
-using Vectra.BuildingBlocks.Configuration.System.Storage.Cache;
-using Vectra.BuildingBlocks.Configuration.System.Storage.Database;
+using Synentra.BuildingBlocks.Configuration.System;
+using Synentra.BuildingBlocks.Configuration.System.CircuitBreaker;
+using Synentra.BuildingBlocks.Configuration.System.RateLimit;
+using Synentra.BuildingBlocks.Configuration.System.Server;
+using Synentra.BuildingBlocks.Configuration.System.Storage.Cache;
+using Synentra.BuildingBlocks.Configuration.System.Storage.Database;
 using Xunit;
 
-namespace Vectra.BuildingBlocks.UnitTests.Configuration.System;
+namespace Synentra.BuildingBlocks.UnitTests.Configuration.System;
 
 public class SystemConfigurationTests
 {
@@ -141,7 +141,7 @@ public class SystemConfigurationTests
     {
         var config = new SqliteConfiguration();
 
-        config.ConnectionString.Should().Be("Data Source=vectra.db");
+        config.ConnectionString.Should().Be("Data Source=synentra.db");
     }
 
     [Fact]
@@ -162,9 +162,9 @@ public class SystemConfigurationTests
     }
 
     [Fact]
-    public void CatchProviders_ShouldInitializeAll()
+    public void CacheProviders_ShouldInitializeAll()
     {
-        var providers = new CatchProviders();
+        var providers = new CacheProviders();
 
         providers.Redis.Should().NotBeNull();
         providers.Memory.Should().NotBeNull();

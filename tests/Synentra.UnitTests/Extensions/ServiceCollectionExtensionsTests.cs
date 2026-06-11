@@ -1,10 +1,10 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Vectra.Application.Abstractions.Versioning;
-using Vectra.BuildingBlocks.Clock;
-using Vectra.Extensions;
+using Synentra.Application.Abstractions.Versioning;
+using Synentra.BuildingBlocks.Clock;
+using Synentra.Extensions;
 
-namespace Vectra.UnitTests.Extensions;
+namespace Synentra.UnitTests.Extensions;
 
 public class ServiceCollectionExtensionsTests
 {
@@ -30,99 +30,99 @@ public class ServiceCollectionExtensionsTests
         result.Should().BeSameAs(services);
     }
 
-    // ── AddVectraVersion ──────────────────────────────────────────────────
+    // ── AddSynentraVersion ──────────────────────────────────────────────────
 
     [Fact]
-    public void AddVectraVersion_RegistersIVersion()
+    public void AddSynentraVersion_RegistersIVersion()
     {
         var services = new ServiceCollection();
         services.AddLogging();
-        services.AddVectraVersion();
+        services.AddSynentraVersion();
 
         var provider = services.BuildServiceProvider();
         var version = provider.GetRequiredService<IVersion>();
 
-        version.Should().NotBeNull().And.BeOfType<Vectra.Services.VectraVersion>();
+        version.Should().NotBeNull().And.BeOfType<Synentra.Services.SynentraVersion>();
     }
 
     [Fact]
-    public void AddVectraVersion_ReturnsSameCollection()
+    public void AddSynentraVersion_ReturnsSameCollection()
     {
         var services = new ServiceCollection();
-        var result = services.AddVectraVersion();
+        var result = services.AddSynentraVersion();
         result.Should().BeSameAs(services);
     }
 
-    // ── AddVectraConfiguration ────────────────────────────────────────────
+    // ── AddSynentraConfiguration ────────────────────────────────────────────
 
     [Fact]
-    public void AddVectraConfiguration_ReturnsSameCollection()
+    public void AddSynentraConfiguration_ReturnsSameCollection()
     {
         var services = new ServiceCollection();
         var config = new ConfigurationBuilder().Build();
-        var result = services.AddVectraConfiguration(config);
+        var result = services.AddSynentraConfiguration(config);
         result.Should().BeSameAs(services);
     }
 
     [Fact]
-    public void AddVectraConfiguration_RegistersExpectedOptions()
+    public void AddSynentraConfiguration_RegistersExpectedOptions()
     {
         var services = new ServiceCollection();
         var config = new ConfigurationBuilder().Build();
-        services.AddVectraConfiguration(config);
+        services.AddSynentraConfiguration(config);
 
         // Should not throw – confirms Options infrastructure is registered
         var provider = services.BuildServiceProvider();
-        var act = () => provider.GetRequiredService<Microsoft.Extensions.Options.IOptions<Vectra.BuildingBlocks.Configuration.System.SystemConfiguration>>();
+        var act = () => provider.GetRequiredService<Microsoft.Extensions.Options.IOptions<Synentra.BuildingBlocks.Configuration.System.SystemConfiguration>>();
         act.Should().NotThrow();
     }
 
-    // ── AddVectraHealthChecker ────────────────────────────────────────────
+    // ── AddSynentraHealthChecker ────────────────────────────────────────────
 
     [Fact]
-    public void AddVectraHealthChecker_ReturnsSameCollection()
+    public void AddSynentraHealthChecker_ReturnsSameCollection()
     {
         var services = new ServiceCollection();
-        var result = services.AddVectraHealthChecker();
+        var result = services.AddSynentraHealthChecker();
         result.Should().BeSameAs(services);
     }
 
     [Fact]
-    public void AddVectraHealthChecker_RegistersHealthChecks()
+    public void AddSynentraHealthChecker_RegistersHealthChecks()
     {
         var services = new ServiceCollection();
-        services.AddVectraHealthChecker();
+        services.AddSynentraHealthChecker();
         // Verify the health check service type is registered
         var descriptor = services.Any(s =>
             s.ServiceType == typeof(Microsoft.Extensions.Diagnostics.HealthChecks.HealthCheckService));
         descriptor.Should().BeTrue();
     }
 
-    // ── AddVectraApiDocumentation ─────────────────────────────────────────
+    // ── AddSynentraApiDocumentation ─────────────────────────────────────────
 
     [Fact]
-    public void AddVectraApiDocumentation_ReturnsSameCollection()
+    public void AddSynentraApiDocumentation_ReturnsSameCollection()
     {
         var services = new ServiceCollection();
-        var result = services.AddVectraApiDocumentation();
+        var result = services.AddSynentraApiDocumentation();
         result.Should().BeSameAs(services);
     }
 
-    // ── AddVectraProxyForwarder ───────────────────────────────────────────
+    // ── AddSynentraProxyForwarder ───────────────────────────────────────────
 
     [Fact]
-    public void AddVectraProxyForwarder_ReturnsSameCollection()
+    public void AddSynentraProxyForwarder_ReturnsSameCollection()
     {
         var services = new ServiceCollection();
-        var result = services.AddVectraProxyForwarder();
+        var result = services.AddSynentraProxyForwarder();
         result.Should().BeSameAs(services);
     }
 
     [Fact]
-    public void AddVectraProxyForwarder_RegistersHttpClient()
+    public void AddSynentraProxyForwarder_RegistersHttpClient()
     {
         var services = new ServiceCollection();
-        services.AddVectraProxyForwarder();
+        services.AddSynentraProxyForwarder();
         var provider = services.BuildServiceProvider();
         var factory = provider.GetRequiredService<IHttpClientFactory>();
         factory.Should().NotBeNull();

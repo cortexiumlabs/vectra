@@ -2,12 +2,12 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging.Abstractions;
 using NSubstitute;
 using NSubstitute.ExceptionExtensions;
-using Vectra.Infrastructure.Persistence.Common.Exceptions;
-using Vectra.Infrastructure.Persistence.Sqlite.Contexts;
-using Vectra.Infrastructure.Persistence.Sqlite.Services;
-using Vectra.Infrastructure.Persistence.Sqlite.UnitTests.Helpers;
+using Synentra.Infrastructure.Persistence.Common.Exceptions;
+using Synentra.Infrastructure.Persistence.Sqlite.Contexts;
+using Synentra.Infrastructure.Persistence.Sqlite.Services;
+using Synentra.Infrastructure.Persistence.Sqlite.UnitTests.Helpers;
 
-namespace Vectra.Infrastructure.Persistence.Sqlite.UnitTests.Services;
+namespace Synentra.Infrastructure.Persistence.Sqlite.UnitTests.Services;
 
 public class SqliteDatabaseInitializerTests
 {

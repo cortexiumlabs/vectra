@@ -1,14 +1,14 @@
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
-using Vectra.Application.Abstractions.Executions;
-using Vectra.Application.Abstractions.Security;
-using Vectra.Application.Features.Simulations.SimulateDecision;
-using Vectra.Domain.Agents;
-using Vectra.Domain.Policies;
-using Vectra.BuildingBlocks.Results;
+using Synentra.Application.Abstractions.Executions;
+using Synentra.Application.Abstractions.Security;
+using Synentra.Application.Features.Simulations.SimulateDecision;
+using Synentra.Domain.Agents;
+using Synentra.Domain.Policies;
+using Synentra.BuildingBlocks.Results;
 
-namespace Vectra.Application.UnitTests.Features.Simulations;
+namespace Synentra.Application.UnitTests.Features.Simulations;
 
 public class SimulateDecisionHandlerTests
 {
@@ -79,7 +79,7 @@ public class SimulateDecisionHandlerTests
         _accessService.GetAgentAsync(agentId, Arg.Any<CancellationToken>())
             .Returns(new AgentRequestAccessResult(true, agent, null));
 
-        _decisionEngine.SimulateAsync(Arg.Any<Vectra.Application.Models.RequestContext>(), Arg.Any<CancellationToken>())
+        _decisionEngine.SimulateAsync(Arg.Any<Synentra.Application.Models.RequestContext>(), Arg.Any<CancellationToken>())
             .Returns(DecisionResult.Allow(0.12));
 
         var request = new SimulateDecisionRequest(

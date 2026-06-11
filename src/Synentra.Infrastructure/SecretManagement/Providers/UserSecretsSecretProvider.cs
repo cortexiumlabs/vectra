@@ -1,6 +1,6 @@
 using Microsoft.Extensions.Configuration;
 
-namespace Vectra.Infrastructure.SecretManagement.Providers;
+namespace Synentra.Infrastructure.SecretManagement.Providers;
 
 internal sealed class UserSecretsSecretProvider : ISecretProvider
 {

@@ -1,7 +1,7 @@
-﻿using Vectra.BuildingBlocks.Errors;
-using Vectra.BuildingBlocks.Exceptions;
+﻿using Synentra.BuildingBlocks.Errors;
+using Synentra.BuildingBlocks.Exceptions;
 
-namespace Vectra.Exceptions;
+namespace Synentra.Exceptions;
 
 public abstract class SystemException : BaseException
 {

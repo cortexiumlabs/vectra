@@ -1,4 +1,4 @@
-﻿namespace Vectra.BuildingBlocks.Configuration.Policy;
+﻿namespace Synentra.BuildingBlocks.Configuration.Policy;
 
 public class PolicyProviders
 {

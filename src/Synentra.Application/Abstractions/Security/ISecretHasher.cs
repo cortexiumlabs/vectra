@@ -1,4 +1,4 @@
-﻿namespace Vectra.Application.Abstractions.Security;
+﻿namespace Synentra.Application.Abstractions.Security;
 
 public interface ISecretHasher
 {

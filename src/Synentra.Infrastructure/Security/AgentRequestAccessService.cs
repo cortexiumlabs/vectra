@@ -1,10 +1,10 @@
 using Microsoft.Extensions.Options;
-using Vectra.Application.Abstractions.Persistence;
-using Vectra.Application.Abstractions.Security;
-using Vectra.BuildingBlocks.Configuration.Security;
-using Vectra.Domain.Agents;
+using Synentra.Application.Abstractions.Persistence;
+using Synentra.Application.Abstractions.Security;
+using Synentra.BuildingBlocks.Configuration.Security;
+using Synentra.Domain.Agents;
 
-namespace Vectra.Infrastructure.Security;
+namespace Synentra.Infrastructure.Security;
 
 public sealed class AgentRequestAccessService : IAgentRequestAccessService
 {

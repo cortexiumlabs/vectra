@@ -1,9 +1,9 @@
 using FluentAssertions;
 using System.Text.Json;
-using Vectra.Domain.Policies;
-using Vectra.Infrastructure.Policy;
+using Synentra.Domain.Policies;
+using Synentra.Infrastructure.Policy;
 
-namespace Vectra.Infrastructure.UnitTests.Policy;
+namespace Synentra.Infrastructure.UnitTests.Policy;
 
 /// <summary>
 /// Tests that cover uncovered branches: ConvertJsonElement (all kinds),

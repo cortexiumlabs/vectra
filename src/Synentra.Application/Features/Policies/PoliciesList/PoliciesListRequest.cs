@@ -1,7 +1,7 @@
-﻿using Vectra.Application.Abstractions.Dispatchers;
-using Vectra.BuildingBlocks.Results;
+﻿using Synentra.Application.Abstractions.Dispatchers;
+using Synentra.BuildingBlocks.Results;
 
-namespace Vectra.Application.Features.Policies.PoliciesList;
+namespace Synentra.Application.Features.Policies.PoliciesList;
 
 public class PoliciesListRequest : IRequest<PaginatedResult<PoliciesListResult>>
 {

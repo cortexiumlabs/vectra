@@ -1,9 +1,9 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Vectra.Application.Abstractions.Persistence;
-using Vectra.Domain.Agents;
-using Vectra.Infrastructure.Persistence.Sqlite.Contexts;
+using Synentra.Application.Abstractions.Persistence;
+using Synentra.Domain.Agents;
+using Synentra.Infrastructure.Persistence.Sqlite.Contexts;
 
-namespace Vectra.Infrastructure.Persistence.Sqlite.Repositories;
+namespace Synentra.Infrastructure.Persistence.Sqlite.Repositories;
 
 public class AgentRepository : IAgentRepository
 {

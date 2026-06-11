@@ -1,6 +1,6 @@
-﻿using Vectra.Domain.Agents;
+﻿using Synentra.Domain.Agents;
 
-namespace Vectra.Application.Abstractions.Security;
+namespace Synentra.Application.Abstractions.Security;
 
 public interface IAgentRequestAccessService
 {

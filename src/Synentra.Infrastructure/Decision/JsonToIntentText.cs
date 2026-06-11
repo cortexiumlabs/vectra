@@ -2,7 +2,7 @@
 using System.Text.Json;
 using System.Text.RegularExpressions;
 
-namespace Vectra.Infrastructure.Decision;
+namespace Synentra.Infrastructure.Decision;
 
 public static class JsonToIntentText
 {

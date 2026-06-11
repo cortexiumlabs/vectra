@@ -1,6 +1,6 @@
-﻿using Vectra.Application.Abstractions.Security;
+﻿using Synentra.Application.Abstractions.Security;
 
-namespace Vectra.Infrastructure.Security;
+namespace Synentra.Infrastructure.Security;
 
 public class BcryptSecretHasher : ISecretHasher
 {

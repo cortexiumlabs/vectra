@@ -1,8 +1,8 @@
 using FluentAssertions;
-using Vectra.Infrastructure.Exceptions;
-using Vectra.Infrastructure.Errors;
+using Synentra.Infrastructure.Exceptions;
+using Synentra.Infrastructure.Errors;
 
-namespace Vectra.Infrastructure.UnitTests.Exceptions;
+namespace Synentra.Infrastructure.UnitTests.Exceptions;
 
 public class JsonSerializationExceptionTests
 {

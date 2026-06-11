@@ -1,19 +1,19 @@
 ﻿using Microsoft.Extensions.Options;
 using Microsoft.OpenApi;
 using System.Text.Json.Serialization;
-using Vectra.Application.Abstractions.Versioning;
-using Vectra.BuildingBlocks.Clock;
-using Vectra.BuildingBlocks.Configuration.HumanInTheLoop;
-using Vectra.BuildingBlocks.Configuration.Observability;
-using Vectra.BuildingBlocks.Configuration.Policy;
-using Vectra.BuildingBlocks.Configuration.SecretManagement;
-using Vectra.BuildingBlocks.Configuration.Security;
-using Vectra.BuildingBlocks.Configuration.Semantic;
-using Vectra.BuildingBlocks.Configuration.System;
-using Vectra.Infrastructure.Persistence.Sqlite;
-using Vectra.Services;
+using Synentra.Application.Abstractions.Versioning;
+using Synentra.BuildingBlocks.Clock;
+using Synentra.BuildingBlocks.Configuration.HumanInTheLoop;
+using Synentra.BuildingBlocks.Configuration.Observability;
+using Synentra.BuildingBlocks.Configuration.Policy;
+using Synentra.BuildingBlocks.Configuration.SecretManagement;
+using Synentra.BuildingBlocks.Configuration.Security;
+using Synentra.BuildingBlocks.Configuration.Semantic;
+using Synentra.BuildingBlocks.Configuration.System;
+using Synentra.Infrastructure.Persistence.Sqlite;
+using Synentra.Services;
 
-namespace Vectra.Extensions;
+namespace Synentra.Extensions;
 
 public static class ServiceCollectionExtensions
 {
@@ -32,13 +32,13 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IClock, SystemClock>();
         return services;
     }
-    public static IServiceCollection AddVectraVersion(this IServiceCollection services)
+    public static IServiceCollection AddSynentraVersion(this IServiceCollection services)
     {
-        services.AddSingleton<IVersion, VectraVersion>();
+        services.AddSingleton<IVersion, SynentraVersion>();
         return services;
     }
 
-    public static IServiceCollection AddVectraConfiguration(this IServiceCollection services, IConfiguration configuration)
+    public static IServiceCollection AddSynentraConfiguration(this IServiceCollection services, IConfiguration configuration)
     {
         services.Configure<SystemConfiguration>(configuration.GetSection(SystemConfigurationName));
         services.Configure<ObservabilityConfiguration>(configuration.GetSection(ObservabilityConfigurationName));
@@ -55,7 +55,7 @@ public static class ServiceCollectionExtensions
 
     #region Health checks
 
-    public static IServiceCollection AddVectraHealthChecker(this IServiceCollection services)
+    public static IServiceCollection AddSynentraHealthChecker(this IServiceCollection services)
     {
         services.AddHealthChecks();
         return services;
@@ -65,16 +65,16 @@ public static class ServiceCollectionExtensions
 
     #region OpenAPI (Swagger)
 
-    public static IServiceCollection AddVectraApiDocumentation(this IServiceCollection services)
+    public static IServiceCollection AddSynentraApiDocumentation(this IServiceCollection services)
     {
         services.AddEndpointsApiExplorer();
         services.AddSwaggerGen(c =>
         {
-            c.SwaggerDoc("vectra", new OpenApiInfo
+            c.SwaggerDoc("synentra", new OpenApiInfo
             {
-                Version = "vectra",
+                Version = "synentra",
                 Title = "Service Invocation",
-                Description = "Using the service invocation API to find out how to communicate with Vectra API.",
+                Description = "Using the service invocation API to find out how to communicate with Synentra API.",
                 License = new OpenApiLicense
                 {
                     Name = "Apache License Version 2.0",
@@ -105,7 +105,7 @@ public static class ServiceCollectionExtensions
 
     #region Persistence
 
-    public static IServiceCollection AddVectraPersistence(this IServiceCollection services)
+    public static IServiceCollection AddSynentraPersistence(this IServiceCollection services)
     {
         using var scope = services.BuildServiceProvider().CreateScope();
         var systemConfig = scope.ServiceProvider.GetRequiredService<IOptions<SystemConfiguration>>().Value;
@@ -134,7 +134,7 @@ public static class ServiceCollectionExtensions
 
     #region HttpClient
 
-    public static IServiceCollection AddVectraProxyForwarder(this IServiceCollection services)
+    public static IServiceCollection AddSynentraProxyForwarder(this IServiceCollection services)
     {
         services.AddHttpClient("ProxyForwarder")
             .ConfigureHttpClient(client =>

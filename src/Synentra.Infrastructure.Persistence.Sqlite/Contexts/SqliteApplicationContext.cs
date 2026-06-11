@@ -1,9 +1,9 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using Vectra.Infrastructure.Persistence.Common;
-using Vectra.Infrastructure.Persistence.Common.Exceptions;
+using Synentra.Infrastructure.Persistence.Common;
+using Synentra.Infrastructure.Persistence.Common.Exceptions;
 
-namespace Vectra.Infrastructure.Persistence.Sqlite.Contexts;
+namespace Synentra.Infrastructure.Persistence.Sqlite.Contexts;
 
 public class SqliteApplicationContext : BaseDbContext
 {

@@ -1,8 +1,8 @@
 using FluentAssertions;
-using Vectra.Application.Abstractions.Executions;
-using Vectra.Infrastructure.Semantic.Providers;
+using Synentra.Application.Abstractions.Executions;
+using Synentra.Infrastructure.Semantic.Providers;
 
-namespace Vectra.Infrastructure.UnitTests.Semantic;
+namespace Synentra.Infrastructure.UnitTests.Semantic;
 
 public class SemanticProviderBaseTests
 {

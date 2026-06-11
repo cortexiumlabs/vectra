@@ -1,4 +1,4 @@
-﻿namespace Vectra.BuildingBlocks.Configuration.Semantic;
+﻿namespace Synentra.BuildingBlocks.Configuration.Semantic;
 
 public class InternalOnnxConfiguration
 {

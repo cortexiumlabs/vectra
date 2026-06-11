@@ -1,27 +1,27 @@
 using FluentAssertions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Vectra.Application.Abstractions.Dispatchers;
-using Vectra.Application.Features.Agents.AgentsList;
-using Vectra.Application.Features.Agents.AssignPolicy;
-using Vectra.Application.Features.Agents.DeleteAgent;
-using Vectra.Application.Features.Agents.RegisterAgent;
-using Vectra.Application.Features.Authentications.GenerateToken;
-using Vectra.Application.Features.Policies.PoliciesList;
-using Vectra.Application.Features.Policies.PolicyDetails;
-using Vectra.BuildingBlocks.Results;
-using VoidType = Vectra.Application.Abstractions.Dispatchers.Void;
+using Synentra.Application.Abstractions.Dispatchers;
+using Synentra.Application.Features.Agents.AgentsList;
+using Synentra.Application.Features.Agents.AssignPolicy;
+using Synentra.Application.Features.Agents.DeleteAgent;
+using Synentra.Application.Features.Agents.RegisterAgent;
+using Synentra.Application.Features.Authentications.GenerateToken;
+using Synentra.Application.Features.Policies.PoliciesList;
+using Synentra.Application.Features.Policies.PolicyDetails;
+using Synentra.BuildingBlocks.Results;
+using VoidType = Synentra.Application.Abstractions.Dispatchers.Void;
 
-namespace Vectra.Application.UnitTests;
+namespace Synentra.Application.UnitTests;
 
 public class DependencyInjectionTests
 {
     [Fact]
-    public void AddVectraApplication_ShouldRegisterAllHandlers()
+    public void AddSynentraApplication_ShouldRegisterAllHandlers()
     {
         var services = new ServiceCollection();
         services.AddLogging();
-        services.AddVectraApplication();
+        services.AddSynentraApplication();
 
         services.Should().Contain(sd =>
             sd.ServiceType == typeof(IActionHandler<AgentsListRequest, PaginatedResult<AgentsListResult>>));
@@ -40,10 +40,10 @@ public class DependencyInjectionTests
     }
 
     [Fact]
-    public void AddVectraApplication_ShouldReturnSameServiceCollection()
+    public void AddSynentraApplication_ShouldReturnSameServiceCollection()
     {
         var services = new ServiceCollection();
-        var returned = services.AddVectraApplication();
+        var returned = services.AddSynentraApplication();
 
         returned.Should().BeSameAs(services);
     }

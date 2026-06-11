@@ -1,5 +1,5 @@
 ﻿/**
- * Vectra - K6 Load Test
+ * Synentra - K6 Load Test
  *
  * Scenario: 1 000 concurrent AI-agent VUs sustaining ~5 000 req/s.
  *
@@ -109,7 +109,7 @@ export function setup() {
         throw new Error(
             `[setup] FATAL: server not reachable at ${BASE_URL} ` +
             `(HTTP ${probe.status}, error_code=${probe.error_code}). ` +
-            `Start the Vectra API before running the load test.`
+            `Start the Synentra API before running the load test.`
         );
     }
 
@@ -307,7 +307,7 @@ export default function (data) {
 
             console.error(
                 `[VU ${__VU}] Server refused connection on /proxy ` +
-                `— is Vectra still running?`
+                `— is Synentra still running?`
             );
 
             return;
@@ -341,7 +341,7 @@ export default function (data) {
 
             console.error(
                 `[VU ${__VU}] Server refused connection on /agents ` +
-                `— is Vectra still running?`
+                `— is Synentra still running?`
             );
 
             return;
@@ -367,7 +367,7 @@ export default function (data) {
 
             console.error(
                 `[VU ${__VU}] Server refused connection on /hitls ` +
-                `— is Vectra still running?`
+                `— is Synentra still running?`
             );
 
             return;

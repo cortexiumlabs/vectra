@@ -1,6 +1,6 @@
-using Vectra.Application.Models;
+using Synentra.Application.Models;
 
-namespace Vectra.Application.Abstractions.Executions;
+namespace Synentra.Application.Abstractions.Executions;
 
 /// <summary>
 /// Abstraction for sending real-time notifications when a HITL request is suspended for review.

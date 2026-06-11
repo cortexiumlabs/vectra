@@ -1,4 +1,4 @@
-﻿namespace Vectra.BuildingBlocks.Configuration.Observability.Logging;
+﻿namespace Synentra.BuildingBlocks.Configuration.Observability.Logging;
 
 public sealed record FileLoggingConfiguration
 {

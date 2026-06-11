@@ -3,16 +3,16 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
 using NSubstitute;
-using Vectra.Application.Abstractions.Caches;
-using Vectra.Application.Abstractions.Executions;
-using Vectra.BuildingBlocks.Configuration.Semantic;
-using Vectra.Infrastructure.Caches;
-using Vectra.Infrastructure.Semantic.Providers.AzureAi;
-using Vectra.Infrastructure.Semantic.Providers.Gemini;
-using Vectra.Infrastructure.Semantic.Providers.Ollama;
-using Vectra.Infrastructure.Semantic.Providers.OpenAi;
+using Synentra.Application.Abstractions.Caches;
+using Synentra.Application.Abstractions.Executions;
+using Synentra.BuildingBlocks.Configuration.Semantic;
+using Synentra.Infrastructure.Caches;
+using Synentra.Infrastructure.Semantic.Providers.AzureAi;
+using Synentra.Infrastructure.Semantic.Providers.Gemini;
+using Synentra.Infrastructure.Semantic.Providers.Ollama;
+using Synentra.Infrastructure.Semantic.Providers.OpenAi;
 
-namespace Vectra.Infrastructure.UnitTests.Semantic;
+namespace Synentra.Infrastructure.UnitTests.Semantic;
 
 /// <summary>
 /// Tests the cacheable early-return paths for all cloud-backed semantic providers

@@ -1,10 +1,10 @@
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System.Text.Json.Serialization;
-using Vectra.Application.Abstractions.Executions;
-using Vectra.BuildingBlocks.Configuration.HumanInTheLoop;
+using Synentra.Application.Abstractions.Executions;
+using Synentra.BuildingBlocks.Configuration.HumanInTheLoop;
 
-namespace Vectra.Infrastructure.HumanInTheLoop.Notifiers;
+namespace Synentra.Infrastructure.HumanInTheLoop.Notifiers;
 
 /// <summary>
 /// Sends HITL notifications to PagerDuty via Events API v2.
@@ -40,7 +40,7 @@ public class PagerDutyNotifier : NotifierBase<PagerDutyNotifier.PagerDutyEvent>
             Payload = new PagerDutyPayload
             {
                 Summary = $"HITL Review Required: {notification.Method} {notification.Url}",
-                Source = "Vectra",
+                Source = "Synentra",
                 Severity = _config.Severity,
                 Timestamp = notification.Timestamp,
                 Component = "HITL",

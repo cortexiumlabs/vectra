@@ -1,7 +1,7 @@
 using FluentAssertions;
-using Vectra.Infrastructure.Security;
+using Synentra.Infrastructure.Security;
 
-namespace Vectra.Infrastructure.UnitTests.Security;
+namespace Synentra.Infrastructure.UnitTests.Security;
 
 public class BcryptSecretHasherTests
 {

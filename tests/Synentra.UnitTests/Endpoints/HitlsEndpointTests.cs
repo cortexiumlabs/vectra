@@ -1,17 +1,17 @@
 using Microsoft.AspNetCore.Http;
 using NSubstitute;
-using Vectra.Application.Abstractions.Dispatchers;
-using VoidType = Vectra.Application.Abstractions.Dispatchers.Void;
-using Vectra.Application.Abstractions.Executions;
-using Vectra.Application.Features.Hitl.Approve;
-using Vectra.Application.Features.Hitl.Deny;
-using Vectra.Application.Features.Hitl.GetAllPending;
-using Vectra.Application.Features.Hitl.GetStatus;
-using Vectra.BuildingBlocks.Errors;
-using Vectra.BuildingBlocks.Results;
-using Vectra.Endpoints;
+using Synentra.Application.Abstractions.Dispatchers;
+using VoidType = Synentra.Application.Abstractions.Dispatchers.Void;
+using Synentra.Application.Abstractions.Executions;
+using Synentra.Application.Features.Hitl.Approve;
+using Synentra.Application.Features.Hitl.Deny;
+using Synentra.Application.Features.Hitl.GetAllPending;
+using Synentra.Application.Features.Hitl.GetStatus;
+using Synentra.BuildingBlocks.Errors;
+using Synentra.BuildingBlocks.Results;
+using Synentra.Endpoints;
 
-namespace Vectra.UnitTests.Endpoints;
+namespace Synentra.UnitTests.Endpoints;
 
 public class HitlsEndpointTests
 {
@@ -143,7 +143,7 @@ public class HitlsEndpointTests
     {
         _dispatcher.Dispatch(Arg.Any<ApproveRequest>(), Arg.Any<CancellationToken>())
             .Returns(Result<ApproveResult>.FailureAsync(
-                Error.Failure(VectraErrors.SystemFailure, "upstream down")));
+                Error.Failure(SynentraErrors.SystemFailure, "upstream down")));
 
         var body = new Hitls.ReviewDecisionRequest(null);
         var context = new DefaultHttpContext();

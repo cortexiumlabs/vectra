@@ -1,10 +1,10 @@
-﻿using Vectra.Application.Abstractions.Dispatchers;
-using Vectra.Application.Abstractions.Persistence;
-using Vectra.Application.Abstractions.Security;
-using Vectra.BuildingBlocks.Results;
-using Vectra.Domain.Agents;
+﻿using Synentra.Application.Abstractions.Dispatchers;
+using Synentra.Application.Abstractions.Persistence;
+using Synentra.Application.Abstractions.Security;
+using Synentra.BuildingBlocks.Results;
+using Synentra.Domain.Agents;
 
-namespace Vectra.Application.Features.Agents.RegisterAgent;
+namespace Synentra.Application.Features.Agents.RegisterAgent;
 
 internal class CreateAgentHandler : IActionHandler<CreateAgentRequest, Result<CreateAgentResult>>
 {

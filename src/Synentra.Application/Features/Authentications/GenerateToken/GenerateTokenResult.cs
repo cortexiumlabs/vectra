@@ -1,4 +1,4 @@
-﻿namespace Vectra.Application.Features.Authentications.GenerateToken;
+﻿namespace Synentra.Application.Features.Authentications.GenerateToken;
 
 public class GenerateTokenResult
 {

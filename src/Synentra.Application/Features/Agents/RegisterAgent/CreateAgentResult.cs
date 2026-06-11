@@ -1,4 +1,4 @@
-﻿namespace Vectra.Application.Features.Agents.RegisterAgent;
+﻿namespace Synentra.Application.Features.Agents.RegisterAgent;
 
 public class CreateAgentResult
 {

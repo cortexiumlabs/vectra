@@ -1,9 +1,9 @@
 using FluentAssertions;
-using Vectra.BuildingBlocks.Configuration.Security;
-using Vectra.BuildingBlocks.Configuration.Security.AgentAuth;
+using Synentra.BuildingBlocks.Configuration.Security;
+using Synentra.BuildingBlocks.Configuration.Security.AgentAuth;
 using Xunit;
 
-namespace Vectra.BuildingBlocks.UnitTests.Configuration.Security;
+namespace Synentra.BuildingBlocks.UnitTests.Configuration.Security;
 
 public class SecurityConfigurationTests
 {

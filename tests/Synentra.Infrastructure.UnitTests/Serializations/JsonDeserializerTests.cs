@@ -1,8 +1,8 @@
 using FluentAssertions;
-using Vectra.Infrastructure.Serializations.Json;
-using Vectra.Infrastructure.Exceptions;
+using Synentra.Infrastructure.Serializations.Json;
+using Synentra.Infrastructure.Exceptions;
 
-namespace Vectra.Infrastructure.UnitTests.Serializations;
+namespace Synentra.Infrastructure.UnitTests.Serializations;
 
 public class JsonDeserializerTests
 {

@@ -1,4 +1,4 @@
-﻿namespace Vectra.Endpoints;
+﻿namespace Synentra.Endpoints;
 
 public abstract class EndpointGroupBase
 {

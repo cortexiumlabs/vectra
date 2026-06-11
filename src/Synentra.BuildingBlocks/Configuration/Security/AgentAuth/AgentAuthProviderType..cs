@@ -1,4 +1,4 @@
-﻿namespace Vectra.BuildingBlocks.Configuration.Security.AgentAuth;
+﻿namespace Synentra.BuildingBlocks.Configuration.Security.AgentAuth;
 
 public enum AgentAuthProviderType
 {

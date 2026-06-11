@@ -2,12 +2,12 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using OllamaSharp;
 using System.Text;
-using Vectra.Application.Abstractions.Caches;
-using Vectra.Application.Abstractions.Executions;
-using Vectra.BuildingBlocks.Configuration.Semantic;
-using Vectra.Infrastructure.Caches;
+using Synentra.Application.Abstractions.Caches;
+using Synentra.Application.Abstractions.Executions;
+using Synentra.BuildingBlocks.Configuration.Semantic;
+using Synentra.Infrastructure.Caches;
 
-namespace Vectra.Infrastructure.Semantic.Providers.Ollama;
+namespace Synentra.Infrastructure.Semantic.Providers.Ollama;
 
 public class OllamaProvider : SemanticProviderBase, ISemanticProvider
 {

@@ -1,4 +1,4 @@
-﻿namespace Vectra.Application.Features.Policies.PoliciesList;
+﻿namespace Synentra.Application.Features.Policies.PoliciesList;
 
 public class PoliciesListResult
 {

@@ -1,6 +1,6 @@
 ﻿using Serilog;
 
-namespace Vectra.Infrastructure.Logging;
+namespace Synentra.Infrastructure.Logging;
 
 public interface ILoggerFactory
 {

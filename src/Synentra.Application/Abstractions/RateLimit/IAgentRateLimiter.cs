@@ -1,4 +1,4 @@
-namespace Vectra.Application.Abstractions.RateLimit;
+namespace Synentra.Application.Abstractions.RateLimit;
 
 public interface IAgentRateLimiter
 {

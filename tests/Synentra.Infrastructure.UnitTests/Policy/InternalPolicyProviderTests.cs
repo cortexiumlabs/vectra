@@ -1,13 +1,13 @@
 using FluentAssertions;
 using NSubstitute;
-using Vectra.Application.Abstractions.Caches;
-using Vectra.Application.Abstractions.Executions;
-using Vectra.Domain.Policies;
-using Vectra.Infrastructure.Caches;
-using Vectra.Infrastructure.Policy.Providers;
+using Synentra.Application.Abstractions.Caches;
+using Synentra.Application.Abstractions.Executions;
+using Synentra.Domain.Policies;
+using Synentra.Infrastructure.Caches;
+using Synentra.Infrastructure.Policy.Providers;
 using Microsoft.Extensions.Logging;
 
-namespace Vectra.Infrastructure.UnitTests.Policy;
+namespace Synentra.Infrastructure.UnitTests.Policy;
 
 public class InternalPolicyProviderTests
 {

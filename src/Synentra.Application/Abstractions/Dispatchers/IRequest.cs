@@ -1,3 +1,3 @@
-﻿namespace Vectra.Application.Abstractions.Dispatchers;
+﻿namespace Synentra.Application.Abstractions.Dispatchers;
 
 public interface IRequest<TResult> : IAction<TResult> { }

@@ -1,4 +1,4 @@
-﻿namespace Vectra.Application.Abstractions.Versioning;
+﻿namespace Synentra.Application.Abstractions.Versioning;
 
 public interface IVersion
 {

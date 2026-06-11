@@ -1,8 +1,8 @@
 using FluentAssertions;
-using Vectra.Application.Models;
-using Vectra.Infrastructure.Risk.Calculators;
+using Synentra.Application.Models;
+using Synentra.Infrastructure.Risk.Calculators;
 
-namespace Vectra.Infrastructure.UnitTests.Risk.Calculators;
+namespace Synentra.Infrastructure.UnitTests.Risk.Calculators;
 
 public class MethodRiskCalculatorTests
 {

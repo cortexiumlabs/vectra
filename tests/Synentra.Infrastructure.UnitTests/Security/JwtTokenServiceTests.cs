@@ -1,18 +1,18 @@
 using FluentAssertions;
 using Microsoft.Extensions.Options;
-using Vectra.BuildingBlocks.Configuration.Security;
-using Vectra.BuildingBlocks.Configuration.Security.AgentAuth;
-using Vectra.Domain.Agents;
-using Vectra.Infrastructure.Security;
+using Synentra.BuildingBlocks.Configuration.Security;
+using Synentra.BuildingBlocks.Configuration.Security.AgentAuth;
+using Synentra.Domain.Agents;
+using Synentra.Infrastructure.Security;
 
-namespace Vectra.Infrastructure.UnitTests.Security;
+namespace Synentra.Infrastructure.UnitTests.Security;
 
 public class JwtTokenServiceTests
 {
     private static JwtTokenService CreateSut(
         string secret = "super-secret-key-for-testing-1234567890",
-        string issuer = "vectra-issuer",
-        string audience = "vectra-audience",
+        string issuer = "synentra-issuer",
+        string audience = "synentra-audience",
         TimeSpan? expiration = null)
     {
         var config = new SecurityConfiguration

@@ -1,4 +1,4 @@
-namespace Vectra.Application.Abstractions.CircuitBreaker;
+namespace Synentra.Application.Abstractions.CircuitBreaker;
 
 public interface ICircuitBreaker
 {

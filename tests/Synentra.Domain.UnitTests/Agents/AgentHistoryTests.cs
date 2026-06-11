@@ -1,7 +1,7 @@
 using FluentAssertions;
-using Vectra.Domain.Agents;
+using Synentra.Domain.Agents;
 
-namespace Vectra.Domain.UnitTests.Agents;
+namespace Synentra.Domain.UnitTests.Agents;
 
 public class AgentHistoryTests
 {

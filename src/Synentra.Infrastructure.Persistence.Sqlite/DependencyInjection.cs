@@ -1,14 +1,14 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
-using Vectra.Application.Abstractions.Persistence;
-using Vectra.BuildingBlocks.Configuration.System;
-using Vectra.Infrastructure.Persistence.Common;
-using Vectra.Infrastructure.Persistence.Sqlite.Contexts;
-using Vectra.Infrastructure.Persistence.Sqlite.Repositories;
-using Vectra.Infrastructure.Persistence.Sqlite.Services;
+using Synentra.Application.Abstractions.Persistence;
+using Synentra.BuildingBlocks.Configuration.System;
+using Synentra.Infrastructure.Persistence.Common;
+using Synentra.Infrastructure.Persistence.Sqlite.Contexts;
+using Synentra.Infrastructure.Persistence.Sqlite.Repositories;
+using Synentra.Infrastructure.Persistence.Sqlite.Services;
 
-namespace Vectra.Infrastructure.Persistence.Sqlite;
+namespace Synentra.Infrastructure.Persistence.Sqlite;
 
 public static class DependencyInjection
 {

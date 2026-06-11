@@ -1,4 +1,4 @@
-﻿namespace Vectra.BuildingBlocks.Configuration.System.Server;
+﻿namespace Synentra.BuildingBlocks.Configuration.System.Server;
 
 public class HttpsServerCertificateConfiguration
 {

@@ -1,11 +1,11 @@
 using FluentAssertions;
 using NSubstitute;
-using Vectra.Application.Models;
-using Vectra.Domain.Agents;
-using Vectra.Infrastructure.Risk.Calculators;
-using Vectra.Infrastructure.Semantic;
+using Synentra.Application.Models;
+using Synentra.Domain.Agents;
+using Synentra.Infrastructure.Risk.Calculators;
+using Synentra.Infrastructure.Semantic;
 
-namespace Vectra.Infrastructure.UnitTests.Risk.Calculators;
+namespace Synentra.Infrastructure.UnitTests.Risk.Calculators;
 
 public class AnomalyDetectionCalculatorTests
 {

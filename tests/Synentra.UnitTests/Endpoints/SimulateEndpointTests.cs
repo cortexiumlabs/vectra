@@ -1,11 +1,11 @@
 using Microsoft.AspNetCore.Http;
-using Vectra.Application.Abstractions.Dispatchers;
-using Vectra.Application.Features.Simulations.SimulateDecision;
-using Vectra.BuildingBlocks.Errors;
-using Vectra.BuildingBlocks.Results;
-using Vectra.Endpoints;
+using Synentra.Application.Abstractions.Dispatchers;
+using Synentra.Application.Features.Simulations.SimulateDecision;
+using Synentra.BuildingBlocks.Errors;
+using Synentra.BuildingBlocks.Results;
+using Synentra.Endpoints;
 
-namespace Vectra.UnitTests.Endpoints;
+namespace Synentra.UnitTests.Endpoints;
 
 public class SimulateEndpointTests
 {
@@ -63,7 +63,7 @@ public class SimulateEndpointTests
     {
         _dispatcher.Dispatch(Arg.Any<SimulateDecisionRequest>(), Arg.Any<CancellationToken>())
             .Returns(Result<SimulateDecisionResult>.SuccessAsync(
-                new SimulateDecisionResult(Vectra.Domain.Policies.DecisionType.Allow, null, 0.2, "default")));
+                new SimulateDecisionResult(Synentra.Domain.Policies.DecisionType.Allow, null, 0.2, "default")));
 
         var context = new DefaultHttpContext();
         context.Items["AgentId"] = Guid.NewGuid();

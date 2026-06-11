@@ -2,13 +2,13 @@ using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using NSubstitute;
-using Vectra.Application.Abstractions.Executions;
-using Vectra.Application.Abstractions.Serializations;
-using Vectra.BuildingBlocks.Configuration.Policy;
-using Vectra.Domain.Policies;
-using Vectra.Infrastructure.Policy;
+using Synentra.Application.Abstractions.Executions;
+using Synentra.Application.Abstractions.Serializations;
+using Synentra.BuildingBlocks.Configuration.Policy;
+using Synentra.Domain.Policies;
+using Synentra.Infrastructure.Policy;
 
-namespace Vectra.Infrastructure.UnitTests.Policy;
+namespace Synentra.Infrastructure.UnitTests.Policy;
 
 public class FileSystemPolicyLoaderTests
 {

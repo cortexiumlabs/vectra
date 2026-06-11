@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Vectra.UnitTests;
+namespace Synentra.UnitTests;
 
 internal static class HttpTestHelpers
 {

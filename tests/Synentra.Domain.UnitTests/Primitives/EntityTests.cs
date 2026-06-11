@@ -1,9 +1,9 @@
 using FluentAssertions;
-using Vectra.Domain.AuditTrails;
-using Vectra.Domain.Agents;
-using Vectra.Domain.Primitives;
+using Synentra.Domain.AuditTrails;
+using Synentra.Domain.Agents;
+using Synentra.Domain.Primitives;
 
-namespace Vectra.Domain.UnitTests.Primitives;
+namespace Synentra.Domain.UnitTests.Primitives;
 
 // Concrete Entity<Guid> subclasses used only in these tests
 file sealed class EntityA : Entity<Guid>

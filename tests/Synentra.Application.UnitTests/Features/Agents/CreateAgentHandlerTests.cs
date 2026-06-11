@@ -1,11 +1,11 @@
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
-using Vectra.Application.Abstractions.Persistence;
-using Vectra.Application.Abstractions.Security;
-using Vectra.Application.Features.Agents.RegisterAgent;
+using Synentra.Application.Abstractions.Persistence;
+using Synentra.Application.Abstractions.Security;
+using Synentra.Application.Features.Agents.RegisterAgent;
 
-namespace Vectra.Application.UnitTests.Features.Agents;
+namespace Synentra.Application.UnitTests.Features.Agents;
 
 public class CreateAgentHandlerTests
 {
@@ -37,7 +37,7 @@ public class CreateAgentHandlerTests
         result.IsSuccess.Should().BeTrue();
         result.Value.Should().NotBeNull();
         result.Value!.AgentId.Should().NotBeEmpty();
-        await _agentRepository.Received(1).AddAsync(Arg.Any<Vectra.Domain.Agents.Agent>(), CancellationToken.None);
+        await _agentRepository.Received(1).AddAsync(Arg.Any<Synentra.Domain.Agents.Agent>(), CancellationToken.None);
     }
 
     [Fact]

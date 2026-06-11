@@ -2,10 +2,10 @@ using System.Net.Http.Json;
 using System.Text.Json;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Vectra.Application.Abstractions.Executions;
-using Vectra.BuildingBlocks.Configuration.Policy;
+using Synentra.Application.Abstractions.Executions;
+using Synentra.BuildingBlocks.Configuration.Policy;
 
-namespace Vectra.Infrastructure.Policy.Providers;
+namespace Synentra.Infrastructure.Policy.Providers;
 
 public class OpaPolicyProvider : IPolicyProvider
 {

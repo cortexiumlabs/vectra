@@ -1,10 +1,10 @@
 using Microsoft.Extensions.Logging;
-using Vectra.Application.Abstractions.Caches;
-using Vectra.Application.Abstractions.Executions;
-using Vectra.Domain.Policies;
-using Vectra.Infrastructure.Caches;
+using Synentra.Application.Abstractions.Caches;
+using Synentra.Application.Abstractions.Executions;
+using Synentra.Domain.Policies;
+using Synentra.Infrastructure.Caches;
 
-namespace Vectra.Infrastructure.Policy;
+namespace Synentra.Infrastructure.Policy;
 
 internal sealed class PolicyCacheService : IPolicyCacheService
 {

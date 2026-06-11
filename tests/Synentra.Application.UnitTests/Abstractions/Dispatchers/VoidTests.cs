@@ -1,7 +1,7 @@
 using FluentAssertions;
-using VoidType = Vectra.Application.Abstractions.Dispatchers.Void;
+using VoidType = Synentra.Application.Abstractions.Dispatchers.Void;
 
-namespace Vectra.Application.UnitTests.Abstractions.Dispatchers;
+namespace Synentra.Application.UnitTests.Abstractions.Dispatchers;
 
 public class VoidTests
 {

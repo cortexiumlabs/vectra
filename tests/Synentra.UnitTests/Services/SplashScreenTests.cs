@@ -1,6 +1,6 @@
-using Vectra.Services;
+using Synentra.Services;
 
-namespace Vectra.UnitTests.Services;
+namespace Synentra.UnitTests.Services;
 
 public class SplashScreenTests
 {
@@ -68,6 +68,6 @@ public class SplashScreenTests
         }
 
         var output = writer.ToString();
-        output.Should().ContainAny("Cortexium", "cortexiumlabs", "vectra", "Vectra");
+        output.Should().ContainAny("synentra", "Synentra");
     }
 }

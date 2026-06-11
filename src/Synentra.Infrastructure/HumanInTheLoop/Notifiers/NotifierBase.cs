@@ -1,8 +1,8 @@
 using Microsoft.Extensions.Logging;
 using System.Net.Http.Json;
-using Vectra.Application.Abstractions.Executions;
+using Synentra.Application.Abstractions.Executions;
 
-namespace Vectra.Infrastructure.HumanInTheLoop.Notifiers;
+namespace Synentra.Infrastructure.HumanInTheLoop.Notifiers;
 
 /// <summary>
 /// Base class for HITL notifiers that provides common functionality for sending notifications.

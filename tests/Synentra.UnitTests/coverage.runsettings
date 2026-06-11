@@ -4,8 +4,8 @@
     <DataCollectors>
       <DataCollector friendlyName="XPlat Code Coverage">
         <Configuration>
-          <Include>[vectra]*</Include>
-          <Exclude>[vectra]Microsoft.AspNetCore.OpenApi.Generated.*,[vectra]System.Runtime.CompilerServices.*,[vectra]Program*</Exclude>
+          <Include>[synentra]*</Include>
+          <Exclude>[synentra]Microsoft.AspNetCore.OpenApi.Generated.*,[synentra]System.Runtime.CompilerServices.*,[synentra]Program*</Exclude>
           <ExcludeByAttribute>GeneratedCodeAttribute,CompilerGeneratedAttribute</ExcludeByAttribute>
           <SkipAutoProps>true</SkipAutoProps>
         </Configuration>

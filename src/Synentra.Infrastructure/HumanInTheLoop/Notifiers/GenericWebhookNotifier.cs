@@ -1,9 +1,9 @@
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Vectra.Application.Abstractions.Executions;
-using Vectra.BuildingBlocks.Configuration.HumanInTheLoop;
+using Synentra.Application.Abstractions.Executions;
+using Synentra.BuildingBlocks.Configuration.HumanInTheLoop;
 
-namespace Vectra.Infrastructure.HumanInTheLoop.Notifiers;
+namespace Synentra.Infrastructure.HumanInTheLoop.Notifiers;
 
 /// <summary>
 /// Sends HITL notifications to a generic HTTP webhook endpoint.

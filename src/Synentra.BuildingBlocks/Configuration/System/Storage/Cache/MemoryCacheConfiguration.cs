@@ -1,4 +1,4 @@
-﻿namespace Vectra.BuildingBlocks.Configuration.System.Storage.Cache;
+﻿namespace Synentra.BuildingBlocks.Configuration.System.Storage.Cache;
 
 public class MemoryCacheConfiguration
 {

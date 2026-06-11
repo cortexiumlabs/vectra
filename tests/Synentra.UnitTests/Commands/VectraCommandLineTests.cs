@@ -1,16 +1,16 @@
-using Vectra.Commands;
-using Vectra.Services;
+using Synentra.Commands;
+using Synentra.Services;
 
-namespace Vectra.UnitTests.Commands;
+namespace Synentra.UnitTests.Commands;
 
-public class VectraCommandLineTests
+public class SynentraCommandLineTests
 {
     [Fact]
     public async Task Version_Should_Print_And_Not_Run()
     {
-        var runner = Substitute.For<IVectraApplicationRunner>();
+        var runner = Substitute.For<ISynentraApplicationRunner>();
 
-        VectraCommandLine.RunnerFactory = () => runner;
+        SynentraCommandLine.RunnerFactory = () => runner;
 
         var output = new StringWriter();
         var original = Console.Out;
@@ -18,11 +18,11 @@ public class VectraCommandLineTests
 
         try
         {
-            var cmd = VectraCommandLine.Create([]);
+            var cmd = SynentraCommandLine.Create([]);
 
             await cmd.Parse("--version").InvokeAsync();
 
-            Assert.Contains("Vectra", output.ToString());
+            Assert.Contains("Synentra", output.ToString());
 
             await runner.DidNotReceive()
                 .RunAsync(Arg.Any<string[]>(), Arg.Any<CancellationToken>());
@@ -36,13 +36,13 @@ public class VectraCommandLineTests
     [Fact]
     public async Task Default_Should_Run_Runner()
     {
-        var runner = Substitute.For<IVectraApplicationRunner>();
+        var runner = Substitute.For<ISynentraApplicationRunner>();
 
-        VectraCommandLine.RunnerFactory = () => runner;
+        SynentraCommandLine.RunnerFactory = () => runner;
 
         var args = new[] { "run", "app" };
 
-        var cmd = VectraCommandLine.Create(args);
+        var cmd = SynentraCommandLine.Create(args);
 
         await cmd.Parse("").InvokeAsync();
 
@@ -53,11 +53,11 @@ public class VectraCommandLineTests
     [Fact]
     public async Task ShortVersion_Should_Not_Run()
     {
-        var runner = Substitute.For<IVectraApplicationRunner>();
+        var runner = Substitute.For<ISynentraApplicationRunner>();
 
-        VectraCommandLine.RunnerFactory = () => runner;
+        SynentraCommandLine.RunnerFactory = () => runner;
 
-        var cmd = VectraCommandLine.Create([]);
+        var cmd = SynentraCommandLine.Create([]);
 
         await cmd.Parse("-v").InvokeAsync();
 

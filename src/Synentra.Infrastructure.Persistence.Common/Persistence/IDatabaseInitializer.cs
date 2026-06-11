@@ -1,4 +1,4 @@
-﻿namespace Vectra.Infrastructure.Persistence.Common;
+﻿namespace Synentra.Infrastructure.Persistence.Common;
 
 public interface IDatabaseInitializer
 {

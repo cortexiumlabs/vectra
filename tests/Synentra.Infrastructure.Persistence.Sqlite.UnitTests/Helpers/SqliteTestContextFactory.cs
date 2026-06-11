@@ -1,8 +1,8 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging.Abstractions;
-using Vectra.Infrastructure.Persistence.Sqlite.Contexts;
+using Synentra.Infrastructure.Persistence.Sqlite.Contexts;
 
-namespace Vectra.Infrastructure.Persistence.Sqlite.UnitTests.Helpers;
+namespace Synentra.Infrastructure.Persistence.Sqlite.UnitTests.Helpers;
 
 internal static class SqliteTestContextFactory
 {

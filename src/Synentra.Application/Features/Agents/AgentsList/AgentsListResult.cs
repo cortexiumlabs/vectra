@@ -1,6 +1,6 @@
-﻿using Vectra.Domain.Agents;
+﻿using Synentra.Domain.Agents;
 
-namespace Vectra.Application.Features.Agents.AgentsList;
+namespace Synentra.Application.Features.Agents.AgentsList;
 
 public class AgentsListResult
 {

@@ -1,10 +1,10 @@
 using FluentAssertions;
 using NSubstitute;
-using Vectra.Application.Models;
-using Vectra.Domain.Agents;
-using Vectra.Infrastructure.Risk;
+using Synentra.Application.Models;
+using Synentra.Domain.Agents;
+using Synentra.Infrastructure.Risk;
 
-namespace Vectra.Infrastructure.UnitTests.Risk;
+namespace Synentra.Infrastructure.UnitTests.Risk;
 
 public class RiskScoreAggregatorTests
 {

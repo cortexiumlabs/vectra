@@ -1,6 +1,6 @@
-﻿using Vectra.Application.Abstractions.Caches;
+﻿using Synentra.Application.Abstractions.Caches;
 
-namespace Vectra.Infrastructure.Caches;
+namespace Synentra.Infrastructure.Caches;
 
 public interface ICacheService
 {

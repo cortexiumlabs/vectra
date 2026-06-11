@@ -1,13 +1,13 @@
 ﻿using FluentValidation;
 using Microsoft.Extensions.DependencyInjection;
 using System.Reflection;
-using Vectra.Application.Abstractions.Dispatchers;
+using Synentra.Application.Abstractions.Dispatchers;
 
-namespace Vectra.Application;
+namespace Synentra.Application;
 
 public static class DependencyInjection
 {
-    public static IServiceCollection AddVectraApplication(this IServiceCollection services)
+    public static IServiceCollection AddSynentraApplication(this IServiceCollection services)
     {
         var assembly = Assembly.GetExecutingAssembly();
 

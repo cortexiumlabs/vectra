@@ -1,7 +1,7 @@
-﻿namespace Vectra.BuildingBlocks.Errors;
+﻿namespace Synentra.BuildingBlocks.Errors;
 
 // Hierarchical Error Codes ([CC][MM][NNN] format)
-public static class VectraErrors
+public static class SynentraErrors
 {
     // ─────────────────────────────────────────────────────────────
     // 00 SYSTEM ERRORS (CC=00)

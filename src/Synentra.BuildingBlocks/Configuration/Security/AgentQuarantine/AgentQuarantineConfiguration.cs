@@ -1,4 +1,4 @@
-﻿namespace Vectra.BuildingBlocks.Configuration.Security.AgentQuarantine;
+﻿namespace Synentra.BuildingBlocks.Configuration.Security.AgentQuarantine;
 
 public class AgentQuarantineConfiguration
 {

@@ -1,16 +1,16 @@
 using FluentAssertions;
 using Microsoft.Extensions.Options;
 using NSubstitute;
-using Vectra.BuildingBlocks.Configuration.System;
-using Vectra.BuildingBlocks.Configuration.System.CircuitBreaker;
-using Vectra.Infrastructure.CircuitBreaker;
+using Synentra.BuildingBlocks.Configuration.System;
+using Synentra.BuildingBlocks.Configuration.System.CircuitBreaker;
+using Synentra.Infrastructure.CircuitBreaker;
 
-namespace Vectra.Infrastructure.UnitTests.CircuitBreaker;
+namespace Synentra.Infrastructure.UnitTests.CircuitBreaker;
 
 public class CircuitBreakerTests
 {
     private readonly IOptions<SystemConfiguration> _options = Substitute.For<IOptions<SystemConfiguration>>();
-    private readonly Vectra.Infrastructure.CircuitBreaker.CircuitBreaker _circuitBreaker;
+    private readonly Synentra.Infrastructure.CircuitBreaker.CircuitBreaker _circuitBreaker;
 
     public CircuitBreakerTests()
     {
@@ -24,7 +24,7 @@ public class CircuitBreakerTests
                 SamplingWindowSeconds = 30
             }
         });
-        _circuitBreaker = new Vectra.Infrastructure.CircuitBreaker.CircuitBreaker(_options);
+        _circuitBreaker = new Synentra.Infrastructure.CircuitBreaker.CircuitBreaker(_options);
     }
 
     [Fact]
@@ -32,7 +32,7 @@ public class CircuitBreakerTests
     {
         // Arrange
         _options.Value.Returns(new SystemConfiguration { CircuitBreaker = new CircuitBreakerConfiguration { Enabled = false } });
-        var cb = new Vectra.Infrastructure.CircuitBreaker.CircuitBreaker(_options);
+        var cb = new Synentra.Infrastructure.CircuitBreaker.CircuitBreaker(_options);
 
         // Act
         var isAllowed = cb.IsAllowed("test-host");

@@ -1,6 +1,6 @@
-﻿using Vectra.BuildingBlocks.Errors;
+﻿using Synentra.BuildingBlocks.Errors;
 
-namespace Vectra.BuildingBlocks.Results;
+namespace Synentra.BuildingBlocks.Results;
 
 public class Result
 {

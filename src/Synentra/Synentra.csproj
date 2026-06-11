@@ -4,15 +4,15 @@
 		<TargetFramework>net10.0</TargetFramework>
 		<Nullable>enable</Nullable>
 		<ImplicitUsings>enable</ImplicitUsings>
-		<AssemblyName>vectra</AssemblyName>
+		<AssemblyName>synentra</AssemblyName>
 		<IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
-		<Title>Vectra</Title>
+		<Title>Synentra</Title>
 		<Description>Intent-Aware Governance Gateway</Description>
 		<Company>Cortexium Labs</Company>
 		<Copyright>© Cortexium Labs. All rights reserved.</Copyright>
 		<Authors>Cortexium Labs</Authors>
-		<RepositoryUrl>https://github.com/cortexiumlabs/vectra</RepositoryUrl>
-		<PackageProjectUrl>https://cortexiumlabs.com/products/vectra</PackageProjectUrl>
+		<RepositoryUrl>https://github.com/synentra/synentra</RepositoryUrl>
+		<PackageProjectUrl>https://synentra.io</PackageProjectUrl>
 		<RepositoryType>git</RepositoryType>
 	</PropertyGroup>
 

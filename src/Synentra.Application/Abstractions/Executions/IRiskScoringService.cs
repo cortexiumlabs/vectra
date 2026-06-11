@@ -1,6 +1,6 @@
-﻿using Vectra.Application.Models;
+﻿using Synentra.Application.Models;
 
-namespace Vectra.Application.Abstractions.Executions;
+namespace Synentra.Application.Abstractions.Executions;
 
 public interface IRiskScoringService
 {

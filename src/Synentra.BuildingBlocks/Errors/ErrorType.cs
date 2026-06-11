@@ -1,4 +1,4 @@
-﻿namespace Vectra.BuildingBlocks.Results;
+﻿namespace Synentra.BuildingBlocks.Results;
 
 public enum ErrorType
 {

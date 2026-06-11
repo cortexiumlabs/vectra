@@ -1,7 +1,7 @@
 using System.Security.Claims;
-using Vectra.Application.Abstractions.Security;
+using Synentra.Application.Abstractions.Security;
 
-namespace Vectra.Middleware;
+namespace Synentra.Middleware;
 
 public class AgentAuthMiddleware
 {

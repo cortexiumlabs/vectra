@@ -1,4 +1,4 @@
-namespace Vectra.Infrastructure.Semantic.Providers.InternalBert;
+namespace Synentra.Infrastructure.Semantic.Providers.InternalBert;
 
 internal sealed record ModelAssets(
     ReadOnlyMemory<byte> OnnxBytes,

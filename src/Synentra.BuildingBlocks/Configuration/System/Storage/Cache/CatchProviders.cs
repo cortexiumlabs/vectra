@@ -1,6 +1,6 @@
-﻿namespace Vectra.BuildingBlocks.Configuration.System.Storage.Cache;
+﻿namespace Synentra.BuildingBlocks.Configuration.System.Storage.Cache;
 
-public class CatchProviders
+public class CacheProviders
 {
     public RedisCacheConfiguration Redis { get; set; } = new();
     public MemoryCacheConfiguration Memory { get; set; } = new();

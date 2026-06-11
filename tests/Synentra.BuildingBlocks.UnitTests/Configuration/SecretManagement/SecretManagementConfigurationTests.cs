@@ -1,8 +1,8 @@
 using FluentAssertions;
-using Vectra.BuildingBlocks.Configuration.SecretManagement;
+using Synentra.BuildingBlocks.Configuration.SecretManagement;
 using Xunit;
 
-namespace Vectra.BuildingBlocks.UnitTests.Configuration.SecretManagement;
+namespace Synentra.BuildingBlocks.UnitTests.Configuration.SecretManagement;
 
 public class SecretManagementConfigurationTests
 {
@@ -59,14 +59,14 @@ public class SecretManagementConfigurationTests
         {
             VaultUri = "https://myvault.vault.azure.net/",
             Optional = true,
-            SecretPrefix = "vectra-",
+            SecretPrefix = "synentra-",
             ReloadOnChange = true,
             ReloadInterval = TimeSpan.FromMinutes(10)
         };
 
         config.VaultUri.Should().Be("https://myvault.vault.azure.net/");
         config.Optional.Should().BeTrue();
-        config.SecretPrefix.Should().Be("vectra-");
+        config.SecretPrefix.Should().Be("synentra-");
         config.ReloadOnChange.Should().BeTrue();
         config.ReloadInterval.Should().Be(TimeSpan.FromMinutes(10));
     }

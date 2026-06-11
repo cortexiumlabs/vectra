@@ -1,11 +1,11 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
-using Vectra.Application.Abstractions.Caches;
-using Vectra.BuildingBlocks.Configuration.System;
-using Vectra.BuildingBlocks.Configuration.System.Storage.Cache;
-using Vectra.Infrastructure.Caches.Providers;
+using Synentra.Application.Abstractions.Caches;
+using Synentra.BuildingBlocks.Configuration.System;
+using Synentra.BuildingBlocks.Configuration.System.Storage.Cache;
+using Synentra.Infrastructure.Caches.Providers;
 
-namespace Vectra.Infrastructure.Caches;
+namespace Synentra.Infrastructure.Caches;
 
 public sealed class CacheProviderFactory : ICacheProviderFactory
 {

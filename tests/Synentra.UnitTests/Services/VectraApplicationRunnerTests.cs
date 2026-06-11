@@ -1,11 +1,11 @@
 ﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Vectra.Services;
+using Synentra.Services;
 
-namespace Vectra.UnitTests.Services;
+namespace Synentra.UnitTests.Services;
 
-public class VectraApplicationRunnerTests
+public class SynentraApplicationRunnerTests
 {
     [Fact]
     public async Task Run_Should_Render_Splash_And_Start()
@@ -18,7 +18,7 @@ public class VectraApplicationRunnerTests
 
         factory.Create(Arg.Any<string[]>()).Returns(builder);
 
-        var runner = new VectraApplicationRunner(factory, splash, startup);
+        var runner = new SynentraApplicationRunner(factory, splash, startup);
 
         startup.When(x => x.ConfigurePipelineAsync(Arg.Any<WebApplication>()))
             .Do(_ => throw new OperationCanceledException());
@@ -43,11 +43,11 @@ public class VectraApplicationRunnerTests
         builder.Services.AddSingleton<ILogger<Program>>(_ =>
             Substitute.For<ILogger<Program>>());
 
-        VectraApplicationRunner.ExitAction = _ => { };
+        SynentraApplicationRunner.ExitAction = _ => { };
 
         var ex = new Exception("boom");
 
-        await VectraApplicationRunner.HandleStartupFailureAsync(builder, ex);
+        await SynentraApplicationRunner.HandleStartupFailureAsync(builder, ex);
     }
 
     [Fact]
@@ -65,9 +65,9 @@ public class VectraApplicationRunnerTests
 
         try
         {
-            VectraApplicationRunner.ExitAction = _ => { };
+            SynentraApplicationRunner.ExitAction = _ => { };
 
-            await VectraApplicationRunner.HandleStartupFailureAsync(
+            await SynentraApplicationRunner.HandleStartupFailureAsync(
                 builder,
                 new Exception("kaboom"));
 

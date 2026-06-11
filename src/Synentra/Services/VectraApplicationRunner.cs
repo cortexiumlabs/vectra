@@ -1,14 +1,14 @@
-﻿using Vectra.Extensions;
+﻿using Synentra.Extensions;
 
-namespace Vectra.Services;
+namespace Synentra.Services;
 
-internal sealed class VectraApplicationRunner : IVectraApplicationRunner
+internal sealed class SynentraApplicationRunner : ISynentraApplicationRunner
 {
     private readonly IWebApplicationFactory _factory;
     private readonly ISplashScreen _splashScreen;
     private readonly IStartupConfiguration _startupConfiguration;
 
-    public VectraApplicationRunner(
+    public SynentraApplicationRunner(
             IWebApplicationFactory factory,
             ISplashScreen splashScreen,
             IStartupConfiguration startupConfiguration)
@@ -28,7 +28,7 @@ internal sealed class VectraApplicationRunner : IVectraApplicationRunner
 
         try
         {
-            builder.AddVectraSecretManagement();
+            builder.AddSynentraSecretManagement();
 
             builder.Logging.AddFilter(
                 "Microsoft.AspNetCore.Hosting.Diagnostics",

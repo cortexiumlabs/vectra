@@ -1,13 +1,13 @@
 using FluentAssertions;
 using NSubstitute;
-using Vectra.Application.Abstractions.Executions;
-using Vectra.Domain.Agents;
-using Vectra.Infrastructure.Security;
+using Synentra.Application.Abstractions.Executions;
+using Synentra.Domain.Agents;
+using Synentra.Infrastructure.Security;
 using Microsoft.Extensions.Options;
-using Vectra.BuildingBlocks.Configuration.Security;
-using Vectra.BuildingBlocks.Configuration.Security.AgentAuth;
+using Synentra.BuildingBlocks.Configuration.Security;
+using Synentra.BuildingBlocks.Configuration.Security.AgentAuth;
 
-namespace Vectra.Infrastructure.UnitTests.Security;
+namespace Synentra.Infrastructure.UnitTests.Security;
 
 public class JwtAgentAuthenticatorTests
 {
@@ -25,8 +25,8 @@ public class JwtAgentAuthenticatorTests
                 SelfSigned = new SelfSignedProvider
                 {
                     Secret = "super-secret-key-for-tests-1234567890",
-                    Issuer = "vectra-issuer",
-                    Audience = "vectra-audience",
+                    Issuer = "synentra-issuer",
+                    Audience = "synentra-audience",
                     Expiration = TimeSpan.FromMinutes(15)
                 },
                 Jwt = new JwtProvider

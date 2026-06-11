@@ -1,7 +1,7 @@
 using FluentAssertions;
-using Vectra.Infrastructure.Decision;
+using Synentra.Infrastructure.Decision;
 
-namespace Vectra.Infrastructure.UnitTests.Decision;
+namespace Synentra.Infrastructure.UnitTests.Decision;
 
 public class JsonToIntentTextTests
 {

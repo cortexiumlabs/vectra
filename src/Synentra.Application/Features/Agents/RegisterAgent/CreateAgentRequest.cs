@@ -1,7 +1,7 @@
-﻿using Vectra.Application.Abstractions.Dispatchers;
-using Vectra.BuildingBlocks.Results;
+﻿using Synentra.Application.Abstractions.Dispatchers;
+using Synentra.BuildingBlocks.Results;
 
-namespace Vectra.Application.Features.Agents.RegisterAgent;
+namespace Synentra.Application.Features.Agents.RegisterAgent;
 
 public class CreateAgentRequest : IRequest<Result<CreateAgentResult>>
 {

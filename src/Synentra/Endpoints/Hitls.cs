@@ -1,10 +1,10 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Vectra.Application.Abstractions.Dispatchers;
-using Vectra.Application.Abstractions.Executions;
-using Vectra.Application.Extensions;
-using Vectra.Extensions;
+using Synentra.Application.Abstractions.Dispatchers;
+using Synentra.Application.Abstractions.Executions;
+using Synentra.Application.Extensions;
+using Synentra.Extensions;
 
-namespace Vectra.Endpoints;
+namespace Synentra.Endpoints;
 
 public class Hitls : EndpointGroupBase
 {

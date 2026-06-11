@@ -1,8 +1,8 @@
-﻿using Vectra.Application.Abstractions.Persistence;
-using Vectra.Application.Models;
-using Vectra.Domain.Agents;
+﻿using Synentra.Application.Abstractions.Persistence;
+using Synentra.Application.Models;
+using Synentra.Domain.Agents;
 
-namespace Vectra.Infrastructure.Risk.Calculators;
+namespace Synentra.Infrastructure.Risk.Calculators;
 
 public class AgentHistoryCalculator : IRiskCalculator
 {

@@ -1,4 +1,4 @@
-namespace Vectra.BuildingBlocks.Configuration.System.RateLimit;
+namespace Synentra.BuildingBlocks.Configuration.System.RateLimit;
 
 public class RateLimitConfiguration
 {

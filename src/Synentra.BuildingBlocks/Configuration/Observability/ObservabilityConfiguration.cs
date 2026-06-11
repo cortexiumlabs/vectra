@@ -1,7 +1,7 @@
-﻿using Vectra.BuildingBlocks.Configuration.Observability.Logging;
-using Vectra.BuildingBlocks.Configuration.Observability.OpenTelemetry;
+﻿using Synentra.BuildingBlocks.Configuration.Observability.Logging;
+using Synentra.BuildingBlocks.Configuration.Observability.OpenTelemetry;
 
-namespace Vectra.BuildingBlocks.Configuration.Observability;
+namespace Synentra.BuildingBlocks.Configuration.Observability;
 
 public class ObservabilityConfiguration
 {

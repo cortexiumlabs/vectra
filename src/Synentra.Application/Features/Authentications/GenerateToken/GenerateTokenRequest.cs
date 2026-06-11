@@ -1,7 +1,7 @@
-﻿using Vectra.Application.Abstractions.Dispatchers;
-using Vectra.BuildingBlocks.Results;
+﻿using Synentra.Application.Abstractions.Dispatchers;
+using Synentra.BuildingBlocks.Results;
 
-namespace Vectra.Application.Features.Authentications.GenerateToken;
+namespace Synentra.Application.Features.Authentications.GenerateToken;
 
 public class GenerateTokenRequest : IRequest<Result<GenerateTokenResult>>
 {

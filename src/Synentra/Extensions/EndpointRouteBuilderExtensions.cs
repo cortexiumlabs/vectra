@@ -1,4 +1,4 @@
-﻿namespace Vectra.Extensions;
+﻿namespace Synentra.Extensions;
 
 public static class EndpointRouteBuilderExtensions
 {

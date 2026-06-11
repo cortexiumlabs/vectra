@@ -1,8 +1,8 @@
 using Microsoft.AspNetCore.Http;
 using NSubstitute;
-using Vectra.Application.Abstractions.Versioning;
+using Synentra.Application.Abstractions.Versioning;
 
-namespace Vectra.UnitTests.Middleware;
+namespace Synentra.UnitTests.Middleware;
 
 public class VersionHeaderMiddlewareTests
 {
@@ -10,14 +10,14 @@ public class VersionHeaderMiddlewareTests
     public void Constructor_NullNext_ThrowsArgumentNullException()
     {
         var version = Substitute.For<IVersion>();
-        var act = () => new Vectra.Middleware.VersionHeaderMiddleware(null!, version);
+        var act = () => new Synentra.Middleware.VersionHeaderMiddleware(null!, version);
         act.Should().Throw<ArgumentNullException>().WithParameterName("next");
     }
 
     [Fact]
     public void Constructor_NullVersion_ThrowsArgumentNullException()
     {
-        var act = () => new Vectra.Middleware.VersionHeaderMiddleware(_ => Task.CompletedTask, null!);
+        var act = () => new Synentra.Middleware.VersionHeaderMiddleware(_ => Task.CompletedTask, null!);
         act.Should().Throw<ArgumentNullException>().WithParameterName("version");
     }
 
@@ -31,12 +31,12 @@ public class VersionHeaderMiddlewareTests
         var next = Substitute.For<RequestDelegate>();
         next(Arg.Any<HttpContext>()).Returns(Task.CompletedTask);
 
-        var middleware = new Vectra.Middleware.VersionHeaderMiddleware(next, version);
+        var middleware = new Synentra.Middleware.VersionHeaderMiddleware(next, version);
         var context = new DefaultHttpContext();
 
         await middleware.Invoke(context);
 
-        context.Response.Headers["Vectra-Version"].ToString().Should().Be(expectedVersion.ToString());
+        context.Response.Headers["Synentra-Version"].ToString().Should().Be(expectedVersion.ToString());
     }
 
     [Fact]
@@ -48,7 +48,7 @@ public class VersionHeaderMiddlewareTests
         var next = Substitute.For<RequestDelegate>();
         next(Arg.Any<HttpContext>()).Returns(Task.CompletedTask);
 
-        var middleware = new Vectra.Middleware.VersionHeaderMiddleware(next, version);
+        var middleware = new Synentra.Middleware.VersionHeaderMiddleware(next, version);
         var context = new DefaultHttpContext();
 
         await middleware.Invoke(context);
@@ -65,11 +65,11 @@ public class VersionHeaderMiddlewareTests
         var next = Substitute.For<RequestDelegate>();
         next(Arg.Any<HttpContext>()).Returns(Task.CompletedTask);
 
-        var middleware = new Vectra.Middleware.VersionHeaderMiddleware(next, version);
+        var middleware = new Synentra.Middleware.VersionHeaderMiddleware(next, version);
         var context = new DefaultHttpContext();
 
         await middleware.Invoke(context);
 
-        context.Response.Headers["Vectra-Version"].ToString().Should().Be("2.5.0.0");
+        context.Response.Headers["Synentra-Version"].ToString().Should().Be("2.5.0.0");
     }
 }

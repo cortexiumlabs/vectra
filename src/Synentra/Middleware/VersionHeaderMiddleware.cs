@@ -1,6 +1,6 @@
-using Vectra.Application.Abstractions.Versioning;
+using Synentra.Application.Abstractions.Versioning;
 
-namespace Vectra.Middleware;
+namespace Synentra.Middleware;
 
 public sealed class VersionHeaderMiddleware
 {
@@ -15,7 +15,7 @@ public sealed class VersionHeaderMiddleware
 
     public Task Invoke(HttpContext context)
     {
-        context.Response.Headers["Vectra-Version"] = _version.Version.ToString();
+        context.Response.Headers["Synentra-Version"] = _version.Version.ToString();
         return _next(context);
     }
 }

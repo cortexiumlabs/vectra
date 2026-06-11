@@ -1,10 +1,10 @@
-using Vectra.Application.Abstractions.Dispatchers;
-using Vectra.Application.Abstractions.Executions;
-using Vectra.Application.Errors;
-using Vectra.BuildingBlocks.Errors;
-using Vectra.BuildingBlocks.Results;
+using Synentra.Application.Abstractions.Dispatchers;
+using Synentra.Application.Abstractions.Executions;
+using Synentra.Application.Errors;
+using Synentra.BuildingBlocks.Errors;
+using Synentra.BuildingBlocks.Results;
 
-namespace Vectra.Application.Features.Hitl.Approve;
+namespace Synentra.Application.Features.Hitl.Approve;
 
 internal class ApproveHandler : IActionHandler<ApproveRequest, Result<ApproveResult>>
 {
@@ -29,7 +29,7 @@ internal class ApproveHandler : IActionHandler<ApproveRequest, Result<ApproveRes
         if (!replayResult.Success)
         {
             var errorCode = replayResult.StatusCode == 503
-                ? VectraErrors.SystemFailure
+                ? SynentraErrors.SystemFailure
                 : ApplicationErrorCodes.HitlRequestNotFound;
             return await Result<ApproveResult>.FailureAsync(
                 Error.Failure(errorCode, replayResult.ErrorReason ?? "Replay failed."));

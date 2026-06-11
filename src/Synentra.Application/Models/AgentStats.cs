@@ -1,4 +1,4 @@
-﻿namespace Vectra.Application.Models;
+﻿namespace Synentra.Application.Models;
 
 public record AgentStats
 {

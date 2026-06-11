@@ -1,9 +1,9 @@
 using FluentAssertions;
-using Vectra.BuildingBlocks.Errors;
-using Vectra.BuildingBlocks.Results;
+using Synentra.BuildingBlocks.Errors;
+using Synentra.BuildingBlocks.Results;
 using Xunit;
 
-namespace Vectra.BuildingBlocks.UnitTests.Errors;
+namespace Synentra.BuildingBlocks.UnitTests.Errors;
 
 public class ErrorTests
 {
@@ -12,10 +12,10 @@ public class ErrorTests
     {
         var validationErrors = new Dictionary<string, string[]> { { "Name", ["Name is required"] } };
 
-        var error = Error.Validation(VectraErrors.ValidationFailed, "Validation failed", validationErrors);
+        var error = Error.Validation(SynentraErrors.ValidationFailed, "Validation failed", validationErrors);
 
         error.Type.Should().Be(ErrorType.Validation);
-        error.ErrorCode.Should().Be(VectraErrors.ValidationFailed);
+        error.ErrorCode.Should().Be(SynentraErrors.ValidationFailed);
         error.Message.Should().Be("Validation failed");
         error.ValidationErrors.Should().BeEquivalentTo(validationErrors);
     }
@@ -23,10 +23,10 @@ public class ErrorTests
     [Fact]
     public void NotFound_ShouldCreateErrorWithNotFoundType()
     {
-        var error = Error.NotFound(VectraErrors.ResourceNotFound, "Resource not found");
+        var error = Error.NotFound(SynentraErrors.ResourceNotFound, "Resource not found");
 
         error.Type.Should().Be(ErrorType.NotFound);
-        error.ErrorCode.Should().Be(VectraErrors.ResourceNotFound);
+        error.ErrorCode.Should().Be(SynentraErrors.ResourceNotFound);
         error.Message.Should().Be("Resource not found");
         error.ValidationErrors.Should().BeNull();
     }
@@ -34,7 +34,7 @@ public class ErrorTests
     [Fact]
     public void Conflict_ShouldCreateErrorWithConflictType()
     {
-        var error = Error.Conflict(VectraErrors.DuplicateResource, "Duplicate resource");
+        var error = Error.Conflict(SynentraErrors.DuplicateResource, "Duplicate resource");
 
         error.Type.Should().Be(ErrorType.Conflict);
         error.Message.Should().Be("Duplicate resource");
@@ -43,7 +43,7 @@ public class ErrorTests
     [Fact]
     public void Unauthorized_ShouldCreateErrorWithUnauthorizedType()
     {
-        var error = Error.Unauthorized(VectraErrors.Unauthorized, "Unauthorized access");
+        var error = Error.Unauthorized(SynentraErrors.Unauthorized, "Unauthorized access");
 
         error.Type.Should().Be(ErrorType.Unauthorized);
         error.Message.Should().Be("Unauthorized access");
@@ -52,7 +52,7 @@ public class ErrorTests
     [Fact]
     public void Forbidden_ShouldCreateErrorWithForbiddenType()
     {
-        var error = Error.Forbidden(VectraErrors.AccessDenied, "Access denied");
+        var error = Error.Forbidden(SynentraErrors.AccessDenied, "Access denied");
 
         error.Type.Should().Be(ErrorType.Forbidden);
         error.Message.Should().Be("Access denied");
@@ -61,7 +61,7 @@ public class ErrorTests
     [Fact]
     public void Failure_ShouldCreateErrorWithFailureType()
     {
-        var error = Error.Failure(VectraErrors.SystemFailure, "System failure");
+        var error = Error.Failure(SynentraErrors.SystemFailure, "System failure");
 
         error.Type.Should().Be(ErrorType.Failure);
         error.Message.Should().Be("System failure");
@@ -70,9 +70,9 @@ public class ErrorTests
     [Fact]
     public void ToString_ShouldReturnFormattedString()
     {
-        var error = Error.Failure(VectraErrors.SystemFailure, "System failure");
+        var error = Error.Failure(SynentraErrors.SystemFailure, "System failure");
 
-        error.ToString().Should().Be($"{VectraErrors.SystemFailure}: System failure");
+        error.ToString().Should().Be($"{SynentraErrors.SystemFailure}: System failure");
     }
 
     [Theory]

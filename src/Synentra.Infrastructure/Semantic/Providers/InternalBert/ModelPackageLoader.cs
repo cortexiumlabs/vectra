@@ -1,8 +1,8 @@
 using System.Security.Cryptography;
 using System.Text.Json;
-using Vectra.BuildingBlocks.Configuration.Semantic;
+using Synentra.BuildingBlocks.Configuration.Semantic;
 
-namespace Vectra.Infrastructure.Semantic.Providers.InternalBert;
+namespace Synentra.Infrastructure.Semantic.Providers.InternalBert;
 
 /// <summary>
 /// Reads a model package from the local file system and returns all assets in memory.

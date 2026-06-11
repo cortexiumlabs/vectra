@@ -1,7 +1,7 @@
 using FluentAssertions;
-using Vectra.Domain.AuditTrails;
+using Synentra.Domain.AuditTrails;
 
-namespace Vectra.Domain.UnitTests.AuditTrails;
+namespace Synentra.Domain.UnitTests.AuditTrails;
 
 public class AuditTrailTests
 {

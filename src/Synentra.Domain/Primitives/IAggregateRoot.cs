@@ -1,3 +1,3 @@
-﻿namespace Vectra.Domain.Primitives;
+﻿namespace Synentra.Domain.Primitives;
 
 public interface IAggregateRoot { }

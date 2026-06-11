@@ -1,12 +1,12 @@
-using Vectra.BuildingBlocks.Errors;
-using Vectra.BuildingBlocks.Exceptions;
+using Synentra.BuildingBlocks.Errors;
+using Synentra.BuildingBlocks.Exceptions;
 
-namespace Vectra.UnitTests.Exceptions;
+namespace Synentra.UnitTests.Exceptions;
 
 public class SystemExceptionTests
 {
     // Concrete subclass for testing the abstract base
-    private sealed class ConcreteSystemException : Vectra.Exceptions.SystemException
+    private sealed class ConcreteSystemException : Synentra.Exceptions.SystemException
     {
         public ConcreteSystemException(ErrorCode errorCode, string message, Exception? inner = null)
             : base(errorCode, message, inner) { }

@@ -1,44 +1,44 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 
-namespace Vectra.UnitTests.Middleware;
+namespace Synentra.UnitTests.Middleware;
 
 public class RequestLoggingMiddlewareTests
 {
     [Fact]
     public void Constructor_NullNext_ThrowsArgumentNullException()
     {
-        var logger = Substitute.For<ILogger<Vectra.Middleware.RequestLoggingMiddleware>>();
-        var version = Substitute.For<Vectra.Application.Abstractions.Versioning.IVersion>();
+        var logger = Substitute.For<ILogger<Synentra.Middleware.RequestLoggingMiddleware>>();
+        var version = Substitute.For<Synentra.Application.Abstractions.Versioning.IVersion>();
 
-        var act = () => new Vectra.Middleware.RequestLoggingMiddleware(null!, logger, version);
+        var act = () => new Synentra.Middleware.RequestLoggingMiddleware(null!, logger, version);
         act.Should().Throw<ArgumentNullException>().WithParameterName("next");
     }
 
     [Fact]
     public void Constructor_NullLogger_ThrowsArgumentNullException()
     {
-        var version = Substitute.For<Vectra.Application.Abstractions.Versioning.IVersion>();
-        var act = () => new Vectra.Middleware.RequestLoggingMiddleware(_ => Task.CompletedTask, null!, version);
+        var version = Substitute.For<Synentra.Application.Abstractions.Versioning.IVersion>();
+        var act = () => new Synentra.Middleware.RequestLoggingMiddleware(_ => Task.CompletedTask, null!, version);
         act.Should().Throw<ArgumentNullException>().WithParameterName("logger");
     }
 
     [Fact]
     public void Constructor_NullVersion_ThrowsArgumentNullException()
     {
-        var logger = Substitute.For<ILogger<Vectra.Middleware.RequestLoggingMiddleware>>();
-        var act = () => new Vectra.Middleware.RequestLoggingMiddleware(_ => Task.CompletedTask, logger, null!);
+        var logger = Substitute.For<ILogger<Synentra.Middleware.RequestLoggingMiddleware>>();
+        var act = () => new Synentra.Middleware.RequestLoggingMiddleware(_ => Task.CompletedTask, logger, null!);
         act.Should().Throw<ArgumentNullException>().WithParameterName("version");
     }
 
     [Fact]
     public async Task Invoke_NextSucceeds_SetsHeaderAndLogsInformation()
     {
-        var logger = Substitute.For<ILogger<Vectra.Middleware.RequestLoggingMiddleware>>();
-        var version = Substitute.For<Vectra.Application.Abstractions.Versioning.IVersion>();
+        var logger = Substitute.For<ILogger<Synentra.Middleware.RequestLoggingMiddleware>>();
+        var version = Substitute.For<Synentra.Application.Abstractions.Versioning.IVersion>();
         version.Version.Returns(new Version(1, 2));
 
-        var middleware = new Vectra.Middleware.RequestLoggingMiddleware(_ => Task.CompletedTask, logger, version);
+        var middleware = new Synentra.Middleware.RequestLoggingMiddleware(_ => Task.CompletedTask, logger, version);
 
         var context = new DefaultHttpContext();
         context.Request.Method = "POST";
@@ -67,12 +67,12 @@ public class RequestLoggingMiddlewareTests
     [Fact]
     public async Task Invoke_NextThrows_LogsAndPropagatesException()
     {
-        var logger = Substitute.For<ILogger<Vectra.Middleware.RequestLoggingMiddleware>>();
-        var version = Substitute.For<Vectra.Application.Abstractions.Versioning.IVersion>();
+        var logger = Substitute.For<ILogger<Synentra.Middleware.RequestLoggingMiddleware>>();
+        var version = Substitute.For<Synentra.Application.Abstractions.Versioning.IVersion>();
         version.Version.Returns(new Version(1, 2));
 
         RequestDelegate next = _ => throw new InvalidOperationException("boom");
-        var middleware = new Vectra.Middleware.RequestLoggingMiddleware(next, logger, version);
+        var middleware = new Synentra.Middleware.RequestLoggingMiddleware(next, logger, version);
 
         var context = new DefaultHttpContext();
         context.Response.Body = new MemoryStream();

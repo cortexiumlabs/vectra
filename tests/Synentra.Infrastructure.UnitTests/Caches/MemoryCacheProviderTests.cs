@@ -3,10 +3,10 @@ using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
-using Vectra.BuildingBlocks.Configuration.System.Storage.Cache;
-using Vectra.Infrastructure.Caches.Providers;
+using Synentra.BuildingBlocks.Configuration.System.Storage.Cache;
+using Synentra.Infrastructure.Caches.Providers;
 
-namespace Vectra.Infrastructure.UnitTests.Caches;
+namespace Synentra.Infrastructure.UnitTests.Caches;
 
 public class MemoryCacheProviderTests
 {

@@ -2,18 +2,18 @@ using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using NSubstitute;
-using Vectra.Application.Abstractions.Executions;
-using Vectra.Application.Abstractions.Persistence;
-using Vectra.Application.Models;
-using Vectra.BuildingBlocks.Clock;
-using Vectra.BuildingBlocks.Configuration.HumanInTheLoop;
-using Vectra.BuildingBlocks.Configuration.Policy;
-using Vectra.BuildingBlocks.Configuration.Semantic;
-using Vectra.Domain.AuditTrails;
-using Vectra.Domain.Policies;
-using Vectra.Infrastructure.Decision;
+using Synentra.Application.Abstractions.Executions;
+using Synentra.Application.Abstractions.Persistence;
+using Synentra.Application.Models;
+using Synentra.BuildingBlocks.Clock;
+using Synentra.BuildingBlocks.Configuration.HumanInTheLoop;
+using Synentra.BuildingBlocks.Configuration.Policy;
+using Synentra.BuildingBlocks.Configuration.Semantic;
+using Synentra.Domain.AuditTrails;
+using Synentra.Domain.Policies;
+using Synentra.Infrastructure.Decision;
 
-namespace Vectra.Infrastructure.UnitTests.Decision;
+namespace Synentra.Infrastructure.UnitTests.Decision;
 
 public class DecisionEngineTests
 {
@@ -558,7 +558,7 @@ public class DecisionEngineTests
         var sut = CreateSut();
         var context = BuildContext();
         context.Headers.Add("X-Test", "value");
-        Dictionary<string, object> capturedInput = null;
+        Dictionary<string, object> capturedInput = null!;
 
         _policyProvider.EvaluateAsync(Arg.Any<string>(), Arg.Do<Dictionary<string, object>>(x => capturedInput = x), Arg.Any<CancellationToken>())
             .Returns(PolicyDecision.Allow());

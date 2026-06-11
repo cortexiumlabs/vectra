@@ -1,12 +1,12 @@
 using Microsoft.Extensions.Logging;
-using Vectra.Application.Abstractions.Dispatchers;
-using Vectra.Application.Abstractions.Persistence;
-using Vectra.Application.Errors;
-using Vectra.BuildingBlocks.Errors;
-using Vectra.BuildingBlocks.Results;
-using Void = Vectra.Application.Abstractions.Dispatchers.Void;
+using Synentra.Application.Abstractions.Dispatchers;
+using Synentra.Application.Abstractions.Persistence;
+using Synentra.Application.Errors;
+using Synentra.BuildingBlocks.Errors;
+using Synentra.BuildingBlocks.Results;
+using Void = Synentra.Application.Abstractions.Dispatchers.Void;
 
-namespace Vectra.Application.Features.Agents.LiftQuarantine;
+namespace Synentra.Application.Features.Agents.LiftQuarantine;
 
 internal class LiftQuarantineHandler : IActionHandler<LiftQuarantineRequest, Result<Void>>
 {

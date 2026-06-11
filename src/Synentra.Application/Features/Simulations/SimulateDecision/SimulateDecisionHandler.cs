@@ -1,12 +1,12 @@
 using Microsoft.Extensions.Logging;
-using Vectra.Application.Abstractions.Dispatchers;
-using Vectra.Application.Abstractions.Executions;
-using Vectra.Application.Abstractions.Security;
-using Vectra.Application.Models;
-using Vectra.BuildingBlocks.Errors;
-using Vectra.BuildingBlocks.Results;
+using Synentra.Application.Abstractions.Dispatchers;
+using Synentra.Application.Abstractions.Executions;
+using Synentra.Application.Abstractions.Security;
+using Synentra.Application.Models;
+using Synentra.BuildingBlocks.Errors;
+using Synentra.BuildingBlocks.Results;
 
-namespace Vectra.Application.Features.Simulations.SimulateDecision;
+namespace Synentra.Application.Features.Simulations.SimulateDecision;
 
 public sealed class SimulateDecisionHandler
     : IActionHandler<SimulateDecisionRequest, Result<SimulateDecisionResult>>
@@ -30,11 +30,11 @@ public sealed class SimulateDecisionHandler
         CancellationToken cancellationToken = default)
     {
         if (action.AgentId is null)
-            return Error.Unauthorized(VectraErrors.MissingCredentials, "Missing agent identity");
+            return Error.Unauthorized(SynentraErrors.MissingCredentials, "Missing agent identity");
 
         var access = await _accessService.GetAgentAsync(action.AgentId.Value, cancellationToken);
         if (!access.IsAllowed || access.Agent is null)
-            return Error.Forbidden(VectraErrors.AccessDenied, access.ForbiddenReason ?? "Access denied");
+            return Error.Forbidden(SynentraErrors.AccessDenied, access.ForbiddenReason ?? "Access denied");
 
         var agent = access.Agent;
 

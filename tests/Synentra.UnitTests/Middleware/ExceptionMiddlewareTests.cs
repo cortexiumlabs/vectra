@@ -3,28 +3,28 @@ using Microsoft.Extensions.Logging;
 using NSubstitute;
 using NSubstitute.ExceptionExtensions;
 
-namespace Vectra.UnitTests.Middleware;
+namespace Synentra.UnitTests.Middleware;
 
 public class ExceptionMiddlewareTests
 {
-    private readonly ILogger<Vectra.Middleware.ExceptionMiddleware> _logger;
+    private readonly ILogger<Synentra.Middleware.ExceptionMiddleware> _logger;
 
     public ExceptionMiddlewareTests()
     {
-        _logger = Substitute.For<ILogger<Vectra.Middleware.ExceptionMiddleware>>();
+        _logger = Substitute.For<ILogger<Synentra.Middleware.ExceptionMiddleware>>();
     }
 
     [Fact]
     public void Constructor_NullNext_ThrowsArgumentNullException()
     {
-        var act = () => new Vectra.Middleware.ExceptionMiddleware(null!, _logger);
+        var act = () => new Synentra.Middleware.ExceptionMiddleware(null!, _logger);
         act.Should().Throw<ArgumentNullException>().WithParameterName("next");
     }
 
     [Fact]
     public void Constructor_NullLogger_ThrowsArgumentNullException()
     {
-        var act = () => new Vectra.Middleware.ExceptionMiddleware(_ => Task.CompletedTask, null!);
+        var act = () => new Synentra.Middleware.ExceptionMiddleware(_ => Task.CompletedTask, null!);
         act.Should().Throw<ArgumentNullException>().WithParameterName("logger");
     }
 
@@ -33,7 +33,7 @@ public class ExceptionMiddlewareTests
     {
         var next = Substitute.For<RequestDelegate>();
         next(Arg.Any<HttpContext>()).Returns(Task.CompletedTask);
-        var middleware = new Vectra.Middleware.ExceptionMiddleware(next, _logger);
+        var middleware = new Synentra.Middleware.ExceptionMiddleware(next, _logger);
 
         var context = new DefaultHttpContext();
         context.Response.Body = new MemoryStream();
@@ -48,7 +48,7 @@ public class ExceptionMiddlewareTests
     {
         var next = Substitute.For<RequestDelegate>();
         next(Arg.Any<HttpContext>()).Throws(new InvalidOperationException("boom"));
-        var middleware = new Vectra.Middleware.ExceptionMiddleware(next, _logger);
+        var middleware = new Synentra.Middleware.ExceptionMiddleware(next, _logger);
 
         var context = new DefaultHttpContext();
         context.Response.Body = new MemoryStream();
@@ -65,7 +65,7 @@ public class ExceptionMiddlewareTests
         var exception = new InvalidOperationException("test error");
         var next = Substitute.For<RequestDelegate>();
         next(Arg.Any<HttpContext>()).Throws(exception);
-        var middleware = new Vectra.Middleware.ExceptionMiddleware(next, _logger);
+        var middleware = new Synentra.Middleware.ExceptionMiddleware(next, _logger);
 
         var context = new DefaultHttpContext();
         context.Response.Body = new MemoryStream();

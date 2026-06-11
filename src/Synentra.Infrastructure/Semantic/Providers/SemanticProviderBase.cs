@@ -1,7 +1,7 @@
 using System.Text;
-using Vectra.Application.Abstractions.Executions;
+using Synentra.Application.Abstractions.Executions;
 
-namespace Vectra.Infrastructure.Semantic.Providers;
+namespace Synentra.Infrastructure.Semantic.Providers;
 
 public abstract class SemanticProviderBase
 {

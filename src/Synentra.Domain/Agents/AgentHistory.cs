@@ -1,6 +1,6 @@
-﻿using Vectra.Domain.Primitives;
+﻿using Synentra.Domain.Primitives;
 
-namespace Vectra.Domain.Agents;
+namespace Synentra.Domain.Agents;
 
 public class AgentHistory: AuditableEntity<Guid>
 {

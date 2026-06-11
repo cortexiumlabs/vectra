@@ -3,27 +3,27 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using NSubstitute;
-using Vectra.BuildingBlocks.Configuration.System;
-using Vectra.BuildingBlocks.Configuration.System.Server;
-using Vectra.Extensions;
+using Synentra.BuildingBlocks.Configuration.System;
+using Synentra.BuildingBlocks.Configuration.System.Server;
+using Synentra.Extensions;
 
-namespace Vectra.UnitTests.Extensions;
+namespace Synentra.UnitTests.Extensions;
 
 public class ApplicationBuilderExtensionsHttpsTests
 {
     [Fact]
-    public void UseVectraHttps_HttpsDisabled_DoesNotRedirect()
+    public void UseSynentraHttps_HttpsDisabled_DoesNotRedirect()
     {
         var app = BuildAppWithHttpsEnabled(false);
-        var act = () => app.UseVectraHttps();
+        var act = () => app.UseSynentraHttps();
         act.Should().NotThrow();
     }
 
     [Fact]
-    public void UseVectraHttps_ReturnsSameBuilder()
+    public void UseSynentraHttps_ReturnsSameBuilder()
     {
         var app = BuildAppWithHttpsEnabled(false);
-        var result = app.UseVectraHttps();
+        var result = app.UseSynentraHttps();
         result.Should().BeSameAs(app);
     }
 

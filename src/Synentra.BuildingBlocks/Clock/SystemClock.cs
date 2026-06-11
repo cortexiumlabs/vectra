@@ -1,4 +1,4 @@
-﻿namespace Vectra.BuildingBlocks.Clock;
+﻿namespace Synentra.BuildingBlocks.Clock;
 
 public class SystemClock : IClock
 {

@@ -5,12 +5,12 @@ using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using NSubstitute;
-using Vectra.Application.Abstractions.Executions;
-using Vectra.BuildingBlocks.Configuration.Policy;
-using Vectra.Domain.Policies;
-using Vectra.Infrastructure.Policy.Providers;
+using Synentra.Application.Abstractions.Executions;
+using Synentra.BuildingBlocks.Configuration.Policy;
+using Synentra.Domain.Policies;
+using Synentra.Infrastructure.Policy.Providers;
 
-namespace Vectra.Infrastructure.UnitTests.Policy.Providers;
+namespace Synentra.Infrastructure.UnitTests.Policy.Providers;
 
 public class OpaPolicyProviderTests
 {

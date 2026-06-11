@@ -1,10 +1,10 @@
 ﻿using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Vectra.Application.Abstractions.Caches;
-using Vectra.BuildingBlocks.Configuration.System.Storage.Cache;
+using Synentra.Application.Abstractions.Caches;
+using Synentra.BuildingBlocks.Configuration.System.Storage.Cache;
 
-namespace Vectra.Infrastructure.Caches.Providers;
+namespace Synentra.Infrastructure.Caches.Providers;
 
 public class MemoryCacheProvider : ICacheProvider
 {

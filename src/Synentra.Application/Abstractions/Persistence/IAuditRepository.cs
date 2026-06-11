@@ -1,6 +1,6 @@
-﻿using Vectra.Domain.AuditTrails;
+﻿using Synentra.Domain.AuditTrails;
 
-namespace Vectra.Application.Abstractions.Persistence;
+namespace Synentra.Application.Abstractions.Persistence;
 
 public interface IAuditRepository
 {

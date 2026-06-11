@@ -1,10 +1,10 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Vectra.Application.Abstractions.Dispatchers;
-using Vectra.Application.Features.Authentications.GenerateToken;
-using Vectra.Extensions;
-using Vectra.Application.Extensions;
+using Synentra.Application.Abstractions.Dispatchers;
+using Synentra.Application.Features.Authentications.GenerateToken;
+using Synentra.Extensions;
+using Synentra.Application.Extensions;
 
-namespace Vectra.Endpoints;
+namespace Synentra.Endpoints;
 
 public class Tokens : EndpointGroupBase
 {

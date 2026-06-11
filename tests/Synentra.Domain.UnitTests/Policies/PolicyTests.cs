@@ -1,7 +1,7 @@
 using FluentAssertions;
-using Vectra.Domain.Policies;
+using Synentra.Domain.Policies;
 
-namespace Vectra.Domain.UnitTests.Policies;
+namespace Synentra.Domain.UnitTests.Policies;
 
 public class PolicyDefinitionTests
 {

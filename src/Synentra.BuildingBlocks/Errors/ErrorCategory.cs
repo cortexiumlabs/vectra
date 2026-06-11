@@ -1,4 +1,4 @@
-﻿namespace Vectra.BuildingBlocks.Errors;
+﻿namespace Synentra.BuildingBlocks.Errors;
 
 public enum ErrorCategory
 {

@@ -1,6 +1,6 @@
-﻿using Vectra.BuildingBlocks.Errors;
+﻿using Synentra.BuildingBlocks.Errors;
 
-namespace Vectra.Errors;
+namespace Synentra.Errors;
 
 public class SystemErrorCodes
 {

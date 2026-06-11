@@ -1,7 +1,7 @@
-﻿using Vectra.Application.Models;
-using Vectra.Domain.Agents;
+﻿using Synentra.Application.Models;
+using Synentra.Domain.Agents;
 
-namespace Vectra.Application.Abstractions.Executions;
+namespace Synentra.Application.Abstractions.Executions;
 
 public interface IHitlService
 {

@@ -1,14 +1,14 @@
 using FluentAssertions;
 using NSubstitute;
-using Vectra.Application.Abstractions.Caches;
-using Vectra.Application.Abstractions.Persistence;
-using Vectra.Application.Models;
-using Vectra.Domain.Agents;
-using Vectra.Infrastructure.Caches;
-using Vectra.Infrastructure.Risk;
+using Synentra.Application.Abstractions.Caches;
+using Synentra.Application.Abstractions.Persistence;
+using Synentra.Application.Models;
+using Synentra.Domain.Agents;
+using Synentra.Infrastructure.Caches;
+using Synentra.Infrastructure.Risk;
 using Microsoft.Extensions.Logging;
 
-namespace Vectra.Infrastructure.UnitTests.Risk;
+namespace Synentra.Infrastructure.UnitTests.Risk;
 
 public class RiskScoringServiceTests
 {

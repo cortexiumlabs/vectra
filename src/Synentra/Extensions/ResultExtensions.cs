@@ -1,8 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Vectra.BuildingBlocks.Errors;
-using Vectra.BuildingBlocks.Results;
+using Synentra.BuildingBlocks.Errors;
+using Synentra.BuildingBlocks.Results;
 
-namespace Vectra.Extensions;
+namespace Synentra.Extensions;
 
 public static class ResultExtensions
 {

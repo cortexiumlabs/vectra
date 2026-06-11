@@ -1,11 +1,11 @@
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging.Abstractions;
-using Vectra.Domain.Agents;
-using Vectra.Domain.AuditTrails;
-using Vectra.Infrastructure.Persistence.Common.Exceptions;
+using Synentra.Domain.Agents;
+using Synentra.Domain.AuditTrails;
+using Synentra.Infrastructure.Persistence.Common.Exceptions;
 
-namespace Vectra.Infrastructure.Persistence.Common.UnitTests.Persistence;
+namespace Synentra.Infrastructure.Persistence.Common.UnitTests.Persistence;
 
 // Concrete subclass of BaseDbContext used for testing.
 internal sealed class TestDbContext : BaseDbContext

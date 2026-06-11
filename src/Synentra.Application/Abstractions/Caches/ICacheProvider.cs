@@ -1,4 +1,4 @@
-﻿namespace Vectra.Application.Abstractions.Caches;
+﻿namespace Synentra.Application.Abstractions.Caches;
 
 public interface ICacheProvider
 {

@@ -1,10 +1,10 @@
 using FluentAssertions;
-using Vectra.BuildingBlocks.Configuration.Observability;
-using Vectra.BuildingBlocks.Configuration.Observability.Logging;
-using Vectra.BuildingBlocks.Configuration.Observability.OpenTelemetry;
+using Synentra.BuildingBlocks.Configuration.Observability;
+using Synentra.BuildingBlocks.Configuration.Observability.Logging;
+using Synentra.BuildingBlocks.Configuration.Observability.OpenTelemetry;
 using Xunit;
 
-namespace Vectra.BuildingBlocks.UnitTests.Configuration.Observability;
+namespace Synentra.BuildingBlocks.UnitTests.Configuration.Observability;
 
 public class ObservabilityConfigurationTests
 {

@@ -1,12 +1,12 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging.Abstractions;
-using Vectra.Domain.Agents;
-using Vectra.Domain.AuditTrails;
-using Vectra.Infrastructure.Persistence.Common.Exceptions;
-using Vectra.Infrastructure.Persistence.Sqlite.Contexts;
-using Vectra.Infrastructure.Persistence.Sqlite.UnitTests.Helpers;
+using Synentra.Domain.Agents;
+using Synentra.Domain.AuditTrails;
+using Synentra.Infrastructure.Persistence.Common.Exceptions;
+using Synentra.Infrastructure.Persistence.Sqlite.Contexts;
+using Synentra.Infrastructure.Persistence.Sqlite.UnitTests.Helpers;
 
-namespace Vectra.Infrastructure.Persistence.Sqlite.UnitTests.Contexts;
+namespace Synentra.Infrastructure.Persistence.Sqlite.UnitTests.Contexts;
 
 public class SqliteApplicationContextTests
 {

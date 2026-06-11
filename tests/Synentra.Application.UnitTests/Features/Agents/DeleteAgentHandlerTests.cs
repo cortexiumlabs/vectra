@@ -1,10 +1,10 @@
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
-using Vectra.Application.Abstractions.Persistence;
-using Vectra.Application.Features.Agents.DeleteAgent;
+using Synentra.Application.Abstractions.Persistence;
+using Synentra.Application.Features.Agents.DeleteAgent;
 
-namespace Vectra.Application.UnitTests.Features.Agents;
+namespace Synentra.Application.UnitTests.Features.Agents;
 
 public class DeleteAgentHandlerTests
 {

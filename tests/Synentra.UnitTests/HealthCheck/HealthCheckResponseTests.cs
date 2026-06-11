@@ -1,6 +1,6 @@
-using Vectra.HealthCheck;
+using Synentra.HealthCheck;
 
-namespace Vectra.UnitTests.HealthCheck;
+namespace Synentra.UnitTests.HealthCheck;
 
 public class HealthCheckResponseTests
 {

@@ -1,11 +1,11 @@
 using Microsoft.Extensions.Logging;
-using Vectra.Application.Abstractions.Dispatchers;
-using Vectra.Application.Abstractions.Executions;
-using Vectra.Application.Errors;
-using Vectra.BuildingBlocks.Errors;
-using Vectra.BuildingBlocks.Results;
+using Synentra.Application.Abstractions.Dispatchers;
+using Synentra.Application.Abstractions.Executions;
+using Synentra.Application.Errors;
+using Synentra.BuildingBlocks.Errors;
+using Synentra.BuildingBlocks.Results;
 
-namespace Vectra.Application.Features.Policies.PolicyDetails;
+namespace Synentra.Application.Features.Policies.PolicyDetails;
 
 internal class PolicyDetailsHandler : IActionHandler<PolicyDetailsRequest, Result<PolicyDetailsResult>>
 {

@@ -1,8 +1,8 @@
 ﻿using System.Text.Json;
-using Vectra.Application.Abstractions.Serializations;
-using Vectra.Infrastructure.Exceptions;
+using Synentra.Application.Abstractions.Serializations;
+using Synentra.Infrastructure.Exceptions;
 
-namespace Vectra.Infrastructure.Serializations.Json;
+namespace Synentra.Infrastructure.Serializations.Json;
 
 public class JsonDeserializer : IDeserializer
 {

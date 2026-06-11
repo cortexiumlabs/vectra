@@ -1,4 +1,4 @@
-﻿namespace Vectra.Domain.Agents;
+﻿namespace Synentra.Domain.Agents;
 
 public enum AgentStatus
 {

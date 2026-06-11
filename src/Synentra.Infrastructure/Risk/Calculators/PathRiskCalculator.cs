@@ -1,8 +1,8 @@
 ﻿using System.Text.RegularExpressions;
-using Vectra.Application.Models;
-using Vectra.Domain.Agents;
+using Synentra.Application.Models;
+using Synentra.Domain.Agents;
 
-namespace Vectra.Infrastructure.Risk.Calculators;
+namespace Synentra.Infrastructure.Risk.Calculators;
 
 public class PathRiskCalculator : IRiskCalculator
 {

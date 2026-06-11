@@ -1,6 +1,6 @@
-﻿namespace Vectra.Services;
+﻿namespace Synentra.Services;
 
-public interface IVectraApplicationRunner
+public interface ISynentraApplicationRunner
 {
     Task RunAsync(string[] args, CancellationToken cancellationToken);
 }

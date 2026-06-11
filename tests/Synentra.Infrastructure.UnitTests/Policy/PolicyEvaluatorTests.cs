@@ -1,9 +1,9 @@
 using FluentAssertions;
 using System.Text.Json;
-using Vectra.Domain.Policies;
-using Vectra.Infrastructure.Policy;
+using Synentra.Domain.Policies;
+using Synentra.Infrastructure.Policy;
 
-namespace Vectra.Infrastructure.UnitTests.Policy;
+namespace Synentra.Infrastructure.UnitTests.Policy;
 
 public class PolicyEvaluatorTests
 {

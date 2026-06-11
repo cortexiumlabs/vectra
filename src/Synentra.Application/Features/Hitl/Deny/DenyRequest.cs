@@ -1,7 +1,7 @@
-using Vectra.Application.Abstractions.Dispatchers;
-using Vectra.BuildingBlocks.Results;
+using Synentra.Application.Abstractions.Dispatchers;
+using Synentra.BuildingBlocks.Results;
 
-namespace Vectra.Application.Features.Hitl.Deny;
+namespace Synentra.Application.Features.Hitl.Deny;
 
 public class DenyRequest : IRequest<Result<Abstractions.Dispatchers.Void>>
 {

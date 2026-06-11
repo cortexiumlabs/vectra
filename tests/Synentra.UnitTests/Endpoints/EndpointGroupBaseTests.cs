@@ -1,8 +1,8 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
-using Vectra.Endpoints;
+using Synentra.Endpoints;
 
-namespace Vectra.UnitTests.Endpoints;
+namespace Synentra.UnitTests.Endpoints;
 
 public class EndpointGroupBaseTests
 {

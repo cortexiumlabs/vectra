@@ -1,8 +1,8 @@
-using Vectra.Application.Abstractions.Dispatchers;
-using Vectra.Application.Abstractions.Executions;
-using Vectra.BuildingBlocks.Results;
+using Synentra.Application.Abstractions.Dispatchers;
+using Synentra.Application.Abstractions.Executions;
+using Synentra.BuildingBlocks.Results;
 
-namespace Vectra.Application.Features.Hitl.GetAllPending;
+namespace Synentra.Application.Features.Hitl.GetAllPending;
 
 internal class GetAllPendingHandler : IActionHandler<GetAllPendingRequest, PaginatedResult<PendingHitlRequest>>
 {

@@ -1,6 +1,6 @@
-using Vectra.Domain.Policies;
+using Synentra.Domain.Policies;
 
-namespace Vectra.Application.Abstractions.Executions;
+namespace Synentra.Application.Abstractions.Executions;
 
 public interface IPolicyCacheService
 {

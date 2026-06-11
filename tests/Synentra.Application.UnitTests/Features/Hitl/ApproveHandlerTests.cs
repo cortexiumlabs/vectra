@@ -1,10 +1,10 @@
 using FluentAssertions;
 using NSubstitute;
-using Vectra.Application.Abstractions.Executions;
-using Vectra.Application.Features.Hitl.Approve;
-using Vectra.BuildingBlocks.Results;
+using Synentra.Application.Abstractions.Executions;
+using Synentra.Application.Features.Hitl.Approve;
+using Synentra.BuildingBlocks.Results;
 
-namespace Vectra.Application.UnitTests.Features.Hitl;
+namespace Synentra.Application.UnitTests.Features.Hitl;
 
 public class ApproveHandlerTests
 {

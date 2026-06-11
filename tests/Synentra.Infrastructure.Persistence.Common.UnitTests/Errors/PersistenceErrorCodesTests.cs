@@ -1,8 +1,8 @@
 using FluentAssertions;
-using Vectra.BuildingBlocks.Errors;
-using Vectra.Infrastructure.Persistence.Common.Errors;
+using Synentra.BuildingBlocks.Errors;
+using Synentra.Infrastructure.Persistence.Common.Errors;
 
-namespace Vectra.Infrastructure.Persistence.Common.UnitTests.Errors;
+namespace Synentra.Infrastructure.Persistence.Common.UnitTests.Errors;
 
 public class PersistenceErrorCodesTests
 {

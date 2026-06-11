@@ -2,10 +2,10 @@
 using Microsoft.Extensions.Options;
 using Serilog;
 using System.Diagnostics.CodeAnalysis;
-using Vectra.BuildingBlocks.Configuration.System;
-using Vectra.BuildingBlocks.Configuration.System.Server;
+using Synentra.BuildingBlocks.Configuration.System;
+using Synentra.BuildingBlocks.Configuration.System.Server;
 
-namespace Vectra.Extensions;
+namespace Synentra.Extensions;
 
 [ExcludeFromCodeCoverage]
 public static class WebApplicationBuilderExtensions
@@ -13,7 +13,7 @@ public static class WebApplicationBuilderExtensions
     private const int DefaultHttpPort = 7080;
     private const int DefaultHttpsPort = 7443;
 
-    public static WebApplicationBuilder ConfigureVectraHttpServer(this WebApplicationBuilder builder)
+    public static WebApplicationBuilder ConfigureSynentraHttpServer(this WebApplicationBuilder builder)
     {
         using var scope = builder.Services.BuildServiceProvider().CreateScope();
         var serverConfig = scope.ServiceProvider.GetRequiredService<IOptions<SystemConfiguration>>();

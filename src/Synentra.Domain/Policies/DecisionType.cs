@@ -1,4 +1,4 @@
-﻿namespace Vectra.Domain.Policies;
+﻿namespace Synentra.Domain.Policies;
 
 public enum DecisionType
 {

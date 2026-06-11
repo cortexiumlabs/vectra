@@ -1,6 +1,6 @@
-﻿using Vectra.Infrastructure.SecretManagement;
+﻿using Synentra.Infrastructure.SecretManagement;
 
-namespace Vectra.Infrastructure.Caches;
+namespace Synentra.Infrastructure.Caches;
 
 public class SecretManagementService : ISecretManagementService
 {

@@ -4,12 +4,12 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
 using NSubstitute;
-using Vectra.BuildingBlocks.Configuration.SecretManagement;
-using Vectra.Infrastructure.Caches;
-using Vectra.Infrastructure.SecretManagement;
-using Vectra.Infrastructure.SecretManagement.Providers;
+using Synentra.BuildingBlocks.Configuration.SecretManagement;
+using Synentra.Infrastructure.Caches;
+using Synentra.Infrastructure.SecretManagement;
+using Synentra.Infrastructure.SecretManagement.Providers;
 
-namespace Vectra.Infrastructure.UnitTests.SecretManagement;
+namespace Synentra.Infrastructure.UnitTests.SecretManagement;
 
 public class SecretProviderFactoryTests
 {

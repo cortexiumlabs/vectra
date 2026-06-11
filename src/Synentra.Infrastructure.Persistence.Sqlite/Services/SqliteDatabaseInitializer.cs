@@ -1,10 +1,10 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using Vectra.Infrastructure.Persistence.Common;
-using Vectra.Infrastructure.Persistence.Common.Exceptions;
-using Vectra.Infrastructure.Persistence.Sqlite.Contexts;
+using Synentra.Infrastructure.Persistence.Common;
+using Synentra.Infrastructure.Persistence.Common.Exceptions;
+using Synentra.Infrastructure.Persistence.Sqlite.Contexts;
 
-namespace Vectra.Infrastructure.Persistence.Sqlite.Services;
+namespace Synentra.Infrastructure.Persistence.Sqlite.Services;
 
 public class SqliteDatabaseInitializer : IDatabaseInitializer
 {

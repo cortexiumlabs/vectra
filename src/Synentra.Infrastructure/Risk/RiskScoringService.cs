@@ -1,11 +1,11 @@
 ﻿using Microsoft.Extensions.Logging;
-using Vectra.Application.Abstractions.Caches;
-using Vectra.Application.Abstractions.Executions;
-using Vectra.Application.Abstractions.Persistence;
-using Vectra.Application.Models;
-using Vectra.Infrastructure.Caches;
+using Synentra.Application.Abstractions.Caches;
+using Synentra.Application.Abstractions.Executions;
+using Synentra.Application.Abstractions.Persistence;
+using Synentra.Application.Models;
+using Synentra.Infrastructure.Caches;
 
-namespace Vectra.Infrastructure.Risk;
+namespace Synentra.Infrastructure.Risk;
 
 public class RiskScoringService : IRiskScoringService
 {

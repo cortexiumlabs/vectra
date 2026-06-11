@@ -1,9 +1,9 @@
 using FluentAssertions;
 using NSubstitute;
-using Vectra.Application.Abstractions.Executions;
-using Vectra.Application.Features.Hitl.GetAllPending;
+using Synentra.Application.Abstractions.Executions;
+using Synentra.Application.Features.Hitl.GetAllPending;
 
-namespace Vectra.Application.UnitTests.Features.Hitl;
+namespace Synentra.Application.UnitTests.Features.Hitl;
 
 public class GetAllPendingHandlerTests
 {

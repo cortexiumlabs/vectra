@@ -1,16 +1,16 @@
 ﻿using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Vectra.Application.Abstractions.Executions;
-using Vectra.Application.Abstractions.Persistence;
-using Vectra.Application.Models;
-using Vectra.BuildingBlocks.Clock;
-using Vectra.BuildingBlocks.Configuration.HumanInTheLoop;
-using Vectra.BuildingBlocks.Configuration.Policy;
-using Vectra.BuildingBlocks.Configuration.Semantic;
-using Vectra.Domain.AuditTrails;
-using Vectra.Domain.Policies;
+using Synentra.Application.Abstractions.Executions;
+using Synentra.Application.Abstractions.Persistence;
+using Synentra.Application.Models;
+using Synentra.BuildingBlocks.Clock;
+using Synentra.BuildingBlocks.Configuration.HumanInTheLoop;
+using Synentra.BuildingBlocks.Configuration.Policy;
+using Synentra.BuildingBlocks.Configuration.Semantic;
+using Synentra.Domain.AuditTrails;
+using Synentra.Domain.Policies;
 
-namespace Vectra.Infrastructure.Decision;
+namespace Synentra.Infrastructure.Decision;
 
 public class DecisionEngine : IDecisionEngine
 {

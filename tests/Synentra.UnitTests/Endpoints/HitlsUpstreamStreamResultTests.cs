@@ -1,12 +1,12 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using NSubstitute;
-using Vectra.Application.Abstractions.Dispatchers;
-using Vectra.Application.Features.Hitl.Approve;
-using Vectra.BuildingBlocks.Results;
-using Vectra.Endpoints;
+using Synentra.Application.Abstractions.Dispatchers;
+using Synentra.Application.Features.Hitl.Approve;
+using Synentra.BuildingBlocks.Results;
+using Synentra.Endpoints;
 
-namespace Vectra.UnitTests.Endpoints;
+namespace Synentra.UnitTests.Endpoints;
 
 public class HitlsUpstreamStreamResultTests
 {

@@ -1,8 +1,8 @@
 ﻿using System.Text.Json;
 using System.Text.RegularExpressions;
-using Vectra.Domain.Policies;
+using Synentra.Domain.Policies;
 
-namespace Vectra.Infrastructure.Policy;
+namespace Synentra.Infrastructure.Policy;
 
 public static class PolicyEvaluator
 {

@@ -1,11 +1,11 @@
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
-using Vectra.Application.Abstractions.Persistence;
-using Vectra.Application.Features.Agents.AgentsList;
-using Vectra.Domain.Agents;
+using Synentra.Application.Abstractions.Persistence;
+using Synentra.Application.Features.Agents.AgentsList;
+using Synentra.Domain.Agents;
 
-namespace Vectra.Application.UnitTests.Features.Agents;
+namespace Synentra.Application.UnitTests.Features.Agents;
 
 public class AgentsListHandlerTests
 {

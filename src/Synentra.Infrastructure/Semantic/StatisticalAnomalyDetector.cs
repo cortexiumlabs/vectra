@@ -1,7 +1,7 @@
-﻿using Vectra.Application.Abstractions.Persistence;
-using Vectra.Application.Models;
+﻿using Synentra.Application.Abstractions.Persistence;
+using Synentra.Application.Models;
 
-namespace Vectra.Infrastructure.Semantic;
+namespace Synentra.Infrastructure.Semantic;
 
 public class StatisticalAnomalyDetector : IAnomalyDetector
 {

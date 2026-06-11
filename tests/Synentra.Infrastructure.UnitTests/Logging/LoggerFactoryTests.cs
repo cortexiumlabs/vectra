@@ -1,8 +1,8 @@
 using FluentAssertions;
 using Serilog.Events;
-using Vectra.Infrastructure.Logging;
+using Synentra.Infrastructure.Logging;
 
-namespace Vectra.Infrastructure.UnitTests.Logging;
+namespace Synentra.Infrastructure.UnitTests.Logging;
 
 public class LoggerFactoryTests
 {

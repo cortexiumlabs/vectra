@@ -3,10 +3,10 @@ using Microsoft.Extensions.DependencyInjection;
 using NSubstitute;
 using StackExchange.Redis;
 using System.Text.Json;
-using Vectra.BuildingBlocks.Configuration.System.Storage.Cache;
-using Vectra.Infrastructure.Caches.Providers;
+using Synentra.BuildingBlocks.Configuration.System.Storage.Cache;
+using Synentra.Infrastructure.Caches.Providers;
 
-namespace Vectra.Infrastructure.UnitTests.Caches;
+namespace Synentra.Infrastructure.UnitTests.Caches;
 
 public class RedisCacheProviderTests
 {

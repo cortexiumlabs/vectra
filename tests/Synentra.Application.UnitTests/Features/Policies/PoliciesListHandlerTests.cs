@@ -1,10 +1,10 @@
 using FluentAssertions;
 using NSubstitute;
-using Vectra.Application.Abstractions.Executions;
-using Vectra.Application.Features.Policies.PoliciesList;
-using Vectra.Domain.Policies;
+using Synentra.Application.Abstractions.Executions;
+using Synentra.Application.Features.Policies.PoliciesList;
+using Synentra.Domain.Policies;
 
-namespace Vectra.Application.UnitTests.Features.Policies;
+namespace Synentra.Application.UnitTests.Features.Policies;
 
 public class PoliciesListHandlerTests
 {

@@ -1,7 +1,7 @@
 using FluentAssertions;
-using Vectra.Application.Models;
+using Synentra.Application.Models;
 
-namespace Vectra.Application.UnitTests.Models;
+namespace Synentra.Application.UnitTests.Models;
 
 public class AgentStatsTests
 {

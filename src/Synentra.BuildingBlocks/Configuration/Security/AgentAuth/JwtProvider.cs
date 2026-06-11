@@ -1,4 +1,4 @@
-﻿namespace Vectra.BuildingBlocks.Configuration.Security.AgentAuth;
+﻿namespace Synentra.BuildingBlocks.Configuration.Security.AgentAuth;
 
 /// <summary>
 /// External provider settings (Keycloak, Auth0, Azure AD, Custom)

@@ -3,13 +3,13 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
 using NSubstitute;
-using Vectra.Application.Abstractions.Caches;
-using Vectra.Application.Abstractions.Executions;
-using Vectra.BuildingBlocks.Configuration.Semantic;
-using Vectra.Infrastructure.Caches;
-using Vectra.Infrastructure.Semantic.Providers.InternalBert;
+using Synentra.Application.Abstractions.Caches;
+using Synentra.Application.Abstractions.Executions;
+using Synentra.BuildingBlocks.Configuration.Semantic;
+using Synentra.Infrastructure.Caches;
+using Synentra.Infrastructure.Semantic.Providers.InternalBert;
 
-namespace Vectra.Infrastructure.UnitTests.Semantic;
+namespace Synentra.Infrastructure.UnitTests.Semantic;
 
 public class InternalOnnxProviderTests
 {

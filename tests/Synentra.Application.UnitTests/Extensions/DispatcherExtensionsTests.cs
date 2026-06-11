@@ -1,18 +1,18 @@
 using FluentAssertions;
 using NSubstitute;
-using Vectra.Application.Abstractions.Dispatchers;
-using Vectra.Application.Extensions;
-using Vectra.Application.Features.Agents.AgentsList;
-using Vectra.Application.Features.Agents.AssignPolicy;
-using Vectra.Application.Features.Agents.DeleteAgent;
-using Vectra.Application.Features.Agents.RegisterAgent;
-using Vectra.Application.Features.Authentications.GenerateToken;
-using Vectra.Application.Features.Policies.PoliciesList;
-using Vectra.Application.Features.Policies.PolicyDetails;
-using Vectra.BuildingBlocks.Results;
-using VoidType = Vectra.Application.Abstractions.Dispatchers.Void;
+using Synentra.Application.Abstractions.Dispatchers;
+using Synentra.Application.Extensions;
+using Synentra.Application.Features.Agents.AgentsList;
+using Synentra.Application.Features.Agents.AssignPolicy;
+using Synentra.Application.Features.Agents.DeleteAgent;
+using Synentra.Application.Features.Agents.RegisterAgent;
+using Synentra.Application.Features.Authentications.GenerateToken;
+using Synentra.Application.Features.Policies.PoliciesList;
+using Synentra.Application.Features.Policies.PolicyDetails;
+using Synentra.BuildingBlocks.Results;
+using VoidType = Synentra.Application.Abstractions.Dispatchers.Void;
 
-namespace Vectra.Application.UnitTests.Extensions;
+namespace Synentra.Application.UnitTests.Extensions;
 
 public class DispatcherExtensionsTests
 {

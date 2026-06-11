@@ -1,7 +1,7 @@
 using FluentAssertions;
-using Vectra.Application.Abstractions.Serializations;
+using Synentra.Application.Abstractions.Serializations;
 
-namespace Vectra.Application.UnitTests.Abstractions.Serializations;
+namespace Synentra.Application.UnitTests.Abstractions.Serializations;
 
 public class SerializationConfigurationTests
 {

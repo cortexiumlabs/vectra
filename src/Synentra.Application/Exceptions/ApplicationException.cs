@@ -1,7 +1,7 @@
-﻿using Vectra.BuildingBlocks.Errors;
-using Vectra.BuildingBlocks.Exceptions;
+﻿using Synentra.BuildingBlocks.Errors;
+using Synentra.BuildingBlocks.Exceptions;
 
-namespace Vectra.Application.Exceptions;
+namespace Synentra.Application.Exceptions;
 
 public abstract class ApplicationException : BaseException
 {

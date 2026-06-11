@@ -1,6 +1,6 @@
-﻿using Vectra.Infrastructure.Errors;
+﻿using Synentra.Infrastructure.Errors;
 
-namespace Vectra.Infrastructure.Exceptions;
+namespace Synentra.Infrastructure.Exceptions;
 
 public sealed class JsonSerializationInputRequiredException : SerializationException
 {

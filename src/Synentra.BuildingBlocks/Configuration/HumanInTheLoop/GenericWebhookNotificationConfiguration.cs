@@ -1,4 +1,4 @@
-namespace Vectra.BuildingBlocks.Configuration.HumanInTheLoop;
+namespace Synentra.BuildingBlocks.Configuration.HumanInTheLoop;
 
 /// <summary>
 /// Configuration for generic webhook notifications.

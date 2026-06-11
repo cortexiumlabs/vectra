@@ -1,11 +1,11 @@
 using FluentAssertions;
 using Microsoft.Extensions.Options;
 using Serilog;
-using Vectra.BuildingBlocks.Configuration.Observability;
-using Vectra.BuildingBlocks.Configuration.Observability.Logging;
-using Vectra.Infrastructure.Logging;
+using Synentra.BuildingBlocks.Configuration.Observability;
+using Synentra.BuildingBlocks.Configuration.Observability.Logging;
+using Synentra.Infrastructure.Logging;
 
-namespace Vectra.Infrastructure.UnitTests.Logging;
+namespace Synentra.Infrastructure.UnitTests.Logging;
 
 public class LoggerFactoryCreateLoggerTests
 {

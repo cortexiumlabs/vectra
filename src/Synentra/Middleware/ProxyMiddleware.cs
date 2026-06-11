@@ -1,12 +1,12 @@
 ﻿using System.Text.Json;
-using Vectra.Application.Abstractions.CircuitBreaker;
-using Vectra.Application.Abstractions.Executions;
-using Vectra.Application.Abstractions.RateLimit;
-using Vectra.Application.Abstractions.Security;
-using Vectra.Application.Models;
-using Vectra.Infrastructure.Decision;
+using Synentra.Application.Abstractions.CircuitBreaker;
+using Synentra.Application.Abstractions.Executions;
+using Synentra.Application.Abstractions.RateLimit;
+using Synentra.Application.Abstractions.Security;
+using Synentra.Application.Models;
+using Synentra.Infrastructure.Decision;
 
-namespace Vectra.Middleware;
+namespace Synentra.Middleware;
 
 public class ProxyMiddleware
 {

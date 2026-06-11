@@ -1,10 +1,10 @@
 using Microsoft.EntityFrameworkCore;
-using Vectra.Domain.AuditTrails;
-using Vectra.Infrastructure.Persistence.Sqlite.Contexts;
-using Vectra.Infrastructure.Persistence.Sqlite.Repositories;
-using Vectra.Infrastructure.Persistence.Sqlite.UnitTests.Helpers;
+using Synentra.Domain.AuditTrails;
+using Synentra.Infrastructure.Persistence.Sqlite.Contexts;
+using Synentra.Infrastructure.Persistence.Sqlite.Repositories;
+using Synentra.Infrastructure.Persistence.Sqlite.UnitTests.Helpers;
 
-namespace Vectra.Infrastructure.Persistence.Sqlite.UnitTests.Repositories;
+namespace Synentra.Infrastructure.Persistence.Sqlite.UnitTests.Repositories;
 
 public class AuditRepositoryTests
 {

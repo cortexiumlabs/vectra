@@ -2,9 +2,9 @@ using Azure.Extensions.AspNetCore.Configuration.Secrets;
 using Azure.Identity;
 using Azure.Security.KeyVault.Secrets;
 using Microsoft.Extensions.Configuration;
-using Vectra.BuildingBlocks.Configuration.SecretManagement;
+using Synentra.BuildingBlocks.Configuration.SecretManagement;
 
-namespace Vectra.Infrastructure.SecretManagement.Providers;
+namespace Synentra.Infrastructure.SecretManagement.Providers;
 
 internal sealed class AzureKeyVaultSecretProvider : ISecretProvider
 {

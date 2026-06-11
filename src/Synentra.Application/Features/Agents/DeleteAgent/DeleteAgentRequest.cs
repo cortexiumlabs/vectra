@@ -1,7 +1,7 @@
-﻿using Vectra.Application.Abstractions.Dispatchers;
-using Vectra.BuildingBlocks.Results;
+﻿using Synentra.Application.Abstractions.Dispatchers;
+using Synentra.BuildingBlocks.Results;
 
-namespace Vectra.Application.Features.Agents.DeleteAgent;
+namespace Synentra.Application.Features.Agents.DeleteAgent;
 
 public class DeleteAgentRequest : IRequest<Result<Abstractions.Dispatchers.Void>>
 {

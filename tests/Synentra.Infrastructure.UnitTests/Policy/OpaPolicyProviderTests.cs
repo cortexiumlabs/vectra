@@ -5,11 +5,11 @@ using Microsoft.Extensions.Options;
 using NSubstitute;
 using System.Net;
 using System.Text.Json;
-using Vectra.Application.Abstractions.Executions;
-using Vectra.BuildingBlocks.Configuration.Policy;
-using Vectra.Infrastructure.Policy.Providers;
+using Synentra.Application.Abstractions.Executions;
+using Synentra.BuildingBlocks.Configuration.Policy;
+using Synentra.Infrastructure.Policy.Providers;
 
-namespace Vectra.Infrastructure.UnitTests.Policy;
+namespace Synentra.Infrastructure.UnitTests.Policy;
 
 public class OpaPolicyProviderTests
 {
@@ -23,7 +23,7 @@ public class OpaPolicyProviderTests
                 Opa = opa ?? new OpaPolicyConfiguration
                 {
                     BaseUrl = "http://opa.local",
-                    Path = "/v1/data/vectra/allow",
+                    Path = "/v1/data/synentra/allow",
                     Timeout = TimeSpan.FromSeconds(5)
                 }
             }

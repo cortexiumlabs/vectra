@@ -1,4 +1,4 @@
-﻿namespace Vectra.BuildingBlocks.Configuration.HumanInTheLoop;
+﻿namespace Synentra.BuildingBlocks.Configuration.HumanInTheLoop;
 
 /// <summary>
 /// Configuration for Slack notifications.
@@ -15,7 +15,7 @@ public class SlackNotificationConfiguration
     public string? Channel { get; set; }
 
     /// <summary>Optional username for the bot.</summary>
-    public string? Username { get; set; } = "Vectra HITL";
+    public string? Username { get; set; } = "Synentra HITL";
 
     /// <summary>Optional icon emoji for the bot.</summary>
     public string? IconEmoji { get; set; } = ":robot_face:";

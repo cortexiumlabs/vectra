@@ -1,11 +1,11 @@
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
-using Vectra.Application.Abstractions.Executions;
-using Vectra.Application.Features.Policies.PolicyDetails;
-using Vectra.Domain.Policies;
+using Synentra.Application.Abstractions.Executions;
+using Synentra.Application.Features.Policies.PolicyDetails;
+using Synentra.Domain.Policies;
 
-namespace Vectra.Application.UnitTests.Features.Policies;
+namespace Synentra.Application.UnitTests.Features.Policies;
 
 public class PolicyDetailsHandlerTests
 {

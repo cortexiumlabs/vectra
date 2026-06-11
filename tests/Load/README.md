@@ -1,13 +1,13 @@
-# Vectra – K6 Load Test
+# Synentra – K6 Load Test
 
-Simulates **1 000 concurrent AI-agent VUs** sustaining **~5 000 req/s** against a running Vectra instance.
+Simulates **1 000 concurrent AI-agent VUs** sustaining **~5 000 req/s** against a running Synentra instance.
 
 ## Prerequisites
 
 | Tool | Version |
 |------|---------|
 | [k6](https://k6.io/docs/get-started/installation/) | ≥ 0.50 |
-| Vectra API | running and reachable |
+| Synentra API | running and reachable |
 
 Install k6 on Windows:
 ```powershell
@@ -22,7 +22,7 @@ choco install k6
 
 ```powershell
 # From repo root
-k6 run tests/load/k6/vectra_load_test.js
+k6 run tests/load/k6/synentra_load_test.js
 ```
 
 All defaults target `http://localhost:7080` with 1 000 VUs / 5 000 req/s.
@@ -33,7 +33,7 @@ All defaults target `http://localhost:7080` with 1 000 VUs / 5 000 req/s.
 
 | Variable           | Default                    | Description                        |
 |--------------------|----------------------------|------------------------------------|
-| `BASE_URL`         | `http://localhost:7080`    | Vectra API base URL                |
+| `BASE_URL`         | `http://localhost:7080`    | Synentra API base URL                |
 | `TARGET_RPS`       | `5000`                     | Target requests per second         |
 | `VUS`              | `1000`                     | Number of concurrent virtual users |
 | `RAMP_DURATION`    | `30s`                      | Ramp-up period before steady state |
@@ -44,11 +44,11 @@ Override via `-e` flags:
 
 ```powershell
 k6 run `
-  -e BASE_URL=https://vectra.internal `
+  -e BASE_URL=https://synentra.internal `
   -e VUS=500 `
   -e TARGET_RPS=2500 `
   -e STEADY_DURATION=10m `
-  tests/load/vectra_load_test_without_policy.js
+  tests/load/synentra_load_test_without_policy.js
 ```
 
 ---
@@ -86,7 +86,7 @@ k6 run `
 ## HTML Report
 
 ```powershell
-k6 run --out json=results.json tests/Load/vectra_load_test_without_policy.js
+k6 run --out json=results.json tests/Load/synentra_load_test_without_policy.js
 # then open with k6 reporter or Grafana k6 dashboard
 ```
 
@@ -98,7 +98,7 @@ k6 run --out json=results.json tests/Load/vectra_load_test_without_policy.js
 - name: Run K6 load test
   uses: grafana/k6-action@v0.3.1
   with:
-    filename: tests/Load/vectra_load_test_without_policy.js
+    filename: tests/Load/synentra_load_test_without_policy.js
   env:
     BASE_URL: ${{ secrets.STAGING_URL }}
     TARGET_RPS: "1000"

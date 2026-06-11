@@ -1,8 +1,8 @@
 using FluentAssertions;
-using Vectra.BuildingBlocks.Configuration.Semantic;
+using Synentra.BuildingBlocks.Configuration.Semantic;
 using Xunit;
 
-namespace Vectra.BuildingBlocks.UnitTests.Configuration.Semantic;
+namespace Synentra.BuildingBlocks.UnitTests.Configuration.Semantic;
 
 public class SemanticConfigurationTests
 {

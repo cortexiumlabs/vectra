@@ -4,11 +4,11 @@ using Microsoft.Extensions.Options;
 using NSubstitute;
 using System.Net;
 using System.Text.Json;
-using Vectra.Application.Abstractions.Executions;
-using Vectra.BuildingBlocks.Configuration.HumanInTheLoop;
-using Vectra.Infrastructure.HumanInTheLoop.Notifiers;
+using Synentra.Application.Abstractions.Executions;
+using Synentra.BuildingBlocks.Configuration.HumanInTheLoop;
+using Synentra.Infrastructure.HumanInTheLoop.Notifiers;
 
-namespace Vectra.Infrastructure.UnitTests.HumanInTheLoop.Notifiers;
+namespace Synentra.Infrastructure.UnitTests.HumanInTheLoop.Notifiers;
 
 public class SlackNotifierTests
 {
@@ -25,7 +25,7 @@ public class SlackNotifierTests
                 {
                     Enabled = true,
                     WebhookUrl = "https://hooks.slack.com/services/TEST",
-                    Username = "Vectra Bot",
+                    Username = "Synentra Bot",
                     IconEmoji = ":robot:"
                 }
             }
@@ -102,7 +102,7 @@ public class SlackNotifierTests
 
         payload.GetProperty("text").GetString().Should().Contain("HITL Review Required");
         payload.GetProperty("text").GetString().Should().Contain(notification.Id);
-        payload.GetProperty("username").GetString().Should().Be("Vectra Bot");
+        payload.GetProperty("username").GetString().Should().Be("Synentra Bot");
         payload.GetProperty("icon_emoji").GetString().Should().Be(":robot:");
     }
 

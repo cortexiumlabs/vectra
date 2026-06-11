@@ -1,10 +1,10 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Vectra.BuildingBlocks.Errors;
-using Vectra.BuildingBlocks.Results;
-using Vectra.Extensions;
+using Synentra.BuildingBlocks.Errors;
+using Synentra.BuildingBlocks.Results;
+using Synentra.Extensions;
 
-namespace Vectra.UnitTests.Extensions;
+namespace Synentra.UnitTests.Extensions;
 
 public class ResultExtensionsTests
 {

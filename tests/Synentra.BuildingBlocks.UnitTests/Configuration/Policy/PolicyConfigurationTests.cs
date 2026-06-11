@@ -1,8 +1,8 @@
 using FluentAssertions;
-using Vectra.BuildingBlocks.Configuration.Policy;
+using Synentra.BuildingBlocks.Configuration.Policy;
 using Xunit;
 
-namespace Vectra.BuildingBlocks.UnitTests.Configuration.Policy;
+namespace Synentra.BuildingBlocks.UnitTests.Configuration.Policy;
 
 public class PolicyConfigurationTests
 {
@@ -47,7 +47,7 @@ public class PolicyConfigurationTests
         var config = new OpaPolicyConfiguration();
 
         config.BaseUrl.Should().BeEmpty();
-        config.Path.Should().Be("/v1/data/vectra/authz");
+        config.Path.Should().Be("/v1/data/synentra/authz");
         config.Timeout.Should().Be(TimeSpan.FromSeconds(5));
     }
 

@@ -1,7 +1,7 @@
-﻿using Vectra.BuildingBlocks.Configuration.System.Storage.Cache;
-using Vectra.BuildingBlocks.Configuration.System.Storage.Database;
+﻿using Synentra.BuildingBlocks.Configuration.System.Storage.Cache;
+using Synentra.BuildingBlocks.Configuration.System.Storage.Database;
 
-namespace Vectra.BuildingBlocks.Configuration.System;
+namespace Synentra.BuildingBlocks.Configuration.System;
 
 public class StorageConfiguration
 {

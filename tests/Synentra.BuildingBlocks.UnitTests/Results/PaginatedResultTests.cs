@@ -1,9 +1,9 @@
 using FluentAssertions;
-using Vectra.BuildingBlocks.Errors;
-using Vectra.BuildingBlocks.Results;
+using Synentra.BuildingBlocks.Errors;
+using Synentra.BuildingBlocks.Results;
 using Xunit;
 
-namespace Vectra.BuildingBlocks.UnitTests.Results;
+namespace Synentra.BuildingBlocks.UnitTests.Results;
 
 public class PaginatedResultTests
 {
@@ -35,7 +35,7 @@ public class PaginatedResultTests
     [Fact]
     public void Failure_ShouldReturnFailureResultWithEmptyItems()
     {
-        var error = Error.Failure(VectraErrors.SystemFailure, "Failure");
+        var error = Error.Failure(SynentraErrors.SystemFailure, "Failure");
 
         var result = PaginatedResult<string>.Failure(error);
 
@@ -47,7 +47,7 @@ public class PaginatedResultTests
     [Fact]
     public async Task FailureAsync_ShouldReturnFailureResult()
     {
-        var error = Error.Failure(VectraErrors.SystemFailure, "Failure");
+        var error = Error.Failure(SynentraErrors.SystemFailure, "Failure");
 
         var result = await PaginatedResult<string>.FailureAsync(error);
 

@@ -2,23 +2,23 @@
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Options;
 using System.Diagnostics.CodeAnalysis;
-using Vectra.Application.Abstractions.Serializations;
-using Vectra.BuildingBlocks.Configuration.System;
-using Vectra.HealthCheck;
-using Vectra.Infrastructure.Persistence.Common;
-using Vectra.Middleware;
+using Synentra.Application.Abstractions.Serializations;
+using Synentra.BuildingBlocks.Configuration.System;
+using Synentra.HealthCheck;
+using Synentra.Infrastructure.Persistence.Common;
+using Synentra.Middleware;
 
-namespace Vectra.Extensions;
+namespace Synentra.Extensions;
 
 public static class ApplicationBuilderExtensions
 {
-    public static IApplicationBuilder UseVectraCustomException(this IApplicationBuilder app)
+    public static IApplicationBuilder UseSynentraCustomException(this IApplicationBuilder app)
     {
         app.UseMiddleware<ExceptionMiddleware>();
         return app;
     }
 
-    public static IApplicationBuilder UseVectraCustomHeaders(this IApplicationBuilder app)
+    public static IApplicationBuilder UseSynentraCustomHeaders(this IApplicationBuilder app)
     {
         // Inject IVersion via middleware instead of locating from ApplicationServices
         app.UseMiddleware<VersionHeaderMiddleware>();
@@ -26,7 +26,7 @@ public static class ApplicationBuilderExtensions
     }
 
     [ExcludeFromCodeCoverage]
-    public static IApplicationBuilder UseVectraHealthCheck(this IApplicationBuilder app)
+    public static IApplicationBuilder UseSynentraHealthCheck(this IApplicationBuilder app)
     {
         app.UseEndpoints(endpoints =>
         {
@@ -58,7 +58,7 @@ public static class ApplicationBuilderExtensions
     }
 
     [ExcludeFromCodeCoverage]
-    public static IApplicationBuilder UseVectraApiDocumentation(this IApplicationBuilder app)
+    public static IApplicationBuilder UseSynentraApiDocumentation(this IApplicationBuilder app)
     {
         using var serviceScope = app.ApplicationServices.CreateScope();
         app.UseSwagger(options =>
@@ -69,7 +69,7 @@ public static class ApplicationBuilderExtensions
         app.UseSwaggerUI(options =>
         {
             options.RoutePrefix = "open-api";
-            options.SwaggerEndpoint($"vectra/specifications.json", $"Vectra API");
+            options.SwaggerEndpoint($"synentra/specifications.json", $"Synentra API");
         });
 
         app.UseEndpoints(endpoints =>
@@ -93,7 +93,7 @@ public static class ApplicationBuilderExtensions
         return app;
     }
 
-    public static IApplicationBuilder UseVectraHttps(this IApplicationBuilder app)
+    public static IApplicationBuilder UseSynentraHttps(this IApplicationBuilder app)
     {
         using var scope = app.ApplicationServices.CreateScope();
         var serverConfiguration = scope.ServiceProvider.GetRequiredService<IOptions<SystemConfiguration>>();

@@ -1,4 +1,4 @@
-﻿namespace Vectra.HealthCheck;
+﻿namespace Synentra.HealthCheck;
 
 public class HealthCheckResponse
 {

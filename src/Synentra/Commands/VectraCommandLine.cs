@@ -1,16 +1,16 @@
 ﻿using System.CommandLine;
-using Vectra.Services;
+using Synentra.Services;
 
-namespace Vectra.Commands;
+namespace Synentra.Commands;
 
-internal static class VectraCommandLine
+internal static class SynentraCommandLine
 {
-    internal static Func<IVectraApplicationRunner> RunnerFactory = null!;
+    internal static Func<ISynentraApplicationRunner> RunnerFactory = null!;
 
-    static VectraCommandLine()
+    static SynentraCommandLine()
     {
         RunnerFactory = () =>
-            new VectraApplicationRunner(
+            new SynentraApplicationRunner(
                 new DefaultWebApplicationFactory(),
                 new SplashScreen(),
                 new StartupConfiguration());
@@ -20,11 +20,11 @@ internal static class VectraCommandLine
     {
         var versionOption = new Option<bool>("--version", "-v")
         {
-            Description = "Show the current Vectra version."
+            Description = "Show the current Synentra version."
         };
 
         var rootCommand = new RootCommand(
-            "VECTRA – Intent-Aware Governance Gateway for Autonomous AI Agents");
+            "SYNENTRA – Intent-Aware Governance Gateway for Autonomous AI Agents");
 
         var builtIn =
             rootCommand.Options.OfType<VersionOption>().FirstOrDefault();
@@ -39,7 +39,7 @@ internal static class VectraCommandLine
             if (parseResult.GetValue(versionOption))
             {
                 Console.WriteLine(
-                    $"Vectra {VectraVersion.GetApplicationVersion()}");
+                    $"Synentra {SynentraVersion.GetApplicationVersion()}");
 
                 return;
             }

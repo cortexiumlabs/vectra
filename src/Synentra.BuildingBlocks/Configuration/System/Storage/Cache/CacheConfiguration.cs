@@ -1,7 +1,7 @@
-﻿namespace Vectra.BuildingBlocks.Configuration.System.Storage.Cache;
+﻿namespace Synentra.BuildingBlocks.Configuration.System.Storage.Cache;
 
 public class CacheConfiguration
 {
     public string DefaultProvider { get; set; } = "Redis";
-    public CatchProviders Providers { get; set; } = new();
+    public CacheProviders Providers { get; set; } = new();
 }

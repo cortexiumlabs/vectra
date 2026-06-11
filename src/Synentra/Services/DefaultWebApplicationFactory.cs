@@ -1,6 +1,6 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 
-namespace Vectra.Services;
+namespace Synentra.Services;
 
 [ExcludeFromCodeCoverage]
 public sealed class DefaultWebApplicationFactory : IWebApplicationFactory

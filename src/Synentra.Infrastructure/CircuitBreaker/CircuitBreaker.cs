@@ -1,10 +1,10 @@
 using System.Collections.Concurrent;
 using Microsoft.Extensions.Options;
-using Vectra.Application.Abstractions.CircuitBreaker;
-using Vectra.BuildingBlocks.Configuration.System;
-using Vectra.BuildingBlocks.Configuration.System.CircuitBreaker;
+using Synentra.Application.Abstractions.CircuitBreaker;
+using Synentra.BuildingBlocks.Configuration.System;
+using Synentra.BuildingBlocks.Configuration.System.CircuitBreaker;
 
-namespace Vectra.Infrastructure.CircuitBreaker;
+namespace Synentra.Infrastructure.CircuitBreaker;
 
 /// <summary>
 /// Simple per-host circuit breaker (Closed → Open → HalfOpen → Closed).

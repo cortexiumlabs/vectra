@@ -1,13 +1,13 @@
 using FluentAssertions;
 using Microsoft.Extensions.Logging.Abstractions;
 using NSubstitute;
-using Vectra.Application.Abstractions.Caches;
-using Vectra.Application.Abstractions.Executions;
-using Vectra.Domain.Policies;
-using Vectra.Infrastructure.Caches;
-using Vectra.Infrastructure.Policy;
+using Synentra.Application.Abstractions.Caches;
+using Synentra.Application.Abstractions.Executions;
+using Synentra.Domain.Policies;
+using Synentra.Infrastructure.Caches;
+using Synentra.Infrastructure.Policy;
 
-namespace Vectra.Infrastructure.UnitTests.Policy;
+namespace Synentra.Infrastructure.UnitTests.Policy;
 
 public class PolicyCacheServiceTests
 {
@@ -30,7 +30,7 @@ public class PolicyCacheServiceTests
     private IPolicyCacheService CreateSut()
     {
         var type = typeof(FileSystemPolicyLoader).Assembly
-            .GetType("Vectra.Infrastructure.Policy.PolicyCacheService")!;
+            .GetType("Synentra.Infrastructure.Policy.PolicyCacheService")!;
         // Create a typed NullLogger matching ILogger<PolicyCacheService> via reflection
         var typedNullLoggerType = typeof(NullLogger<>).MakeGenericType(type);
         var logger = Activator.CreateInstance(typedNullLoggerType)!;

@@ -1,7 +1,7 @@
 ﻿using System.Reflection;
-using Vectra.Endpoints;
+using Synentra.Endpoints;
 
-namespace Vectra.Extensions;
+namespace Synentra.Extensions;
 
 public static class WebApplicationExtensions
 {

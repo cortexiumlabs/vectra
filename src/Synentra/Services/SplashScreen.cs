@@ -1,6 +1,6 @@
 ﻿using System.Reflection;
 
-namespace Vectra.Services;
+namespace Synentra.Services;
 
 internal class SplashScreen: ISplashScreen
 {
@@ -8,7 +8,7 @@ internal class SplashScreen: ISplashScreen
 
     public void Render()
     {
-        var version = VectraVersion.GetApplicationVersion();
+        var version = SynentraVersion.GetApplicationVersion();
         var assembly = Assembly.GetExecutingAssembly();
 
         using var stream = assembly.GetManifestResourceStream(ResourceName)
@@ -21,7 +21,7 @@ internal class SplashScreen: ISplashScreen
         Console.WriteLine(splashContent);
         Console.ForegroundColor = ConsoleColor.Cyan;
         Console.WriteLine($"    v{version} | © Cortexium Labs. All rights reserved.");
-        Console.WriteLine("    https://cortexiumlabs.com/vectra");
+        Console.WriteLine("    https://synentra.io");
         Console.WriteLine("    ------------------------------------------------");
         Console.WriteLine("    Intent-Aware Governance for Secure, Observable,");
         Console.WriteLine("    and Controlled Interactions Across Autonomous");

@@ -1,10 +1,10 @@
 using FluentAssertions;
-using Vectra.Application.Errors;
-using Vectra.Application.Exceptions;
-using Vectra.BuildingBlocks.Errors;
-using AppException = Vectra.Application.Exceptions.ApplicationException;
+using Synentra.Application.Errors;
+using Synentra.Application.Exceptions;
+using Synentra.BuildingBlocks.Errors;
+using AppException = Synentra.Application.Exceptions.ApplicationException;
 
-namespace Vectra.Application.UnitTests.Exceptions;
+namespace Synentra.Application.UnitTests.Exceptions;
 
 file sealed class ConcreteApplicationException : AppException
 {
@@ -39,6 +39,6 @@ public class ApplicationExceptionTests
         var exception = new ConcreteApplicationException(
             ApplicationErrorCodes.AgentNotFound, "Agent missing");
 
-        exception.ToString().Should().Contain("VEC");
+        exception.ToString().Should().Contain("SYN");
     }
 }

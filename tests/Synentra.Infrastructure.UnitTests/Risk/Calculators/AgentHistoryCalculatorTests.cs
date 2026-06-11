@@ -1,11 +1,11 @@
 using FluentAssertions;
 using NSubstitute;
-using Vectra.Application.Abstractions.Persistence;
-using Vectra.Application.Models;
-using Vectra.Domain.Agents;
-using Vectra.Infrastructure.Risk.Calculators;
+using Synentra.Application.Abstractions.Persistence;
+using Synentra.Application.Models;
+using Synentra.Domain.Agents;
+using Synentra.Infrastructure.Risk.Calculators;
 
-namespace Vectra.Infrastructure.UnitTests.Risk.Calculators;
+namespace Synentra.Infrastructure.UnitTests.Risk.Calculators;
 
 public class AgentHistoryCalculatorTests
 {

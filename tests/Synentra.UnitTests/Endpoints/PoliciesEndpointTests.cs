@@ -1,13 +1,13 @@
 using Microsoft.AspNetCore.Http;
 using NSubstitute;
-using Vectra.Application.Abstractions.Dispatchers;
-using Vectra.Application.Features.Policies.PoliciesList;
-using Vectra.Application.Features.Policies.PolicyDetails;
-using Vectra.BuildingBlocks.Errors;
-using Vectra.BuildingBlocks.Results;
-using Vectra.Endpoints;
+using Synentra.Application.Abstractions.Dispatchers;
+using Synentra.Application.Features.Policies.PoliciesList;
+using Synentra.Application.Features.Policies.PolicyDetails;
+using Synentra.BuildingBlocks.Errors;
+using Synentra.BuildingBlocks.Results;
+using Synentra.Endpoints;
 
-namespace Vectra.UnitTests.Endpoints;
+namespace Synentra.UnitTests.Endpoints;
 
 public class PoliciesEndpointTests
 {
@@ -57,8 +57,8 @@ public class PoliciesEndpointTests
 
         await _dispatcher.Received(1).Dispatch(
             Arg.Is<IAction<PaginatedResult<PoliciesListResult>>>(r =>
-                ((Vectra.Application.Features.Policies.PoliciesList.PoliciesListRequest)r).Page == 1 &&
-                ((Vectra.Application.Features.Policies.PoliciesList.PoliciesListRequest)r).PageSize == 25),
+                ((Synentra.Application.Features.Policies.PoliciesList.PoliciesListRequest)r).Page == 1 &&
+                ((Synentra.Application.Features.Policies.PoliciesList.PoliciesListRequest)r).PageSize == 25),
             Arg.Any<CancellationToken>());
     }
 

@@ -1,11 +1,11 @@
 ﻿using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Vectra.Application.Abstractions.Executions;
-using Vectra.Application.Abstractions.Serializations;
-using Vectra.BuildingBlocks.Configuration.Policy;
-using Vectra.Domain.Policies;
+using Synentra.Application.Abstractions.Executions;
+using Synentra.Application.Abstractions.Serializations;
+using Synentra.BuildingBlocks.Configuration.Policy;
+using Synentra.Domain.Policies;
 
-namespace Vectra.Infrastructure.Policy;
+namespace Synentra.Infrastructure.Policy;
 
 public class FileSystemPolicyLoader : IPolicyLoader
 {

@@ -1,10 +1,10 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
-using Vectra.Endpoints;
-using Vectra.Extensions;
+using Synentra.Endpoints;
+using Synentra.Extensions;
 
-namespace Vectra.UnitTests.Extensions;
+namespace Synentra.UnitTests.Extensions;
 
 public class WebApplicationExtensionsTests
 {

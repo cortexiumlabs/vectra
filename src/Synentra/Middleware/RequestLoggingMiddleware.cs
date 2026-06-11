@@ -1,7 +1,7 @@
 using System.Diagnostics;
-using Vectra.Application.Abstractions.Versioning;
+using Synentra.Application.Abstractions.Versioning;
 
-namespace Vectra.Middleware;
+namespace Synentra.Middleware;
 
 public sealed class RequestLoggingMiddleware
 {

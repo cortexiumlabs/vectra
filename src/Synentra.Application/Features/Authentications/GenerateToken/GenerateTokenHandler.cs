@@ -1,13 +1,13 @@
-﻿using Vectra.Application.Abstractions.Dispatchers;
-using Vectra.Application.Abstractions.Executions;
-using Vectra.Application.Abstractions.Persistence;
-using Vectra.Application.Abstractions.Security;
-using Vectra.Application.Errors;
-using Vectra.BuildingBlocks.Errors;
-using Vectra.BuildingBlocks.Results;
-using Vectra.Domain.Agents;
+﻿using Synentra.Application.Abstractions.Dispatchers;
+using Synentra.Application.Abstractions.Executions;
+using Synentra.Application.Abstractions.Persistence;
+using Synentra.Application.Abstractions.Security;
+using Synentra.Application.Errors;
+using Synentra.BuildingBlocks.Errors;
+using Synentra.BuildingBlocks.Results;
+using Synentra.Domain.Agents;
 
-namespace Vectra.Application.Features.Authentications.GenerateToken;
+namespace Synentra.Application.Features.Authentications.GenerateToken;
 
 internal class GenerateTokenHandler : IActionHandler<GenerateTokenRequest, Result<GenerateTokenResult>>
 {

@@ -1,13 +1,13 @@
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
-using Vectra.Application.Abstractions.Executions;
-using Vectra.Application.Abstractions.Persistence;
-using Vectra.Application.Features.Agents.AssignPolicy;
-using Vectra.Domain.Agents;
-using Vectra.Domain.Policies;
+using Synentra.Application.Abstractions.Executions;
+using Synentra.Application.Abstractions.Persistence;
+using Synentra.Application.Features.Agents.AssignPolicy;
+using Synentra.Domain.Agents;
+using Synentra.Domain.Policies;
 
-namespace Vectra.Application.UnitTests.Features.Agents;
+namespace Synentra.Application.UnitTests.Features.Agents;
 
 public class AssignPolicyHandlerTests
 {

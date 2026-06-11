@@ -1,7 +1,7 @@
-﻿using Vectra.Application.Models;
-using Vectra.Domain.Policies;
+﻿using Synentra.Application.Models;
+using Synentra.Domain.Policies;
 
-namespace Vectra.Application.Abstractions.Executions;
+namespace Synentra.Application.Abstractions.Executions;
 
 public interface IDecisionEngine
 {

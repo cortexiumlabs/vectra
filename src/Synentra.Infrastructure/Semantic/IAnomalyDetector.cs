@@ -1,6 +1,6 @@
-﻿using Vectra.Application.Models;
+﻿using Synentra.Application.Models;
 
-namespace Vectra.Infrastructure.Semantic;
+namespace Synentra.Infrastructure.Semantic;
 
 public interface IAnomalyDetector
 {

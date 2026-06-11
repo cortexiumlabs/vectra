@@ -3,12 +3,12 @@ using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using Vectra.Application.Abstractions.Executions;
-using Vectra.Domain.Agents;
-using Vectra.BuildingBlocks.Configuration.Security;
-using Vectra.BuildingBlocks.Configuration.Security.AgentAuth;
+using Synentra.Application.Abstractions.Executions;
+using Synentra.Domain.Agents;
+using Synentra.BuildingBlocks.Configuration.Security;
+using Synentra.BuildingBlocks.Configuration.Security.AgentAuth;
 
-namespace Vectra.Infrastructure.Security;
+namespace Synentra.Infrastructure.Security;
 
 public class JwtTokenService : ITokenService
 {

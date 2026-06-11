@@ -1,10 +1,10 @@
 using FluentAssertions;
 using Microsoft.Extensions.Options;
-using Vectra.BuildingBlocks.Configuration.System;
-using Vectra.BuildingBlocks.Configuration.System.RateLimit;
-using Vectra.Infrastructure.RateLimit;
+using Synentra.BuildingBlocks.Configuration.System;
+using Synentra.BuildingBlocks.Configuration.System.RateLimit;
+using Synentra.Infrastructure.RateLimit;
 
-namespace Vectra.Infrastructure.UnitTests.RateLimit;
+namespace Synentra.Infrastructure.UnitTests.RateLimit;
 
 public class AgentRateLimiterTests
 {

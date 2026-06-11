@@ -1,4 +1,4 @@
-﻿namespace Vectra.Application.Abstractions.Serializations;
+﻿namespace Synentra.Application.Abstractions.Serializations;
 
 public interface ISerializer
 {

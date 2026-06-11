@@ -1,7 +1,7 @@
 ﻿using System.Text.Json;
-using Vectra.Application.Abstractions.Serializations;
+using Synentra.Application.Abstractions.Serializations;
 
-namespace Vectra.Infrastructure.Serializations.Json;
+namespace Synentra.Infrastructure.Serializations.Json;
 
 public class JsonSerializer : ISerializer
 {

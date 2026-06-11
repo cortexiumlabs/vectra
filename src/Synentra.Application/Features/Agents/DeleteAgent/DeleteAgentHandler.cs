@@ -1,9 +1,9 @@
-﻿using Vectra.Application.Abstractions.Dispatchers;
-using Vectra.Application.Abstractions.Persistence;
-using Vectra.BuildingBlocks.Results;
-using Void = Vectra.Application.Abstractions.Dispatchers.Void;
+﻿using Synentra.Application.Abstractions.Dispatchers;
+using Synentra.Application.Abstractions.Persistence;
+using Synentra.BuildingBlocks.Results;
+using Void = Synentra.Application.Abstractions.Dispatchers.Void;
 
-namespace Vectra.Application.Features.Agents.DeleteAgent;
+namespace Synentra.Application.Features.Agents.DeleteAgent;
 
 internal class DeleteAgentHandler : IActionHandler<DeleteAgentRequest, Result<Void>>
 {

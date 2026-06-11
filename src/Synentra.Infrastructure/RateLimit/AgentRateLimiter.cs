@@ -1,10 +1,10 @@
 using System.Collections.Concurrent;
 using Microsoft.Extensions.Options;
-using Vectra.Application.Abstractions.RateLimit;
-using Vectra.BuildingBlocks.Configuration.System;
-using Vectra.BuildingBlocks.Configuration.System.RateLimit;
+using Synentra.Application.Abstractions.RateLimit;
+using Synentra.BuildingBlocks.Configuration.System;
+using Synentra.BuildingBlocks.Configuration.System.RateLimit;
 
-namespace Vectra.Infrastructure.RateLimit;
+namespace Synentra.Infrastructure.RateLimit;
 
 /// <summary>
 /// Fixed-window per-agent rate limiter backed by an in-process concurrent dictionary.

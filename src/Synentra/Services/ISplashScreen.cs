@@ -1,4 +1,4 @@
-﻿namespace Vectra.Services;
+﻿namespace Synentra.Services;
 
 public interface ISplashScreen
 {

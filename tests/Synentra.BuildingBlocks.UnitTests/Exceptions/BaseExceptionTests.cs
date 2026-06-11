@@ -1,9 +1,9 @@
 using FluentAssertions;
-using Vectra.BuildingBlocks.Errors;
-using Vectra.BuildingBlocks.Exceptions;
+using Synentra.BuildingBlocks.Errors;
+using Synentra.BuildingBlocks.Exceptions;
 using Xunit;
 
-namespace Vectra.BuildingBlocks.UnitTests.Exceptions;
+namespace Synentra.BuildingBlocks.UnitTests.Exceptions;
 
 file sealed class TestException : BaseException
 {
@@ -19,7 +19,7 @@ public class BaseExceptionTests
     [Fact]
     public void Constructor_WithErrorCodeAndMessage_ShouldSetProperties()
     {
-        var errorCode = VectraErrors.SystemFailure;
+        var errorCode = SynentraErrors.SystemFailure;
 
         var ex = new TestException(errorCode, "System failed");
 
@@ -33,7 +33,7 @@ public class BaseExceptionTests
     {
         var inner = new InvalidOperationException("inner");
 
-        var ex = new TestException(VectraErrors.SystemFailure, "outer", inner);
+        var ex = new TestException(SynentraErrors.SystemFailure, "outer", inner);
 
         ex.InnerException.Should().Be(inner);
     }
@@ -41,18 +41,18 @@ public class BaseExceptionTests
     [Fact]
     public void Constructor_WithError_ShouldDeriveMessageFromError()
     {
-        var error = Error.Failure(VectraErrors.SystemFailure, "Derived message");
+        var error = Error.Failure(SynentraErrors.SystemFailure, "Derived message");
 
         var ex = new TestException(error);
 
-        ex.ErrorCode.Should().Be(VectraErrors.SystemFailure);
+        ex.ErrorCode.Should().Be(SynentraErrors.SystemFailure);
         ex.Message.Should().Contain("Derived message");
     }
 
     [Fact]
     public void ToString_ShouldReturnFormattedString()
     {
-        var errorCode = VectraErrors.SystemFailure;
+        var errorCode = SynentraErrors.SystemFailure;
 
         var ex = new TestException(errorCode, "System failed");
 

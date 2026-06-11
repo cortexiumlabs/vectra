@@ -1,11 +1,11 @@
 ﻿using Microsoft.Extensions.Logging;
-using Vectra.Application.Abstractions.Dispatchers;
-using Vectra.Application.Abstractions.Persistence;
-using Vectra.Application.Errors;
-using Vectra.BuildingBlocks.Errors;
-using Vectra.BuildingBlocks.Results;
+using Synentra.Application.Abstractions.Dispatchers;
+using Synentra.Application.Abstractions.Persistence;
+using Synentra.Application.Errors;
+using Synentra.BuildingBlocks.Errors;
+using Synentra.BuildingBlocks.Results;
 
-namespace Vectra.Application.Features.Agents.AgentsList;
+namespace Synentra.Application.Features.Agents.AgentsList;
 
 internal class AgentsListHandler : IActionHandler<AgentsListRequest, PaginatedResult<AgentsListResult>>
 {

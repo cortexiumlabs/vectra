@@ -1,10 +1,10 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using Vectra.Domain.Agents;
-using Vectra.Domain.AuditTrails;
-using Vectra.Infrastructure.Persistence.Common.Exceptions;
+using Synentra.Domain.Agents;
+using Synentra.Domain.AuditTrails;
+using Synentra.Infrastructure.Persistence.Common.Exceptions;
 
-namespace Vectra.Infrastructure.Persistence.Common;
+namespace Synentra.Infrastructure.Persistence.Common;
 
 public abstract class BaseDbContext : DbContext, IDatabaseContext
 {

@@ -1,9 +1,9 @@
 using FluentAssertions;
-using Vectra.BuildingBlocks.Errors;
-using Vectra.BuildingBlocks.Results;
+using Synentra.BuildingBlocks.Errors;
+using Synentra.BuildingBlocks.Results;
 using Xunit;
 
-namespace Vectra.BuildingBlocks.UnitTests.Results;
+namespace Synentra.BuildingBlocks.UnitTests.Results;
 
 public class ResultTests
 {
@@ -28,7 +28,7 @@ public class ResultTests
     [Fact]
     public void Failure_ShouldReturnFailureResult()
     {
-        var error = Error.Failure(VectraErrors.SystemFailure, "Something went wrong");
+        var error = Error.Failure(SynentraErrors.SystemFailure, "Something went wrong");
 
         var result = Result.Failure(error);
 
@@ -39,7 +39,7 @@ public class ResultTests
     [Fact]
     public async Task FailureAsync_ShouldReturnFailureResult()
     {
-        var error = Error.Failure(VectraErrors.SystemFailure, "Something went wrong");
+        var error = Error.Failure(SynentraErrors.SystemFailure, "Something went wrong");
 
         var result = await Result.FailureAsync(error);
 
@@ -72,7 +72,7 @@ public class ResultOfTTests
     [Fact]
     public void Failure_ShouldReturnFailureResultWithError()
     {
-        var error = Error.NotFound(VectraErrors.ResourceNotFound, "Resource not found");
+        var error = Error.NotFound(SynentraErrors.ResourceNotFound, "Resource not found");
 
         var result = Result<string>.Failure(error);
 
@@ -84,7 +84,7 @@ public class ResultOfTTests
     [Fact]
     public async Task FailureAsync_ShouldReturnFailureResultWithError()
     {
-        var error = Error.NotFound(VectraErrors.ResourceNotFound, "Resource not found");
+        var error = Error.NotFound(SynentraErrors.ResourceNotFound, "Resource not found");
 
         var result = await Result<string>.FailureAsync(error);
 
@@ -104,7 +104,7 @@ public class ResultOfTTests
     [Fact]
     public void ImplicitConversion_FromError_ShouldReturnFailure()
     {
-        var error = Error.Conflict(VectraErrors.DuplicateResource, "Duplicate resource");
+        var error = Error.Conflict(SynentraErrors.DuplicateResource, "Duplicate resource");
 
         Result<string> result = error;
 

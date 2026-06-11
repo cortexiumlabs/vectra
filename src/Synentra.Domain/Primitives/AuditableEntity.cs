@@ -1,4 +1,4 @@
-﻿namespace Vectra.Domain.Primitives;
+﻿namespace Synentra.Domain.Primitives;
 
 public abstract class AuditableEntity : AuditableEntity<Guid>
 {

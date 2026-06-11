@@ -1,7 +1,7 @@
 using FluentAssertions;
-using Vectra.Application.Abstractions.Security;
+using Synentra.Application.Abstractions.Security;
 
-namespace Vectra.Application.UnitTests.Abstractions.Security;
+namespace Synentra.Application.UnitTests.Abstractions.Security;
 
 public class AgentAuthResultTests
 {

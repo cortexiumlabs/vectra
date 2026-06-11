@@ -1,7 +1,7 @@
-﻿using Vectra.BuildingBlocks.Configuration.Security.AgentAuth;
-using Vectra.BuildingBlocks.Configuration.Security.AgentQuarantine;
+﻿using Synentra.BuildingBlocks.Configuration.Security.AgentAuth;
+using Synentra.BuildingBlocks.Configuration.Security.AgentQuarantine;
 
-namespace Vectra.BuildingBlocks.Configuration.Security;
+namespace Synentra.BuildingBlocks.Configuration.Security;
 
 public class SecurityConfiguration
 {

@@ -1,8 +1,8 @@
-﻿using Vectra.BuildingBlocks.Configuration.System.CircuitBreaker;
-using Vectra.BuildingBlocks.Configuration.System.RateLimit;
-using Vectra.BuildingBlocks.Configuration.System.Server;
+﻿using Synentra.BuildingBlocks.Configuration.System.CircuitBreaker;
+using Synentra.BuildingBlocks.Configuration.System.RateLimit;
+using Synentra.BuildingBlocks.Configuration.System.Server;
 
-namespace Vectra.BuildingBlocks.Configuration.System;
+namespace Synentra.BuildingBlocks.Configuration.System;
 
 public class SystemConfiguration
 {

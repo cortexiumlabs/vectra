@@ -1,6 +1,6 @@
-﻿using Vectra.Domain.Agents;
+﻿using Synentra.Domain.Agents;
 
-namespace Vectra.Application.Abstractions.Persistence;
+namespace Synentra.Application.Abstractions.Persistence;
 
 public interface IAgentRepository
 {

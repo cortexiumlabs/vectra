@@ -1,11 +1,11 @@
 using Microsoft.Extensions.Options;
-using Vectra.Application.Abstractions.Persistence;
-using Vectra.BuildingBlocks.Configuration.Security.AgentQuarantine;
-using Vectra.BuildingBlocks.Configuration.Security;
-using Vectra.Domain.Agents;
-using Vectra.Infrastructure.Security;
+using Synentra.Application.Abstractions.Persistence;
+using Synentra.BuildingBlocks.Configuration.Security.AgentQuarantine;
+using Synentra.BuildingBlocks.Configuration.Security;
+using Synentra.Domain.Agents;
+using Synentra.Infrastructure.Security;
 
-namespace Vectra.UnitTests.Services;
+namespace Synentra.UnitTests.Services;
 
 public class AgentRequestAccessServiceTests
 {

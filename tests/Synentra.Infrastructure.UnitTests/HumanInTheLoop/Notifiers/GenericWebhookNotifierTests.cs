@@ -4,11 +4,11 @@ using Microsoft.Extensions.Options;
 using NSubstitute;
 using System.Net;
 using System.Text.Json;
-using Vectra.Application.Abstractions.Executions;
-using Vectra.BuildingBlocks.Configuration.HumanInTheLoop;
-using Vectra.Infrastructure.HumanInTheLoop.Notifiers;
+using Synentra.Application.Abstractions.Executions;
+using Synentra.BuildingBlocks.Configuration.HumanInTheLoop;
+using Synentra.Infrastructure.HumanInTheLoop.Notifiers;
 
-namespace Vectra.Infrastructure.UnitTests.HumanInTheLoop.Notifiers;
+namespace Synentra.Infrastructure.UnitTests.HumanInTheLoop.Notifiers;
 
 public class GenericWebhookNotifierTests
 {

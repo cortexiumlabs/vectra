@@ -1,14 +1,14 @@
 ﻿using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Vectra.Application.Abstractions.Executions;
-using Vectra.Application.Abstractions.Persistence;
-using Vectra.Application.Models;
-using Vectra.BuildingBlocks.Clock;
-using Vectra.BuildingBlocks.Configuration.HumanInTheLoop;
-using Vectra.Domain.AuditTrails;
-using Vectra.Infrastructure.Caches;
+using Synentra.Application.Abstractions.Executions;
+using Synentra.Application.Abstractions.Persistence;
+using Synentra.Application.Models;
+using Synentra.BuildingBlocks.Clock;
+using Synentra.BuildingBlocks.Configuration.HumanInTheLoop;
+using Synentra.Domain.AuditTrails;
+using Synentra.Infrastructure.Caches;
 
-namespace Vectra.Infrastructure.HumanInTheLoop;
+namespace Synentra.Infrastructure.HumanInTheLoop;
 
 public class HitlService : IHitlService
 {

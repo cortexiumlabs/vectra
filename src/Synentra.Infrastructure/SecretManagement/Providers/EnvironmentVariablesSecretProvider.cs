@@ -1,7 +1,7 @@
 using Microsoft.Extensions.Configuration;
-using Vectra.BuildingBlocks.Configuration.SecretManagement;
+using Synentra.BuildingBlocks.Configuration.SecretManagement;
 
-namespace Vectra.Infrastructure.SecretManagement.Providers;
+namespace Synentra.Infrastructure.SecretManagement.Providers;
 
 internal sealed class EnvironmentVariablesSecretProvider : ISecretProvider
 {

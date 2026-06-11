@@ -1,12 +1,12 @@
 using Microsoft.AspNetCore.Mvc;
 using System.Text.Json;
-using Vectra.Application.Abstractions.Dispatchers;
-using Vectra.Application.Extensions;
-using Vectra.Application.Features.Simulations.SimulateDecision;
-using Vectra.Extensions;
-using Vectra.Infrastructure.Decision;
+using Synentra.Application.Abstractions.Dispatchers;
+using Synentra.Application.Extensions;
+using Synentra.Application.Features.Simulations.SimulateDecision;
+using Synentra.Extensions;
+using Synentra.Infrastructure.Decision;
 
-namespace Vectra.Endpoints;
+namespace Synentra.Endpoints;
 
 public class Simulate : EndpointGroupBase
 {

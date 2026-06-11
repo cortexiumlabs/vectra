@@ -1,9 +1,9 @@
 using FluentAssertions;
 using NSubstitute;
-using Vectra.Application.Abstractions.Caches;
-using Vectra.Infrastructure.Caches;
+using Synentra.Application.Abstractions.Caches;
+using Synentra.Infrastructure.Caches;
 
-namespace Vectra.Infrastructure.UnitTests.Caches;
+namespace Synentra.Infrastructure.UnitTests.Caches;
 
 public class CacheServiceTests
 {
