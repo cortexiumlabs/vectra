@@ -58,8 +58,8 @@ jobs:
 
       - name: Publish
         run: |
-          release_name="vectra-${{ matrix.title }}-${{ matrix.os_arch }}"
-          dotnet publish src/Vectra/Vectra.csproj \
+          release_name="synentra-${{ matrix.title }}-${{ matrix.os_arch }}"
+          dotnet publish src/Synentra/Synentra.csproj \
             -p:PublishSingleFile=true \
             -p:PublishReadyToRun=true \
             --runtime "${{ matrix.kind }}-${{ matrix.os_arch }}" \
@@ -79,5 +79,5 @@ jobs:
       - name: Upload binaries
         uses: actions/upload-artifact@v4
         with:
-          name: vectra-${{ matrix.title }}-${{ matrix.os_arch }}
+          name: synentra-${{ matrix.title }}-${{ matrix.os_arch }}
           path: ${{ github.workspace }}/dist

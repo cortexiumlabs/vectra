@@ -32,8 +32,8 @@ jobs:
         if: ${{ env.SONAR_TOKEN != '' }}
         run: |
           dotnet sonarscanner begin `
-            /k:"cortexiumlabs_vectra" `
-            /o:"cortexiumlabs" `
+            /k:"synentra_synentra" `
+            /o:"synentra" `
             /d:sonar.token="${{ secrets.SONAR_TOKEN }}" `
             /d:sonar.host.url="https://sonarcloud.io" `
             /d:sonar.cs.opencover.reportsPaths="coverage/**/coverage.opencover.xml" `

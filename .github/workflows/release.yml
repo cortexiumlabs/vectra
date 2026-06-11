@@ -1,4 +1,4 @@
-name: Vectra Release
+name: Synentra Release
 
 on:
   workflow_dispatch:
