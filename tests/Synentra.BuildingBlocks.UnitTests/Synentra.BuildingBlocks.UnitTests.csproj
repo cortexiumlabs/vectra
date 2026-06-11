@@ -22,7 +22,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\..\src\Vectra.BuildingBlocks\Vectra.BuildingBlocks.csproj" />
+        <ProjectReference Include="..\..\src\Synentra.BuildingBlocks\Synentra.BuildingBlocks.csproj" />
     </ItemGroup>
 
 </Project>

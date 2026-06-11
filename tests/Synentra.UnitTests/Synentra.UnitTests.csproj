@@ -21,9 +21,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Vectra\Vectra.csproj" />
-    <ProjectReference Include="..\..\src\Vectra.BuildingBlocks\Vectra.BuildingBlocks.csproj" />
-    <ProjectReference Include="..\..\src\Vectra.Application\Vectra.Application.csproj" />
+    <ProjectReference Include="..\..\src\Synentra\Synentra.csproj" />
+    <ProjectReference Include="..\..\src\Synentra.BuildingBlocks\Synentra.BuildingBlocks.csproj" />
+    <ProjectReference Include="..\..\src\Synentra.Application\Synentra.Application.csproj" />
   </ItemGroup>
 
   <ItemGroup>

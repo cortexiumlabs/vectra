@@ -26,7 +26,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\..\src\Vectra.Domain\Vectra.Domain.csproj" />
+		<ProjectReference Include="..\..\src\Synentra.Domain\Synentra.Domain.csproj" />
 	</ItemGroup>
 
 </Project>

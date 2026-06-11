@@ -8,8 +8,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Vectra.Application\Vectra.Application.csproj" />
-    <ProjectReference Include="..\..\src\Vectra.Domain\Vectra.Domain.csproj" />
+    <ProjectReference Include="..\..\src\Synentra.Application\Synentra.Application.csproj" />
+    <ProjectReference Include="..\..\src\Synentra.Domain\Synentra.Domain.csproj" />
   </ItemGroup>
 
   <ItemGroup>

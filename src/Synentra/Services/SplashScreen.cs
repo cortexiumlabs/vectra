@@ -4,7 +4,7 @@ namespace Vectra.Services;
 
 internal class SplashScreen: ISplashScreen
 {
-    private const string ResourceName = "Vectra.Resources.splash.txt";
+    private const string ResourceName = "Synentra.Resources.splash.txt";
 
     public void Render()
     {

@@ -22,11 +22,9 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
-			<_Parameter1>Vectra.UnitTests</_Parameter1>
-		</AssemblyAttribute>
+		<InternalsVisibleTo Include="Synentra.UnitTests" />
 	</ItemGroup>
-
+	
 	<ItemGroup>
 		<None Include="appsettings.Development.json">
 			<CopyToOutputDirectory>Never</CopyToOutputDirectory>
@@ -45,8 +43,8 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\Vectra.Infrastructure.Persistence.Sqlite\Vectra.Infrastructure.Persistence.Sqlite.csproj" />
-		<ProjectReference Include="..\Vectra.Infrastructure\Vectra.Infrastructure.csproj" />
+		<ProjectReference Include="..\Synentra.Infrastructure.Persistence.Sqlite\Synentra.Infrastructure.Persistence.Sqlite.csproj" />
+		<ProjectReference Include="..\Synentra.Infrastructure\Synentra.Infrastructure.csproj" />
 	</ItemGroup>
 
 	<Target Name="RemoveDevAppSettingsFromPublish" AfterTargets="ComputeFilesToPublish">

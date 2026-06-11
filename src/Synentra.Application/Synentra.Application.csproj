@@ -12,7 +12,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\Vectra.Domain\Vectra.Domain.csproj" />
+		<ProjectReference Include="..\Synentra.Domain\Synentra.Domain.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -21,7 +21,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<InternalsVisibleTo Include="Vectra.Application.UnitTests" />
+		<InternalsVisibleTo Include="Synentra.Application.UnitTests" />
 		<InternalsVisibleTo Include="DynamicProxyGenAssembly2" />
 	</ItemGroup>
 	

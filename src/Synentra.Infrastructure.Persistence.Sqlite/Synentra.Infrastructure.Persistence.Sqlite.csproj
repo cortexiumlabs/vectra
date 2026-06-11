@@ -12,7 +12,11 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-	  <ProjectReference Include="..\Vectra.BuildingBlocks\Vectra.BuildingBlocks.csproj" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0.5" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\Synentra.Infrastructure.Persistence.Common\Synentra.Infrastructure.Persistence.Common.csproj" />
 	</ItemGroup>
 
 </Project>
