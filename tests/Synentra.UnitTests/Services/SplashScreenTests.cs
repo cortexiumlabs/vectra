@@ -49,7 +49,7 @@ public class SplashScreenTests
     }
 
     [Fact]
-    public void Render_OutputContainsCortexiumBranding()
+    public void Render_OutputContainsSynentraBranding()
     {
         var writer = new StringWriter();
         var originalOut = Console.Out;

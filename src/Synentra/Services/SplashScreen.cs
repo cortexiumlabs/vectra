@@ -20,7 +20,7 @@ internal class SplashScreen: ISplashScreen
         Console.ForegroundColor = ConsoleColor.Cyan;
         Console.WriteLine(splashContent);
         Console.ForegroundColor = ConsoleColor.Cyan;
-        Console.WriteLine($"    v{version} | © Cortexium Labs. All rights reserved.");
+        Console.WriteLine($"    v{version} | © Synentra. All rights reserved.");
         Console.WriteLine("    https://synentra.io");
         Console.WriteLine("    ------------------------------------------------");
         Console.WriteLine("    Intent-Aware Governance for Secure, Observable,");
