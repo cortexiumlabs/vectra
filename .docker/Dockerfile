@@ -5,21 +5,21 @@ FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 ARG APP_VERSION="1.0.0"
 WORKDIR /src
 
-COPY Vectra.slnx .
+COPY Synentra.slnx .
 
-COPY src/Vectra/Vectra.csproj src/Vectra/
-COPY src/Vectra.Application/Vectra.Application.csproj src/Vectra.Application/
-COPY src/Vectra.Domain/Vectra.Domain.csproj src/Vectra.Domain/
-COPY src/Vectra.BuildingBlocks/Vectra.BuildingBlocks.csproj src/Vectra.BuildingBlocks/
-COPY src/Vectra.Infrastructure/Vectra.Infrastructure.csproj src/Vectra.Infrastructure/
-COPY src/Vectra.Infrastructure.Persistence.Common/Vectra.Infrastructure.Persistence.Common.csproj src/Vectra.Infrastructure.Persistence.Common/
-COPY src/Vectra.Infrastructure.Persistence.Sqlite/Vectra.Infrastructure.Persistence.Sqlite.csproj src/Vectra.Infrastructure.Persistence.Sqlite/
+COPY src/Synentra/Synentra.csproj src/Synentra/
+COPY src/Synentra.Application/Synentra.Application.csproj src/Synentra.Application/
+COPY src/Synentra.Domain/Synentra.Domain.csproj src/Synentra.Domain/
+COPY src/Synentra.BuildingBlocks/Synentra.BuildingBlocks.csproj src/Synentra.BuildingBlocks/
+COPY src/Synentra.Infrastructure/Synentra.Infrastructure.csproj src/Synentra.Infrastructure/
+COPY src/Synentra.Infrastructure.Persistence.Common/Synentra.Infrastructure.Persistence.Common.csproj src/Synentra.Infrastructure.Persistence.Common/
+COPY src/Synentra.Infrastructure.Persistence.Sqlite/Synentra.Infrastructure.Persistence.Sqlite.csproj src/Synentra.Infrastructure.Persistence.Sqlite/
 
-RUN dotnet restore src/Vectra/Vectra.csproj --runtime linux-x64
+RUN dotnet restore src/Synentra/Synentra.csproj --runtime linux-x64
 
 COPY src/ src/
 
-RUN dotnet publish "./src/Vectra/Vectra.csproj" -c Release -o /app/publish \
+RUN dotnet publish "./src/Synentra/Synentra.csproj" -c Release -o /app/publish \
     /p:UseAppHost=false \
     /p:Version=${APP_VERSION} \
     --runtime "linux-x64"
@@ -35,4 +35,4 @@ COPY --from=build /app/publish .
 
 EXPOSE 7080
 
-ENTRYPOINT ["dotnet", "vectra.dll"]
+ENTRYPOINT ["dotnet", "synentra.dll"]
