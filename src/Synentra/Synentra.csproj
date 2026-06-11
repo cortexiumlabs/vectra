@@ -8,9 +8,9 @@
 		<IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
 		<Title>Synentra</Title>
 		<Description>Intent-Aware Governance Gateway</Description>
-		<Company>Cortexium Labs</Company>
-		<Copyright>© Cortexium Labs. All rights reserved.</Copyright>
-		<Authors>Cortexium Labs</Authors>
+		<Company>Synentra</Company>
+		<Copyright>© Synentra. All rights reserved.</Copyright>
+		<Authors>Synentra</Authors>
 		<RepositoryUrl>https://github.com/synentra/synentra</RepositoryUrl>
 		<PackageProjectUrl>https://synentra.io</PackageProjectUrl>
 		<RepositoryType>git</RepositoryType>
