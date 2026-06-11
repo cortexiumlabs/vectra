@@ -6,7 +6,7 @@ labels: type:bug
 assignees: ''
 ---
 
-## What version of Vectra?
+## What version of Synentra?
 > e.g., 1.0.x
 
 ## Describe the bug
