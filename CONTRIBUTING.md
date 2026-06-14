@@ -1,66 +1,144 @@
 # Contribution Guidelines
 
-Thank you for your interest in contributing to **Vectra**!  
-We’re thrilled to collaborate with developers like you to make this project more powerful, stable, and innovative.
+Thank you for your interest in contributing to **Synentra**.
 
-Whether you’re here to:
+Synentra is an open, community-driven project, and we welcome contributions of all kinds — including code, documentation, design discussions, issue reporting, and community support.
 
-- 🐞 Report a bug  
-- 💬 Discuss the current state of the project  
-- 🔧 Submit a fix  
-- 💡 Propose a new feature  
-- 🧭 Become a maintainer  
+Whether you are:
 
-We welcome and appreciate your contribution!
+* 🐞 Reporting a bug
+* 💬 Participating in discussions
+* 🔧 Submitting a fix
+* 💡 Proposing a feature
+* 🧭 Participating in governance or maintainer activities
 
-## Development Workflow
-
-We use **GitHub** to manage our source code, issues, feature requests, and pull requests.  
-All changes to the codebase are made through **Pull Requests (PRs)** — following the principles of [GitHub Flow](https://guides.github.com/introduction/flow/index.html).
-
-### How to Contribute Code
-
-1. **Fork** the repository and create a new branch from `main`.  
-   Use a descriptive branch name, e.g.:
-   - `feature/vectra-ruleset`
-   - `fix/vectra-proxy-bug`
-2. **Implement your changes** — write clean, maintainable, and well-documented code.
-3. **Write tests** for any new or modified functionality.
-4. **Update documentation** if your changes affect public APIs or usage.
-5. **Run all tests** and ensure they pass successfully.
-6. **Follow coding standards** — maintain consistency with the existing style and linting rules.
-7. **Submit a Pull Request (PR)** including:
-   - A clear and concise description of your changes.
-   - References to related issues or discussions.
-   - Screenshots, logs, or examples where relevant.
-
-💡 *We actively review all pull requests and provide constructive feedback. Your ideas and improvements help shape Vectra for everyone.*
-
-## Reporting Bugs & Issues
-
-We use [GitHub Issues](https://github.com/synentra/synentra/issues) to track bugs, enhancements, and discussions.
-To report a bug, [open a new issue](https://github.com/synentra/synentra/issues/new) and include as much detail as possible:
-
-- **Summary** – A short description of the issue.  
-- **Steps to Reproduce** – Include exact steps or a minimal reproducible example (preferably in C#).  
-- **Expected Behavior** – What you expected to happen.  
-- **Actual Behavior** – What actually happens.  
-- **Additional Context** – Logs, screenshots, or environment details that help diagnose the issue.
-
-🔍 *Clear, reproducible reports help us resolve issues faster and maintain higher project quality.*
+Your contributions are valued and appreciated.
 
 ## Code of Conduct
 
-By participating in this project, you agree to help foster a welcoming and inclusive environment for everyone.  
-Be respectful, constructive, and considerate in all interactions — collaboration is key to success.
+All contributors are expected to:
+
+* Be respectful and inclusive
+* Avoid harassment or discriminatory behavior
+* Engage constructively in discussions
+* Help maintain a welcoming environment for all participants
+
+Reports of unacceptable behavior may be sent to:
+
+**[conduct@synentra.io](mailto:conduct@synentra.io)**
+
+All reports are handled confidentially by maintainers.
+
+## Legal Requirements (DCO)
+
+All contributions must comply with the **Developer Certificate of Origin (DCO)**.
+
+By submitting a contribution, you certify that:
+
+* You have the right to submit the work under the project license
+* The contribution is your original work or properly attributed
+* You agree to license your contribution under Apache-2.0
+
+## Development Workflow
+
+Synentra uses **GitHub Flow** for all contributions.
+
+All changes must go through Pull Requests (PRs).
+
+### Branching
+
+1. Fork the repository
+2. Create a feature branch from `main`
+
+Use descriptive branch names such as:
+
+* `feature/intent-policy-engine`
+* `fix/auth-token-validation`
+* `docs/update-governance`
+
+## How to Contribute Code
+
+1. Fork the repository and create a branch from `main`
+2. Implement your changes with clean, maintainable code
+3. Ensure your changes follow existing architectural patterns
+4. Add or update tests for any modified functionality
+5. Run all tests locally before submitting
+6. Update documentation where necessary
+7. Ensure linting and CI checks pass
+
+## Pull Request Guidelines
+
+All Pull Requests must include:
+
+* A clear description of the change
+* The motivation for the change
+* References to related issues or discussions
+* Any breaking changes clearly highlighted
+* Screenshots, logs, or examples where relevant
+
+### Review Process
+
+* All PRs are reviewed by Committers or Maintainers
+* Feedback is expected to be constructive and iterative
+* Maintainers may request changes before merging
+* Large or architectural changes may require design discussion before approval
+
+## Reporting Bugs
+
+We use GitHub Issues to track bugs and enhancements:
+
+👉 https://github.com/synentra/synentra/issues
+
+When reporting a bug, please include:
+
+* **Summary** – Short description of the issue
+* **Steps to Reproduce** – Minimal reproducible steps
+* **Expected Behavior** – What you expected to happen
+* **Actual Behavior** – What actually happened
+* **Environment Details** – OS, runtime version, configuration
+* **Logs / Screenshots** – If applicable
+
+Clear and reproducible reports significantly improve resolution speed.
+
+## Feature Requests
+
+Feature proposals are welcome.
+
+When submitting a feature request, please include:
+
+* Problem description
+* Proposed solution
+* Alternative approaches considered
+* Any relevant use cases or design constraints
+
+Large features may require a design discussion before implementation.
+
+## Security Issues
+
+Security vulnerabilities must **not** be reported via public issues.
+
+Please follow the process defined in [`SECURITY.md`](SECURITY.md).
+
+Security reports should be sent privately to:
+
+**[security@synentra.io](mailto:security@synentra.io)**
+
+## Governance Participation
+
+Contributors interested in deeper involvement may:
+
+* Participate in design discussions
+* Join community meetings (if applicable)
+* Progress toward Committer status through sustained contributions
+
+Governance details are defined in [`GOVERNANCE.md`](GOVERNANCE.md).
 
 ## License
 
-By contributing to **Vectra**, you agree that your contributions will be licensed under the terms of the [Apache-2.0](https://opensource.org/license/Apache-2.0), which governs this project.
+By contributing to Synentra, you agree that your contributions will be licensed under the **Apache License 2.0**.
 
-If you have any questions about licensing or contributions, please reach out to the maintainers.
+## Thank You
 
-## ❤️ Thank You
+Your contributions help make Synentra a stronger, more reliable, and more open platform.
 
-Your time and expertise make **Vectra** better every day.  
-Together, we can build a flexible, open, and powerful automation platform for everyone.
+We appreciate your time, effort, and collaboration in building this project.
