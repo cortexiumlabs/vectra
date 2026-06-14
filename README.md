@@ -34,6 +34,7 @@
   - [Ways to Get Involved](#ways-to-get-involved)
   - [Contributing Code](#contributing-code)
 - [License](#license)
+- [Support Synentra](#support-synentra)
 
 ## Overview: SYNENTRA
 
@@ -43,9 +44,10 @@
 
 While traditional API gateways route traffic based on static endpoints and basic authentication, SYNENTRA introduces a semantic layer of security by evaluating the *actual intent* behind every API call. This allows developers to establish dynamic guardrails, ensuring that AI agents and automated systems operate strictly within defined behavioral boundaries.
 
-> ✨ **Support SYNENTRA by giving it a star!** ✨  
-> Your support helps others discover the project and drives continued innovation.  
-> ![Synentra Staring](/img/starring.gif)
+> ✨ **Love SYNENTRA? Give it a star!** ✨  
+> ⭐ Your support helps others discover the project and fuels continued innovation in AI governance.  
+>
+> ![Star SYNENTRA](/img/starring.gif)
 
 ### Key Capabilities
 
@@ -205,6 +207,11 @@ Please read [CONTRIBUTING.md](https://github.com/synentra/synentra/blob/main/CON
 
 SYNENTRA is open-source and licensed under the **Apache 2.0 License**.  
 See [LICENSE](https://github.com/synentra/synentra/blob/main/LICENSE) for details.
+
+## Support SYNENTRA
+[![⭐ Star on GitHub](https://img.shields.io/badge/⭐%20Star%20on%20GitHub-555555?style=flat&logo=github)](https://github.com/synentra/synentra)  
+✨ **Support SYNENTRA by giving it a star!** ✨  
+Your support helps others discover the project and drives continued innovation.
 
 [dotnet-budge]: https://img.shields.io/badge/.NET-10.0-purple
 [dotnet-url]: https://dotnet.microsoft.com/en-us/download/dotnet/10.0
