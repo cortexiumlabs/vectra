@@ -19,7 +19,7 @@
 
 - [Overview](#overview-synentra)
   - [Key Capabilities](#key-capabilities)
-  - [Why SYNENTRA?](#why-synentra%3F)
+  - [Why Synentra](#why-synentra)
 - [Key Features](#key-features)
 - [Architecture](#architecture)
 - [Quick Start](#quick-start)
@@ -33,6 +33,7 @@
 - [Community & Contributing](#community-%26-contributing)
   - [Ways to Get Involved](#ways-to-get-involved)
   - [Contributing Code](#contributing-code)
+  - [Community](#community)
 - [License](#license)
 - [Support Synentra](#support-synentra)
 
@@ -55,7 +56,7 @@ While traditional API gateways route traffic based on static endpoints and basic
 * **Human-in-the-Loop (HITL) Safeguards:** Not all automated actions should happen instantly. When SYNENTRA identifies an agent's intent as high-risk, potentially destructive, or malicious, it automatically intercepts the request. The gateway holds the action and routes it to a human operator for manual review and approval before execution.
 * **Precise Agent Governance:** As AI agents become more autonomous, the risk of unintended actions grows. SYNENTRA provides the fine-grained control necessary to oversee agent behavior, preventing systemic damage and ensuring compliance.
 
-### Why SYNENTRA?
+### Why SYNENTRA
 
 As organizations deploy more LLM-driven agents and complex microservices, establishing trust in automated workflows is critical. SYNENTRA bridges the gap between automation and safety, providing the necessary oversight to let agents act freely while keeping humans firmly in control of critical decisions.
 
