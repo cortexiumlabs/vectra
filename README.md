@@ -201,7 +201,21 @@ Please read [CONTRIBUTING.md](https://github.com/synentra/synentra/blob/main/CON
 
 ### Community
 
-* 🔔 Watch the repository to stay up to date with releases and RFC discussions.
+Join the Synentra community:
+
+- 💬 Discussions: https://github.com/synentra/synentra/discussions
+- 📖 Documentation: https://synentra.io/docs
+
+### Discussion Categories
+
+| Category | Purpose |
+|-----------|----------|
+| Q&A | Ask questions and get help |
+| Ideas | Feature requests and proposals |
+| Contributors | Contributor coordination |
+| Governance | Project direction and decisions |
+| Show & Tell | Share your integrations and projects |
+| Announcements | Project updates and releases |
 
 ## License
 
