@@ -47,7 +47,7 @@ While traditional API gateways route traffic based on static endpoints and basic
 > ✨ **Love SYNENTRA? Give it a star!** ✨  
 > ⭐ Your support helps others discover the project and fuels continued innovation in AI governance.  
 >
-> ![Star SYNENTRA](/img/starring.gif)
+> <div align="center" style="padding:10px; background:#dcd4fc; border-radius:12px;"><img src="/img/starring.gif" width="300" /></div>
 
 ### Key Capabilities
 
