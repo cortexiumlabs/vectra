@@ -8,7 +8,7 @@ integrated throughout our software development and release lifecycle to ensure t
 
 If you identify a potential security issue or vulnerability in Synentra, please **report it privately** to our security team:
 
-📧 **[contact@synentra.io](mailto:contact@synentra.io)** with the subject line `[SYNENTRA] Security Vulnerability`
+📧 **[security@synentra.io](mailto:security@synentra.io)** with the subject line `Security Vulnerability`
 
 > **Important:** Please **do not** create a public issue or pull request, as this may expose the vulnerability before it is resolved.
 
