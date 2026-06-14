@@ -22,6 +22,7 @@
   - [Why Synentra](#why-synentra)
 - [Key Features](#key-features)
 - [Architecture](#architecture)
+- [Roadmap](#roadmap)
 - [Quick Start](#quick-start)
   - [Run via Docker](#run-via-docker)
   - [Use a Pre-Built Binary](#use-a-pre-built-binary)
@@ -86,6 +87,12 @@ Every inbound HTTP request from an AI Agent flows through three layers inside th
    - ✅ **Direct Allow** → forwarded to the upstream service via the proxy, audit recorded.
    - ⏳ **Pending Review** → held in the **HITL Review** queue for human approval. Approved requests are proxied; disapproved requests are blocked and audited.
    - 🚫 **Policy Block** → blocked immediately, audit recorded.
+
+## Roadmap
+
+Our roadmap is actively maintained and outlines upcoming features, milestones, and long-term direction.
+
+👉 View the full roadmap: [ROADMAP.md](ROADMAP.md)
 
 ## Quick Start
 
