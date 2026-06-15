@@ -1,6 +1,6 @@
 <div align="center">
   <img src="/img/banner.png" alt="Synentra Banner" />
-  <h2>The only open‑source, intent‑aware governance gateway for autonomous AI agents that call enterprise APIs.</h2>
+  <h2>An open‑source, intent‑aware governance gateway designed specifically for autonomous AI agents that interact with enterprise APIs</h2>
 
   [![dotnet][dotnet-budge]][dotnet-url]
   [![Build Status][actions-badge]][actions-url]
