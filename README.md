@@ -1,6 +1,6 @@
 <div align="center">
   <img src="/img/banner.png" alt="Synentra Banner" />
-  <h2>SYNENTRA — Intent-Aware Governance Gateway</h2>
+  <h2>The only open‑source, intent‑aware governance gateway for autonomous AI agents that call enterprise APIs.</h2>
 
   [![dotnet][dotnet-budge]][dotnet-url]
   [![Build Status][actions-badge]][actions-url]
@@ -15,11 +15,20 @@
   [![Good First Issues][github-good-first-issue-badge]][github-good-first-issue-url]
 </div>
 
+> ⭐ **If Synentra helps you secure your AI agents, consider starring the repo to help others discover it.**
+>
+> <div align="center" style="padding:2px; background:#dcd4fc; border: 2px solid #eeeeee;"><img src="/img/starring.gif" /></div>
+
 ## Table of Contents
 
 - [Overview](#overview-synentra)
   - [Key Capabilities](#key-capabilities)
   - [Why Synentra](#why-synentra)
+	- [Differentiators](#differentiators)
+	- [Core Advantages](#core-advantages)
+	- [TL;DR](#tl%3Bdr)
+	- [What Synentra is *Not*](#what-synentra-is-not)
+	- [Who Should Use Synentra](#who-should-use-synentra)
 - [Key Features](#key-features)
 - [Architecture](#architecture)
 - [Roadmap](#roadmap)
@@ -46,11 +55,6 @@
 
 While traditional API gateways route traffic based on static endpoints and basic authentication, SYNENTRA introduces a semantic layer of security by evaluating the *actual intent* behind every API call. This allows developers to establish dynamic guardrails, ensuring that AI agents and automated systems operate strictly within defined behavioral boundaries.
 
-> ✨ **Love SYNENTRA? Give it a star!** ✨  
-> ⭐ Your support helps others discover the project and fuels continued innovation in AI governance.  
->
-> <div align="center" style="padding:2px; background:#dcd4fc; border: 2px solid #eeeeee;"><img src="/img/starring.gif" /></div>
-
 ### Key Capabilities
 
 * **Intent-Based Policy Enforcement:** Move beyond standard Role-Based Access Control (RBAC). SYNENTRA analyzes the underlying purpose of a request, allowing you to build context-aware policies that govern *what* an agent is trying to achieve, rather than just *who* the agent is.
@@ -59,7 +63,44 @@ While traditional API gateways route traffic based on static endpoints and basic
 
 ### Why SYNENTRA
 
-As organizations deploy more LLM-driven agents and complex microservices, establishing trust in automated workflows is critical. SYNENTRA bridges the gap between automation and safety, providing the necessary oversight to let agents act freely while keeping humans firmly in control of critical decisions.
+Synentra is the **only open‑source, intent‑aware governance gateway** purpose‑built for **autonomous AI agents that interact with enterprise APIs**. It unifies deterministic policies, local semantic intent classification, and adaptive agent trust scoring – all delivered with **sub‑30ms end‑to-end latency**.
+
+### Differentiators
+
+> **Real‑time, intent‑aware governance for AI agent *actions* – far beyond LLM chat supervision.**
+
+| Problem | Synentra Solution |
+|---------|-------------------|
+| Traditional API gateways (Kong, Tyk) block by path and method only – they cannot detect a dangerous request like “export all customers” in the payload. | **Semantic intent classification** (local ONNX model) understands *what the agent is trying to do*. |
+| AI gateways (Portkey, Cloudflare) focus on LLM cost management and prompt security, not on governing downstream agent actions. | **Agent trust scoring** – each agent carries a dynamic risk score that evolves with every request. |
+| Human‑in‑the‑loop typically demands custom code or external tools. | **Built‑in HITL** – suspend, approve, or deny actions directly via API, Slack, Microsoft Teams, or PagerDuty. |
+| No visibility into *which* agent performed which operation. | **Agent identity + JWT** – provides a complete, per‑agent audit trail. |
+
+### Core Advantages
+
+| Advantage | How Synentra Delivers It |
+|-----------|---------------------------|
+| **Local, low‑latency intent classification** | A fine‑tuned ONNX model (DistilBERT) runs inside the gateway – inference completes in under 20ms, with no external API dependency. |
+| **Agent trust scoring** | A dynamic risk score (0.0–1.0) is continuously updated based on violation rate, HITL history, and anomaly detection. Policies can automatically quarantine low‑trust agents. |
+| **Hybrid semantic + deterministic policy engine** | Combine fast JSON‑based attribute‑based access control (ABAC) with intent‑aware conditions such as `input.intent == "bulk_export"`. Policies are hot‑reloadable and designed for GitOps. |
+
+### TL;DR
+
+> “Synentra bridges the gap between conventional API gateways and slow, cloud‑dependent LLM guards. It empowers enterprises to let AI agents act autonomously – while understanding *why* they act, continuously scoring their trust, and requiring human approval for high‑risk intents – all in under 20 milliseconds.”
+
+### What Synentra Is Not
+
+- ❌ A generic LLM proxy (no token counting, no prompt caching)
+- ❌ A cost‑control tool for the OpenAI API
+- ❌ A load balancer or canary deployment tool
+- ❌ A sidecar exclusively for MCP servers – it works with **any HTTP API**
+
+### Who Should Use Synentra
+
+- **Platform engineers** – secure AI agent traffic without adding latency or operational complexity.
+- **Security architects** – enforce compliance and maintain a complete audit record for every agent action.
+- **Compliance officers** – achieve SOC 2/HIPAA readiness with built‑in human‑in‑the‑loop and auditable logs.
+- **AI agent developers** (LangChain, Semantic Kernel, custom frameworks) – integrate once and govern every agent uniformly.
 
 ## Key Features
 
