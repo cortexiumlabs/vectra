@@ -1,5 +1,7 @@
 using System.Security.Claims;
+using Microsoft.Extensions.Options;
 using Synentra.Application.Abstractions.Security;
+using Synentra.BuildingBlocks.Configuration.Security;
 
 namespace Synentra.Middleware;
 
@@ -17,24 +19,33 @@ public class AgentAuthMiddleware
     public async Task InvokeAsync(HttpContext context)
     {
         var authenticator = context.RequestServices.GetRequiredService<IAgentAuthenticator>();
-        await AttachFromHeaderAsync(context, authenticator, "Bearer");
+        var securityOptions = context.RequestServices.GetRequiredService<IOptions<SecurityConfiguration>>();
+        await AttachFromHeaderAsync(context, authenticator, securityOptions.Value);
         await _next(context);
     }
 
     private async Task AttachFromHeaderAsync(
         HttpContext context,
         IAgentAuthenticator authenticator,
-        string expectedPrefix)
+        SecurityConfiguration securityConfiguration)
     {
-        var authHeader = context.Request.Headers.Authorization.FirstOrDefault();
-        if (string.IsNullOrWhiteSpace(authHeader))
+        var agentAuthOptions = securityConfiguration.AgentAuth;
+        var customHeaderName = !string.IsNullOrWhiteSpace(agentAuthOptions.CustomHeaderName)
+            ? agentAuthOptions.CustomHeaderName
+            : "Synentra-Authorization";
+
+        var hasCustomHeader = context.Request.Headers.TryGetValue(customHeaderName, out _);
+
+        string? credential = null;
+        if (agentAuthOptions.UseCustomHeader)
+            credential = ExtractBearerToken(context, customHeaderName);
+
+        if (string.IsNullOrWhiteSpace(credential) && !hasCustomHeader && agentAuthOptions.FallbackToAuthorization)
+            credential = ExtractBearerToken(context, "Authorization");
+
+        if (string.IsNullOrWhiteSpace(credential))
             return;
 
-        var parts = authHeader.Split(' ', 2, StringSplitOptions.RemoveEmptyEntries);
-        if (parts.Length != 2 || !parts[0].Equals(expectedPrefix, StringComparison.OrdinalIgnoreCase))
-            return;
-
-        var credential = parts[1];
         var principal = await authenticator.ValidateAsync(credential, CancellationToken.None);
         if (principal is null)
             return;
@@ -50,5 +61,18 @@ public class AgentAuthMiddleware
             if (double.TryParse(trustClaim, out var trust))
                 context.Items["TrustScore"] = trust;
         }
+    }
+
+    private static string? ExtractBearerToken(HttpContext context, string headerName)
+    {
+        var headerValue = context.Request.Headers[headerName].FirstOrDefault();
+        if (string.IsNullOrWhiteSpace(headerValue))
+            return null;
+
+        var parts = headerValue.Split(' ', 2, StringSplitOptions.RemoveEmptyEntries);
+        if (parts.Length != 2 || !parts[0].Equals("Bearer", StringComparison.OrdinalIgnoreCase))
+            return null;
+
+        return parts[1];
     }
 }

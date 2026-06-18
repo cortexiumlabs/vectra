@@ -14,7 +14,7 @@ public class Tokens : EndpointGroupBase
 
         group.MapPost("", GetToken)
             .WithName("GetToken")
-            .WithSummary("Exchange credentials for JWT");
+            .WithSummary("Exchange credentials for gateway JWT used in Synentra-Authorization header");
     }
 
     public static async Task<IResult> GetToken(

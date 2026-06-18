@@ -280,7 +280,7 @@ export default function (data) {
     const agent = agents[__VU % agents.length];
 
     const authHeader = {
-        Authorization: `Bearer ${agent.token}`,
+        "Synentra-Authorization": `Bearer ${agent.token}`,
     };
 
     // Deterministic weighted traffic distribution:

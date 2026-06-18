@@ -23,6 +23,27 @@ public class SecurityConfigurationTests
         config.Provider.Should().Be(AgentAuthProviderType.SelfSigned);
         config.SelfSigned.Should().NotBeNull();
         config.Jwt.Should().NotBeNull();
+        config.UseCustomHeader.Should().BeTrue();
+        config.CustomHeaderName.Should().Be("Synentra-Authorization");
+        config.FallbackToAuthorization.Should().BeFalse();
+    }
+
+    [Fact]
+    public void AgentAuthConfiguration_ShouldAllowCustomValues()
+    {
+        var config = new AgentAuthConfiguration
+        {
+            UseCustomHeader = true,
+            CustomHeaderName = "X-Custom-Auth",
+            FallbackToAuthorization = true
+        };
+
+        config.Provider.Should().Be(AgentAuthProviderType.SelfSigned);
+        config.SelfSigned.Should().NotBeNull();
+        config.Jwt.Should().NotBeNull();
+        config.UseCustomHeader.Should().BeTrue();
+        config.CustomHeaderName.Should().Be("X-Custom-Auth");
+        config.FallbackToAuthorization.Should().BeTrue();
     }
 
     [Fact]

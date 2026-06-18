@@ -2,6 +2,11 @@
 
 Simulates **1 000 concurrent AI-agent VUs** sustaining **~5 000 req/s** against a running Synentra instance.
 
+## Authentication Header
+
+The load script sends gateway JWTs using `Synentra-Authorization: Bearer <token>`.
+`Authorization` is reserved for upstream API credentials and is forwarded untouched by Synentra.
+
 ## Prerequisites
 
 | Tool | Version |

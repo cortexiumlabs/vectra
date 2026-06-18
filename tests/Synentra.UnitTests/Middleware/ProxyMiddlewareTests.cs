@@ -11,6 +11,7 @@ using Synentra.Application.Abstractions.RateLimit;
 using Synentra.Application.Abstractions.Security;
 using Synentra.Application.Models;
 using Synentra.BuildingBlocks.Configuration.Security;
+using Synentra.BuildingBlocks.Configuration.Security.AgentAuth;
 using Synentra.Domain.Agents;
 using Synentra.Domain.Policies;
 using Synentra.Middleware;
@@ -319,6 +320,49 @@ public class ProxyMiddlewareTests
     }
 
     [Fact]
+    public async Task InvokeAsync_ForwardsAuthorizationHeader_ButStripsSynentraHeader()
+    {
+        var agentId = Guid.NewGuid();
+        var accessService = Substitute.For<IAgentRequestAccessService>();
+        accessService.GetAgentAsync(agentId, Arg.Any<CancellationToken>())
+            .Returns(new AgentRequestAccessResult(true, new Agent("test", "owner", "hash"), null));
+
+        var rateLimiter = Substitute.For<IAgentRateLimiter>();
+        rateLimiter.IsAllowedAsync(agentId, Arg.Any<CancellationToken>()).Returns(true);
+
+        var circuitBreaker = Substitute.For<ICircuitBreaker>();
+        circuitBreaker.IsAllowed(Arg.Any<string>()).Returns(true);
+
+        var decisionEngine = Substitute.For<IDecisionEngine>();
+        decisionEngine.EvaluateAsync(Arg.Any<RequestContext>(), Arg.Any<CancellationToken>())
+            .Returns(DecisionResult.Allow());
+
+        HttpRequestMessage? forwardedRequest = null;
+        var handler = new CaptureRequestHttpMessageHandler(request => forwardedRequest = request, HttpStatusCode.OK, "ok");
+        var httpClient = new HttpClient(handler);
+        _httpClientFactory.CreateClient(Arg.Any<string>()).Returns(httpClient);
+
+        var middleware = BuildMiddleware(_ => Task.CompletedTask);
+        var context = BuildContext("/proxy/http://example.com/api",
+            decisionEngine: decisionEngine, accessService: accessService,
+            rateLimiter: rateLimiter, circuitBreaker: circuitBreaker);
+
+        context.Items["AgentId"] = agentId;
+        context.Request.Headers.Authorization = "Bearer upstream-token";
+        context.Request.Headers["Synentra-Authorization"] = "Bearer gateway-token";
+        context.Request.Body = new MemoryStream();
+        context.Response.Body = new MemoryStream();
+
+        await middleware.InvokeAsync(context);
+
+        forwardedRequest.Should().NotBeNull();
+        forwardedRequest!.Headers.Authorization.Should().NotBeNull();
+        forwardedRequest.Headers.Authorization!.Scheme.Should().Be("Bearer");
+        forwardedRequest.Headers.Authorization.Parameter.Should().Be("upstream-token");
+        forwardedRequest.Headers.Contains("Synentra-Authorization").Should().BeFalse();
+    }
+
+    [Fact]
     public async Task InvokeAsync_SuccessfulProxy_CopiesResponseStatusCode()
     {
         var agentId = Guid.NewGuid();
@@ -455,6 +499,13 @@ public class ProxyMiddlewareTests
         services.AddSingleton(agentRepository);
         services.AddSingleton(rateLimiter);
         services.AddSingleton(circuitBreaker);
+        services.AddSingleton(Microsoft.Extensions.Options.Options.Create(new SecurityConfiguration
+        {
+            AgentAuth = new AgentAuthConfiguration
+            {
+                CustomHeaderName = "Synentra-Authorization"
+            }
+        }));
         var provider = services.BuildServiceProvider();
 
         var context = new DefaultHttpContext { RequestServices = provider };
@@ -487,6 +538,30 @@ public class ProxyMiddlewareTests
         protected override Task<HttpResponseMessage> SendAsync(
             HttpRequestMessage request, CancellationToken cancellationToken)
         {
+            var response = new HttpResponseMessage(_statusCode)
+            {
+                Content = new StringContent(_body)
+            };
+            return Task.FromResult(response);
+        }
+    }
+
+    private sealed class CaptureRequestHttpMessageHandler : HttpMessageHandler
+    {
+        private readonly Action<HttpRequestMessage> _onRequest;
+        private readonly HttpStatusCode _statusCode;
+        private readonly string _body;
+
+        public CaptureRequestHttpMessageHandler(Action<HttpRequestMessage> onRequest, HttpStatusCode statusCode, string body)
+        {
+            _onRequest = onRequest;
+            _statusCode = statusCode;
+            _body = body;
+        }
+
+        protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+        {
+            _onRequest(request);
             var response = new HttpResponseMessage(_statusCode)
             {
                 Content = new StringContent(_body)

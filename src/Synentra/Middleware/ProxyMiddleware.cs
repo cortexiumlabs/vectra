@@ -4,6 +4,7 @@ using Synentra.Application.Abstractions.Executions;
 using Synentra.Application.Abstractions.RateLimit;
 using Synentra.Application.Abstractions.Security;
 using Synentra.Application.Models;
+using Synentra.BuildingBlocks.Configuration.Security;
 using Synentra.Infrastructure.Decision;
 
 namespace Synentra.Middleware;
@@ -135,6 +136,11 @@ public class ProxyMiddleware
         // 8. Forward the request with CORRECT headers
         context.Request.Body.Position = 0;
 
+        var securityOptions = context.RequestServices.GetRequiredService<Microsoft.Extensions.Options.IOptions<SecurityConfiguration>>();
+        var synentraAuthHeaderName = !string.IsNullOrWhiteSpace(securityOptions.Value.AgentAuth.CustomHeaderName)
+            ? securityOptions.Value.AgentAuth.CustomHeaderName
+            : "Synentra-Authorization";
+
         // Create a new HttpRequestMessage for manual forwarding (or use YARP with transforms)
         var httpClient = _httpClientFactory.CreateClient();
         var proxyRequest = new HttpRequestMessage
@@ -148,7 +154,7 @@ public class ProxyMiddleware
         foreach (var header in context.Request.Headers)
         {
             // Skip headers that must NOT be forwarded
-            if (header.Key == "Authorization" ||          // JWT for Aegis, not for upstream
+            if (header.Key.Equals(synentraAuthHeaderName, StringComparison.OrdinalIgnoreCase) ||
                 header.Key == "Host" ||                   // Will be set from RequestUri
                 header.Key == "Connection" ||
                 header.Key == "Content-Length")           // Handled by HttpClient
