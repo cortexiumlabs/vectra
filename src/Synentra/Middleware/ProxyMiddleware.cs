@@ -191,6 +191,8 @@ public class ProxyMiddleware
         static bool IsRestrictedHeader(string name) =>
             name.Equals("Transfer-Encoding", StringComparison.OrdinalIgnoreCase) ||
             name.Equals("Content-Length",    StringComparison.OrdinalIgnoreCase) ||
+            name.Equals("Proxy-Connection",  StringComparison.OrdinalIgnoreCase) ||
+            name.Equals("TE",                StringComparison.OrdinalIgnoreCase) ||
             name.Equals("Connection",        StringComparison.OrdinalIgnoreCase) ||
             name.Equals("Keep-Alive",        StringComparison.OrdinalIgnoreCase) ||
             name.Equals("Upgrade",           StringComparison.OrdinalIgnoreCase) ||

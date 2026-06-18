@@ -585,6 +585,43 @@ public class HitlServiceTests
     }
 
     [Fact]
+    public async Task ReplayAsync_WithHopByHopHeaders_DoesNotForwardRestrictedHeaders()
+    {
+        var sut = CreateSut();
+        var id = "excluded-headers-test";
+
+        _cacheProvider.TryGetValueAsync<HitlDecision>($"hitl:decision:{id}")
+            .Returns((true, new HitlDecision(id, HitlRequestStatus.Approved, "rev", null, _now)));
+
+        var pending = new PendingHitlRequest(id, "DELETE", "https://upstream.local/api/user",
+            new Dictionary<string, string>
+            {
+                ["Host"] = "httpbingo.org",
+                ["Connection"] = "keep-alive",
+                ["Content-Length"] = "0",
+                ["Accept"] = "application/json"
+            },
+            null, "reason", Guid.NewGuid(), _now, _now.AddSeconds(300));
+        _cacheProvider.TryGetValueAsync<PendingHitlRequest>($"hitl:{id}")
+            .Returns((true, pending));
+
+        var handler = new CapturingHttpMessageHandler(HttpStatusCode.OK, "{}");
+        _httpClientFactory.CreateClient().Returns(new HttpClient(handler));
+        _cacheProvider.RemoveAsync(Arg.Any<string>()).Returns(Task.CompletedTask);
+        _cacheProvider.SetAsync(Arg.Any<string>(), Arg.Any<HashSet<string>>())
+            .Returns(Task.FromResult<HashSet<string>>(null!));
+
+        var result = await sut.ReplayAsync(id, TestContext.Current.CancellationToken);
+
+        result.Success.Should().BeTrue();
+        handler.CapturedRequest.Should().NotBeNull();
+        handler.CapturedRequest!.Headers.Contains("Host").Should().BeFalse();
+        handler.CapturedRequest.Headers.Contains("Connection").Should().BeFalse();
+        handler.CapturedRequest.Content.Should().BeNull();
+        handler.CapturedRequest.Headers.Contains("Accept").Should().BeTrue();
+    }
+
+    [Fact]
     public async Task SuspendRequestAsync_AuditFails_DoesNotThrow()
     {
         // Exercises lines 276-279: audit fail is swallowed
@@ -649,6 +686,21 @@ public class HitlServiceTests
         protected override Task<HttpResponseMessage> SendAsync(
             HttpRequestMessage request, CancellationToken cancellationToken)
             => throw new TaskCanceledException("timeout");
+    }
+
+    private sealed class CapturingHttpMessageHandler(HttpStatusCode statusCode, string content) : HttpMessageHandler
+    {
+        public HttpRequestMessage? CapturedRequest { get; private set; }
+
+        protected override Task<HttpResponseMessage> SendAsync(
+            HttpRequestMessage request, CancellationToken cancellationToken)
+        {
+            CapturedRequest = request;
+            return Task.FromResult(new HttpResponseMessage(statusCode)
+            {
+                Content = new StringContent(content)
+            });
+        }
     }
 
     // ── Notifier Integration Tests ──────────────────────────────────────

@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using System.Net;
 using Synentra.Application.Abstractions.Executions;
 using Synentra.Application.Abstractions.Persistence;
 using Synentra.Application.Models;
@@ -15,6 +16,19 @@ public class HitlService : IHitlService
     private static readonly HashSet<string> _sensitiveHeaders = new(StringComparer.OrdinalIgnoreCase)
     {
         "Authorization", "Cookie", "Set-Cookie", "X-Api-Key", "X-Auth-Token"
+    };
+
+    private static readonly HashSet<string> _replayExcludedHeaders = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "Host",
+        "Connection",
+        "Proxy-Connection",
+        "Keep-Alive",
+        "Transfer-Encoding",
+        "TE",
+        "Trailer",
+        "Upgrade",
+        "Content-Length"
     };
 
     private readonly ICacheService _cache;
@@ -220,11 +234,16 @@ public class HitlService : IHitlService
         {
             Method = new HttpMethod(pending.Method),
             RequestUri = new Uri(pending.Url, UriKind.Absolute),
-            Content = pending.Body is not null ? new StringContent(pending.Body) : null
+            Content = pending.Body is not null ? new StringContent(pending.Body) : null,
+            Version = HttpVersion.Version11,
+            VersionPolicy = HttpVersionPolicy.RequestVersionOrLower
         };
 
         foreach (var (key, value) in pending.Headers)
         {
+            if (_replayExcludedHeaders.Contains(key))
+                continue;
+
             if (string.Equals(key, "Content-Type", StringComparison.OrdinalIgnoreCase))
                 upstreamRequest.Content?.Headers.TryAddWithoutValidation(key, value);
             else
