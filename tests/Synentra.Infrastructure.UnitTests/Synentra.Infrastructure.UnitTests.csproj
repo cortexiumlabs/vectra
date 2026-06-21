@@ -8,6 +8,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Application\**" />
+    <EmbeddedResource Remove="Application\**" />
+    <None Remove="Application\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\..\src\Synentra.Infrastructure\Synentra.Infrastructure.csproj" />
     <ProjectReference Include="..\..\src\Synentra.Domain\Synentra.Domain.csproj" />
     <ProjectReference Include="..\..\src\Synentra.Application\Synentra.Application.csproj" />
@@ -28,10 +34,6 @@
 
   <ItemGroup>
     <Using Include="Xunit" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Application\Extensions\" />
   </ItemGroup>
 
 </Project>
