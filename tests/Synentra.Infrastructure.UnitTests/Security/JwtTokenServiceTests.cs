@@ -1,4 +1,5 @@
 using FluentAssertions;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 using Synentra.BuildingBlocks.Configuration.Security;
 using Synentra.BuildingBlocks.Configuration.Security.AgentAuth;
@@ -9,11 +10,21 @@ namespace Synentra.Infrastructure.UnitTests.Security;
 
 public class JwtTokenServiceTests
 {
+    private sealed class FakeHostEnvironment : IHostEnvironment
+    {
+        public string EnvironmentName { get; set; } = Environments.Development;
+        public string ApplicationName { get; set; } = "Synentra.Tests";
+        public string ContentRootPath { get; set; } = AppContext.BaseDirectory;
+        public Microsoft.Extensions.FileProviders.IFileProvider ContentRootFileProvider { get; set; }
+            = new Microsoft.Extensions.FileProviders.NullFileProvider();
+    }
+
     private static JwtTokenService CreateSut(
         string secret = "super-secret-key-for-testing-1234567890",
         string issuer = "synentra-issuer",
         string audience = "synentra-audience",
-        TimeSpan? expiration = null)
+        TimeSpan? expiration = null,
+        IHostEnvironment? hostEnvironment = null)
     {
         var config = new SecurityConfiguration
         {
@@ -28,7 +39,7 @@ public class JwtTokenServiceTests
                 }
             }
         };
-        return new JwtTokenService(Options.Create(config));
+        return new JwtTokenService(Options.Create(config), hostEnvironment);
     }
 
     [Fact]
@@ -43,14 +54,14 @@ public class JwtTokenServiceTests
     }
 
     [Fact]
-    public void GenerateToken_EmptySecret_ThrowsInvalidOperationException()
+    public void GenerateToken_EmptySecret_UsesDefaultSecretAndReturnsToken()
     {
         var sut = CreateSut(secret: string.Empty);
         var agent = new Agent("TestAgent", "owner-1", "hash");
 
-        var act = () => sut.GenerateToken(agent);
+        var token = sut.GenerateToken(agent);
 
-        act.Should().Throw<InvalidOperationException>();
+        token.Should().NotBeNullOrEmpty();
     }
 
     [Fact]
@@ -103,11 +114,68 @@ public class JwtTokenServiceTests
     }
 
     [Fact]
-    public void ValidateToken_EmptySecret_ThrowsInvalidOperationException()
+    public void ValidateToken_EmptySecret_UsesDefaultSecretAndReturnsPrincipal()
     {
-        var sut = CreateSut(secret: string.Empty);
+        var generator = CreateSut(secret: string.Empty);
+        var validator = CreateSut(secret: string.Empty);
+        var agent = new Agent("TestAgent", "owner-1", "hash");
+        var token = generator.GenerateToken(agent);
 
-        var act = () => sut.ValidateToken("some.token.value");
+        var principal = validator.ValidateToken(token);
+
+        principal.Should().NotBeNull();
+    }
+
+    [Fact]
+    public void ValidateToken_MissingSelfSignedConfiguration_UsesDeterministicDefaults()
+    {
+        var secretFile = Path.Combine(Path.GetTempPath(), $"synentra-jwt-secret-{Guid.NewGuid():N}.txt");
+        Environment.SetEnvironmentVariable("SYNENTRA_SELF_SIGNED_DEV_SECRET_FILE", secretFile);
+        Environment.SetEnvironmentVariable("SYNENTRA_SELF_SIGNED_SECRET", null);
+        try
+        {
+            var generatorConfig = new SecurityConfiguration { AgentAuth = new AgentAuthConfiguration { SelfSigned = null! } };
+            var validatorConfig = new SecurityConfiguration { AgentAuth = new AgentAuthConfiguration { SelfSigned = null! } };
+
+            var devEnv = new FakeHostEnvironment { EnvironmentName = Environments.Development };
+            var generator = new JwtTokenService(Options.Create(generatorConfig), devEnv);
+            var validator = new JwtTokenService(Options.Create(validatorConfig), devEnv);
+            var agent = new Agent("TestAgent", "owner-1", "hash");
+            var token = generator.GenerateToken(agent);
+
+            var principal = validator.ValidateToken(token);
+
+            principal.Should().NotBeNull();
+        }
+        finally
+        {
+            Environment.SetEnvironmentVariable("SYNENTRA_SELF_SIGNED_DEV_SECRET_FILE", null);
+            if (File.Exists(secretFile))
+                File.Delete(secretFile);
+        }
+    }
+
+    [Fact]
+    public void Constructor_NonDevelopmentAndMissingSecret_ThrowsInvalidOperationException()
+    {
+        Environment.SetEnvironmentVariable("SYNENTRA_SELF_SIGNED_SECRET", null);
+        var prodEnv = new FakeHostEnvironment { EnvironmentName = Environments.Production };
+
+        var config = new SecurityConfiguration
+        {
+            AgentAuth = new AgentAuthConfiguration
+            {
+                SelfSigned = new SelfSignedProvider
+                {
+                    Secret = string.Empty,
+                    Issuer = "synentra-issuer",
+                    Audience = "synentra-audience",
+                    Expiration = TimeSpan.FromMinutes(15)
+                }
+            }
+        };
+
+        var act = () => new JwtTokenService(Options.Create(config), prodEnv);
 
         act.Should().Throw<InvalidOperationException>();
     }

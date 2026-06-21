@@ -20,19 +20,44 @@ public sealed class JwtAgentAuthenticator : IAgentAuthenticator
 
     public JwtAgentAuthenticator(IOptions<SecurityConfiguration> options, ITokenService selfSignedService)
     {
-        _options = options.Value.AgentAuth;
+        // Fall back to a default SelfSigned configuration if none is provided.
+        var agentAuth = options?.Value?.AgentAuth;
+        if (agentAuth == null)
+        {
+            agentAuth = new AgentAuthConfiguration
+            {
+                Provider = AgentAuthProviderType.SelfSigned
+                // All other properties remain default (null/empty).
+            };
+        }
+
+        _options = agentAuth;
         _selfSignedService = selfSignedService;
 
+        // The Lazy is only evaluated when Provider != SelfSigned.
+        // If Jwt config is missing, an exception will be thrown at that point,
+        // which is acceptable because external providers require configuration.
         _oidcConfigManager = new Lazy<ConfigurationManager<OpenIdConnectConfiguration>>(() =>
         {
-            var metadataUrl = !string.IsNullOrWhiteSpace(_options.Jwt.MetadataUrl)
-                ? _options.Jwt.MetadataUrl
-                : $"{_options.Jwt.Authority.TrimEnd('/')}/.well-known/openid-configuration";
+            var jwt = _options.Jwt;
+            if (jwt == null)
+            {
+                throw new InvalidOperationException(
+                    "JWT configuration is missing. To use an external identity provider, " +
+                    "configure Security:AgentAuth:Jwt.");
+            }
+
+            var metadataUrl = !string.IsNullOrWhiteSpace(jwt.MetadataUrl)
+                ? jwt.MetadataUrl
+                : $"{jwt.Authority.TrimEnd('/')}/.well-known/openid-configuration";
 
             return new ConfigurationManager<OpenIdConnectConfiguration>(
                 metadataUrl,
                 new OpenIdConnectConfigurationRetriever(),
-                new HttpDocumentRetriever { RequireHttps = !metadataUrl.StartsWith("http://localhost", StringComparison.OrdinalIgnoreCase) });
+                new HttpDocumentRetriever
+                {
+                    RequireHttps = !metadataUrl.StartsWith("http://localhost", StringComparison.OrdinalIgnoreCase)
+                });
         });
     }
 
@@ -63,7 +88,7 @@ public sealed class JwtAgentAuthenticator : IAgentAuthenticator
             {
                 ValidateIssuerSigningKey = true,
                 IssuerSigningKeys = oidcConfig.SigningKeys,
-                ValidateIssuer = _options.Jwt.ValidateIssuer,
+                ValidateIssuer = _options.Jwt!.ValidateIssuer,
                 ValidIssuer = _options.Jwt.ValidateIssuer ? _options.Jwt.Authority : null,
                 ValidateAudience = _options.Jwt.ValidateAudience,
                 ValidAudience = _options.Jwt.ValidateAudience ? _options.Jwt.Audience : null,

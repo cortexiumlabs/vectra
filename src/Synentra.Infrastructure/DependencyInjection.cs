@@ -45,10 +45,10 @@ public static class DependencyInjection
 {
     public static IServiceCollection AddInfrastructure(this IServiceCollection services)
     {
-        services.AddScoped<ITokenService, JwtTokenService>();
+        services.AddSingleton<ITokenService, JwtTokenService>();
 
         // Register the selected authenticator scheme
-        services.AddScoped<IAgentAuthenticator, JwtAgentAuthenticator>();
+        services.AddSingleton<IAgentAuthenticator, JwtAgentAuthenticator>();
         services.AddSingleton<ISecretHasher, BcryptSecretHasher>();
 
         // Policy engine
