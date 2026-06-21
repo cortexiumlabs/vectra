@@ -30,6 +30,12 @@ public class AgentAuthMiddleware
         SecurityConfiguration securityConfiguration)
     {
         var agentAuthOptions = securityConfiguration.AgentAuth;
+        if (agentAuthOptions == null)
+        {
+            // No agent auth config at all – skip entirely
+            return;
+        }
+
         var customHeaderName = !string.IsNullOrWhiteSpace(agentAuthOptions.CustomHeaderName)
             ? agentAuthOptions.CustomHeaderName
             : "Synentra-Authorization";
