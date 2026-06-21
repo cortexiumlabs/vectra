@@ -2,6 +2,6 @@
 
 public class CacheConfiguration
 {
-    public string DefaultProvider { get; set; } = "Redis";
+    public string DefaultProvider { get; set; } = "Memory";
     public CacheProviders Providers { get; set; } = new();
 }

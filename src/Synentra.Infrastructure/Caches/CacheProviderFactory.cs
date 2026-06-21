@@ -25,11 +25,23 @@ public sealed class CacheProviderFactory : ICacheProviderFactory
 
     public ICacheProvider Create()
     {
-        return _config.DefaultProvider.ToLowerInvariant() switch
+        var provider = _config.DefaultProvider?.Trim();
+
+        return provider?.ToLowerInvariant() switch
         {
-            "redis" => CreateRedis(),
             "memory" => CreateMemory(),
-            _ => throw new NotSupportedException($"Cache provider '{_config.DefaultProvider}' is not supported.")
+
+            "redis" when !string.IsNullOrWhiteSpace(
+                _config.Providers.Redis.Address) =>
+                CreateRedis(),
+
+            "redis" =>
+                throw new InvalidOperationException(
+                    "Redis cache provider is selected but Redis is not configured."),
+
+            _ =>
+                throw new NotSupportedException(
+                    $"Cache provider '{_config.DefaultProvider}' is not supported.")
         };
     }
 

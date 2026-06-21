@@ -157,7 +157,7 @@ public class SystemConfigurationTests
     {
         var config = new CacheConfiguration();
 
-        config.DefaultProvider.Should().Be("Redis");
+        config.DefaultProvider.Should().Be("Memory");
         config.Providers.Should().NotBeNull();
     }
 
