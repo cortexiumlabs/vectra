@@ -1,6 +1,6 @@
-# Vectra Security Policy
+# Synentra Security Policy
 
-At **Vectra**, security is a top priority. We are committed to safeguarding our users, 
+At **Synentra**, security is a top priority. We are committed to safeguarding our users, 
 their data, and the systems that rely on our software. Rigorous security practices are 
 integrated throughout our software development and release lifecycle to ensure the highest level of protection.
 
@@ -28,4 +28,4 @@ We handle every report with urgency and transparency:
 4. **Coordinated Disclosure**  
    Once a fix is ready, we will coordinate public disclosure with the reporter and include a detailed changelog in the relevant release notes.
 
-We sincerely appreciate your responsible disclosure and your efforts in helping **keep Vectra safe for everyone**.
+We sincerely appreciate your responsible disclosure and your efforts in helping **keep Synentra safe for everyone**.
