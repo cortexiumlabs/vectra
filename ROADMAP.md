@@ -12,15 +12,18 @@
 - 📅 Kubernetes operator (policy as CRDs)
 - 📅 Built-in Prometheus alerting rules
 - 📅 Centralized federated policy management
-- 📅 React-based dashboard (HITL, agents, policies, audit logs)
-
-## v1.8.0 – Planned (Q3 2026)
+- 📅 Web-based dashboard (HITL, agents, policies, audit logs)
 - 📅 External LLM fallback (Azure OpenAI, Gemini, Ollama)
 - 📅 Semantic caching (exact + embedding-based)
 - 📅 Advanced policy conditions (intent, risk score, confidence)
 - 📅 Policy visual editor (web UI)
 - 📅 Agent grouping and policy assignment
 - 📅 Python SDK for integrations
+
+## v1.8.0 – Expand intent labels (Q3 2026)
+
+- ✅ Change default intent to 'suspicious' and expand labels 
+- ✅ Remove Postgres provider config from development settings
 
 ## v1.7.0 – Rebranding to Synentra (June 2026)
 This release completes the project rename from **Vectra** to **Synentra** across the entire codebase, documentation, and infrastructure.
