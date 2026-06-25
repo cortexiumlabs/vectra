@@ -42,7 +42,7 @@ public class InternalOnnxProviderTests
 
         var result = await sut.AnalyzeAsync("request body", "/api", CancellationToken.None);
 
-        result.Intent.Should().Be("unknown");
+        result.Intent.Should().Be("suspicious");
         result.Confidence.Should().Be(0.5);
         result.FallbackSafe.Should().BeTrue();
     }
@@ -55,7 +55,7 @@ public class InternalOnnxProviderTests
 
         var result = await sut.AnalyzeAsync(null, "/api", CancellationToken.None);
 
-        result.Intent.Should().Be("unknown");
+        result.Intent.Should().Be("suspicious");
         result.FallbackSafe.Should().BeTrue();
     }
 
@@ -67,7 +67,7 @@ public class InternalOnnxProviderTests
 
         var result = await sut.AnalyzeAsync("   ", "/api", CancellationToken.None);
 
-        result.Intent.Should().Be("unknown");
+        result.Intent.Should().Be("suspicious");
         result.FallbackSafe.Should().BeTrue();
     }
 

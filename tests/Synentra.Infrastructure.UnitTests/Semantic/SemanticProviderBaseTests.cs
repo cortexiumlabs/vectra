@@ -38,7 +38,7 @@ public class SemanticProviderBaseTests
     [Fact]
     public void ParseResponse_LowConfidence_SetsFallbackSafeTrue()
     {
-        var json = """{"intent":"read","confidence":0.5,"risk_tags":[],"explanation":"ok"}""";
+        var json = """{"intent":"safe_read","confidence":0.5,"risk_tags":[],"explanation":"ok"}""";
 
         var result = _sut.ExposedParseResponse(json, "TestProvider");
 
@@ -49,18 +49,18 @@ public class SemanticProviderBaseTests
     [Fact]
     public void ParseResponse_MissingExplanation_UsesDefaultExplanation()
     {
-        var json = """{"intent":"write","confidence":0.8,"risk_tags":[]}""";
+        var json = """{"intent":"safe_write","confidence":0.8,"risk_tags":[]}""";
 
         var result = _sut.ExposedParseResponse(json, "MyProvider");
 
         result.Explanation.Should().Contain("MyProvider");
-        result.Explanation.Should().Contain("write");
+        result.Explanation.Should().Contain("safe_write");
     }
 
     [Fact]
     public void ParseResponse_MissingRiskTags_UsesEmptyArray()
     {
-        var json = """{"intent":"read","confidence":0.9}""";
+        var json = """{"intent":"safe_read","confidence":0.9}""";
 
         var result = _sut.ExposedParseResponse(json, "TestProvider");
 
@@ -72,7 +72,7 @@ public class SemanticProviderBaseTests
     {
         var result = _sut.ExposedParseResponse("not-json", "TestProvider");
 
-        result.Intent.Should().Be("unknown");
+        result.Intent.Should().Be("suspicious");
         result.Confidence.Should().Be(0.5);
         result.FallbackSafe.Should().BeTrue();
     }
@@ -82,7 +82,7 @@ public class SemanticProviderBaseTests
     {
         var result = _sut.ExposedParseResponse("{}", "TestProvider");
 
-        result.Intent.Should().Be("unknown");
+        result.Intent.Should().Be("suspicious");
         result.FallbackSafe.Should().BeTrue();
     }
 

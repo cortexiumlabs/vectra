@@ -61,10 +61,10 @@ public sealed class InternalOnnxProvider : ISemanticProvider, IDisposable
         CancellationToken cancellationToken)
     {
         if (!_enabled)
-            return new SemanticAnalysisResult { Intent = "unknown", Confidence = 0.5, FallbackSafe = true };
+            return new SemanticAnalysisResult { Intent = "suspicious", Confidence = 0.5, FallbackSafe = true };
 
         if (string.IsNullOrWhiteSpace(body))
-            return new SemanticAnalysisResult { Intent = "unknown", Confidence = 0.5, FallbackSafe = true };
+            return new SemanticAnalysisResult { Intent = "suspicious", Confidence = 0.5, FallbackSafe = true };
 
         var cacheKey = $"semantic_internal:{ComputeHash(body)}";
         var (success, cached) = await _cacheProvider!.TryGetValueAsync<SemanticAnalysisResult>(cacheKey);
@@ -91,9 +91,13 @@ public sealed class InternalOnnxProvider : ISemanticProvider, IDisposable
         var riskTags = intent switch
         {
             "bulk_export"        => new[] { "data_exfiltration" },
+            "export"             => new[] { "data_exfiltration" },
             "destructive_delete" => new[] { "destructive" },
+            "soft_delete"        => new[] { "destructive" },
             "admin_action"       => new[] { "privilege_escalation" },
+            "escalate_privileges" => new[] { "privilege_escalation" },
             "harmful"            => new[] { "malicious" },
+            "suspicious"         => new[] { "malicious" },
             _                    => Array.Empty<string>()
         };
 
