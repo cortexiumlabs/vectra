@@ -1,4 +1,5 @@
 using FluentAssertions;
+using Microsoft.Extensions.DependencyInjection;
 using NSubstitute;
 using Synentra.Application.Abstractions.Executions;
 using Synentra.Domain.Agents;
@@ -39,7 +40,12 @@ public class JwtAgentAuthenticatorTests
             }
         };
         tokenService ??= Substitute.For<ITokenService>();
-        return new JwtAgentAuthenticator(Options.Create(config), tokenService);
+
+        var services = new ServiceCollection();
+        services.AddSingleton(tokenService);
+        var serviceProvider = services.BuildServiceProvider();
+
+        return new JwtAgentAuthenticator(Options.Create(config), serviceProvider);
     }
 
     [Fact]

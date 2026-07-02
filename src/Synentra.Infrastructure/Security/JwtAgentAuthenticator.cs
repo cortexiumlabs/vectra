@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Options;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Protocols;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Microsoft.IdentityModel.Tokens;
@@ -15,10 +16,10 @@ namespace Synentra.Infrastructure.Security;
 public sealed class JwtAgentAuthenticator : IAgentAuthenticator
 {
     private readonly AgentAuthConfiguration _options;
-    private readonly ITokenService _selfSignedService;
+    private readonly Lazy<ITokenService> _selfSignedService;
     private readonly Lazy<ConfigurationManager<OpenIdConnectConfiguration>> _oidcConfigManager;
 
-    public JwtAgentAuthenticator(IOptions<SecurityConfiguration> options, ITokenService selfSignedService)
+    public JwtAgentAuthenticator(IOptions<SecurityConfiguration> options, IServiceProvider serviceProvider)
     {
         // Fall back to a default SelfSigned configuration if none is provided.
         var agentAuth = options?.Value?.AgentAuth;
@@ -32,7 +33,7 @@ public sealed class JwtAgentAuthenticator : IAgentAuthenticator
         }
 
         _options = agentAuth;
-        _selfSignedService = selfSignedService;
+        _selfSignedService = new Lazy<ITokenService>(() => serviceProvider.GetRequiredService<ITokenService>());
 
         // The Lazy is only evaluated when Provider != SelfSigned.
         // If Jwt config is missing, an exception will be thrown at that point,
@@ -68,14 +69,14 @@ public sealed class JwtAgentAuthenticator : IAgentAuthenticator
                 "Token generation is not supported for external JWT providers. " +
                 "Obtain a token from the configured identity provider.");
 
-        var token = _selfSignedService.GenerateToken(agent);
+        var token = _selfSignedService.Value.GenerateToken(agent);
         return AgentAuthResult.Success(token);
     }
 
     public async Task<ClaimsPrincipal?> ValidateAsync(string credential, CancellationToken cancellationToken = default)
     {
         return _options.Provider == AgentAuthProviderType.SelfSigned
-            ? _selfSignedService.ValidateToken(credential)
+            ? _selfSignedService.Value.ValidateToken(credential)
             : await ValidateExternalTokenAsync(credential, cancellationToken);
     }
 
