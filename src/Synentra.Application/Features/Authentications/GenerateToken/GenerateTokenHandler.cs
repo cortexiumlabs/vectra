@@ -1,5 +1,4 @@
 ﻿using Synentra.Application.Abstractions.Dispatchers;
-using Synentra.Application.Abstractions.Executions;
 using Synentra.Application.Abstractions.Persistence;
 using Synentra.Application.Abstractions.Security;
 using Synentra.Application.Errors;
@@ -12,16 +11,16 @@ namespace Synentra.Application.Features.Authentications.GenerateToken;
 internal class GenerateTokenHandler : IActionHandler<GenerateTokenRequest, Result<GenerateTokenResult>>
 {
     private readonly IAgentRepository _agentRepository;
-    private readonly ITokenService _tokenService;
+    private readonly IAgentAuthenticator _agentAuthenticator;
     private readonly ISecretHasher _secretHasher;
 
     public GenerateTokenHandler(
         IAgentRepository agentRepository,
-        ITokenService tokenService,
+        IAgentAuthenticator agentAuthenticator,
         ISecretHasher secretHasher)
     {
         _agentRepository = agentRepository ?? throw new ArgumentNullException(nameof(agentRepository));
-        _tokenService = tokenService ?? throw new ArgumentNullException(nameof(tokenService));
+        _agentAuthenticator = agentAuthenticator ?? throw new ArgumentNullException(nameof(agentAuthenticator));
         _secretHasher = secretHasher ?? throw new ArgumentNullException(nameof(secretHasher));
     }
 
@@ -36,7 +35,13 @@ internal class GenerateTokenHandler : IActionHandler<GenerateTokenRequest, Resul
             return await Result<GenerateTokenResult>.FailureAsync(Error.Unauthorized(
                 ApplicationErrorCodes.InvalidClientSession, "Invalid client secret"));
 
-        var token = _tokenService.GenerateToken(agent);
+        var authResult = _agentAuthenticator.Authenticate(agent);
+        if (!authResult.Succeeded || string.IsNullOrWhiteSpace(authResult.Token))
+            return await Result<GenerateTokenResult>.FailureAsync(Error.Unauthorized(
+                ApplicationErrorCodes.InvalidClientSession,
+                authResult.Error ?? "Token generation is not available for the configured authentication provider"));
+
+        var token = authResult.Token;
         return await Result<GenerateTokenResult>.SuccessAsync(new GenerateTokenResult { AccessToken = token });
     }
 }

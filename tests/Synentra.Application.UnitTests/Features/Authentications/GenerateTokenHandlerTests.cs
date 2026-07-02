@@ -1,6 +1,5 @@
 using FluentAssertions;
 using NSubstitute;
-using Synentra.Application.Abstractions.Executions;
 using Synentra.Application.Abstractions.Persistence;
 using Synentra.Application.Abstractions.Security;
 using Synentra.Application.Features.Authentications.GenerateToken;
@@ -11,13 +10,13 @@ namespace Synentra.Application.UnitTests.Features.Authentications;
 public class GenerateTokenHandlerTests
 {
     private readonly IAgentRepository _agentRepository = Substitute.For<IAgentRepository>();
-    private readonly ITokenService _tokenService = Substitute.For<ITokenService>();
+    private readonly IAgentAuthenticator _agentAuthenticator = Substitute.For<IAgentAuthenticator>();
     private readonly ISecretHasher _secretHasher = Substitute.For<ISecretHasher>();
     private readonly GenerateTokenHandler _sut;
 
     public GenerateTokenHandlerTests()
     {
-        _sut = new GenerateTokenHandler(_agentRepository, _tokenService, _secretHasher);
+        _sut = new GenerateTokenHandler(_agentRepository, _agentAuthenticator, _secretHasher);
     }
 
     [Fact]
@@ -30,7 +29,7 @@ public class GenerateTokenHandlerTests
 
         _agentRepository.GetByIdAsync(agentId, CancellationToken.None).Returns(agent);
         _secretHasher.Verify("plainSecret", agent.ClientSecretHash).Returns(true);
-        _tokenService.GenerateToken(agent).Returns("jwt-token");
+        _agentAuthenticator.Authenticate(agent).Returns(AgentAuthResult.Success("jwt-token"));
 
         // Act
         var result = await _sut.Handle(request, CancellationToken.None);
@@ -54,7 +53,7 @@ public class GenerateTokenHandlerTests
 
         // Assert
         result.IsSuccess.Should().BeFalse();
-        _tokenService.DidNotReceive().GenerateToken(Arg.Any<Agent>());
+        _agentAuthenticator.DidNotReceive().Authenticate(Arg.Any<Agent>());
     }
 
     [Fact]
@@ -74,7 +73,7 @@ public class GenerateTokenHandlerTests
 
         // Assert
         result.IsSuccess.Should().BeFalse();
-        _tokenService.DidNotReceive().GenerateToken(Arg.Any<Agent>());
+        _agentAuthenticator.DidNotReceive().Authenticate(Arg.Any<Agent>());
     }
 
     [Fact]
@@ -94,13 +93,13 @@ public class GenerateTokenHandlerTests
 
         // Assert
         result.IsSuccess.Should().BeFalse();
-        _tokenService.DidNotReceive().GenerateToken(Arg.Any<Agent>());
+        _agentAuthenticator.DidNotReceive().Authenticate(Arg.Any<Agent>());
     }
 
     [Fact]
     public void Constructor_ShouldThrowArgumentNullException_WhenRepositoryIsNull()
     {
-        var act = () => new GenerateTokenHandler(null!, _tokenService, _secretHasher);
+        var act = () => new GenerateTokenHandler(null!, _agentAuthenticator, _secretHasher);
         act.Should().Throw<ArgumentNullException>().WithParameterName("agentRepository");
     }
 
@@ -108,13 +107,13 @@ public class GenerateTokenHandlerTests
     public void Constructor_ShouldThrowArgumentNullException_WhenTokenServiceIsNull()
     {
         var act = () => new GenerateTokenHandler(_agentRepository, null!, _secretHasher);
-        act.Should().Throw<ArgumentNullException>().WithParameterName("tokenService");
+        act.Should().Throw<ArgumentNullException>().WithParameterName("agentAuthenticator");
     }
 
     [Fact]
     public void Constructor_ShouldThrowArgumentNullException_WhenSecretHasherIsNull()
     {
-        var act = () => new GenerateTokenHandler(_agentRepository, _tokenService, null!);
+        var act = () => new GenerateTokenHandler(_agentRepository, _agentAuthenticator, null!);
         act.Should().Throw<ArgumentNullException>().WithParameterName("secretHasher");
     }
 }
