@@ -316,4 +316,240 @@ public class AgentAuthMiddlewareTests
 
         context.Items["AgentId"].Should().Be(agentId);
     }
+
+    [Fact]
+    public async Task InvokeAsync_NoAgentAuthConfiguration_SkipsAuthentication()
+    {
+        var services = new ServiceCollection();
+
+        services.AddSingleton(_authenticator);
+
+        services.AddSingleton<IOptions<SecurityConfiguration>>(
+            Options.Create(new SecurityConfiguration
+            {
+                AgentAuth = null
+            }));
+
+        var context = new DefaultHttpContext
+        {
+            RequestServices = services.BuildServiceProvider()
+        };
+
+        var next = Substitute.For<RequestDelegate>();
+        next(Arg.Any<HttpContext>()).Returns(Task.CompletedTask);
+
+        var middleware = new Synentra.Middleware.AgentAuthMiddleware(next, _logger);
+
+        await middleware.InvokeAsync(context);
+
+        await _authenticator.DidNotReceive()
+            .ValidateAsync(Arg.Any<string>(), Arg.Any<CancellationToken>());
+
+        await next.Received(1).Invoke(context);
+    }
+
+    [Fact]
+    public async Task InvokeAsync_UsesDefaultHeader_WhenCustomHeaderNameIsEmpty()
+    {
+        var id = Guid.NewGuid();
+
+        var principal = new ClaimsPrincipal(
+            new ClaimsIdentity(new[]
+            {
+            new Claim(ClaimTypes.NameIdentifier, id.ToString())
+            }));
+
+        _authenticator
+            .ValidateAsync("token", Arg.Any<CancellationToken>())
+            .Returns(principal);
+
+        var services = new ServiceCollection();
+
+        services.AddSingleton(_authenticator);
+
+        services.AddSingleton<IOptions<SecurityConfiguration>>(
+            Options.Create(new SecurityConfiguration
+            {
+                AgentAuth = new AgentAuthConfiguration
+                {
+                    UseCustomHeader = true,
+                    CustomHeaderName = ""
+                }
+            }));
+
+        var context = new DefaultHttpContext
+        {
+            RequestServices = services.BuildServiceProvider()
+        };
+
+        context.Request.Headers["Synentra-Authorization"] = "Bearer token";
+
+        var middleware = new Synentra.Middleware.AgentAuthMiddleware(
+            _ => Task.CompletedTask,
+            _logger);
+
+        await middleware.InvokeAsync(context);
+
+        context.Items["AgentId"].Should().Be(id);
+    }
+
+    [Fact]
+    public async Task InvokeAsync_CustomHeaderDisabled_DoesNotReadCustomHeader()
+    {
+        var context = BuildContext(
+            customAuthHeader: "Bearer token",
+            useCustomHeader: false);
+
+        var middleware = new Synentra.Middleware.AgentAuthMiddleware(
+            _ => Task.CompletedTask,
+            _logger);
+
+        await middleware.InvokeAsync(context);
+
+        await _authenticator.DidNotReceive()
+            .ValidateAsync(Arg.Any<string>(), Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task InvokeAsync_BearerWithoutToken_DoesNothing()
+    {
+        var context = BuildContext(customAuthHeader: "Bearer");
+
+        var middleware = new Synentra.Middleware.AgentAuthMiddleware(
+            _ => Task.CompletedTask,
+            _logger);
+
+        await middleware.InvokeAsync(context);
+
+        context.Items.Should().NotContainKey("AgentId");
+    }
+
+    [Fact]
+    public async Task InvokeAsync_BearerWithExtraSpaces_IsAccepted()
+    {
+        var id = Guid.NewGuid();
+
+        var principal = new ClaimsPrincipal(
+            new ClaimsIdentity(new[]
+            {
+            new Claim(ClaimTypes.NameIdentifier, id.ToString())
+            }));
+
+        _authenticator.ValidateAsync("abc", Arg.Any<CancellationToken>())
+            .Returns(principal);
+
+        var context = BuildContext(
+            customAuthHeader: "Bearer     abc");
+
+        var middleware = new Synentra.Middleware.AgentAuthMiddleware(
+            _ => Task.CompletedTask,
+            _logger);
+
+        await middleware.InvokeAsync(context);
+
+        context.Items["AgentId"].Should().Be(id);
+    }
+
+    [Fact]
+    public async Task InvokeAsync_AgentIdClaim_IsRecognized()
+    {
+        var id = Guid.NewGuid();
+
+        var principal = new ClaimsPrincipal(
+            new ClaimsIdentity(new[]
+            {
+            new Claim("agentId", id.ToString())
+            }));
+
+        _authenticator.ValidateAsync("token", Arg.Any<CancellationToken>())
+            .Returns(principal);
+
+        var context = BuildContext(customAuthHeader: "Bearer token");
+
+        var middleware = new Synentra.Middleware.AgentAuthMiddleware(
+            _ => Task.CompletedTask,
+            _logger);
+
+        await middleware.InvokeAsync(context);
+
+        context.Items["AgentId"].Should().Be(id);
+    }
+
+    [Fact]
+    public async Task InvokeAsync_ClientIdClaim_IsRecognized()
+    {
+        var id = Guid.NewGuid();
+
+        var principal = new ClaimsPrincipal(
+            new ClaimsIdentity(new[]
+            {
+            new Claim("client_id", id.ToString())
+            }));
+
+        _authenticator.ValidateAsync("token", Arg.Any<CancellationToken>())
+            .Returns(principal);
+
+        var context = BuildContext(customAuthHeader: "Bearer token");
+
+        var middleware = new Synentra.Middleware.AgentAuthMiddleware(
+            _ => Task.CompletedTask,
+            _logger);
+
+        await middleware.InvokeAsync(context);
+
+        context.Items["AgentId"].Should().Be(id);
+    }
+
+    [Fact]
+    public async Task InvokeAsync_InvalidTrustScore_DoesNotSetTrustScore()
+    {
+        var id = Guid.NewGuid();
+
+        var principal = new ClaimsPrincipal(
+            new ClaimsIdentity(new[]
+            {
+            new Claim(ClaimTypes.NameIdentifier, id.ToString()),
+            new Claim("trust_score", "abc")
+            }));
+
+        _authenticator.ValidateAsync("token", Arg.Any<CancellationToken>())
+            .Returns(principal);
+
+        var context = BuildContext(customAuthHeader: "Bearer token");
+
+        var middleware = new Synentra.Middleware.AgentAuthMiddleware(
+            _ => Task.CompletedTask,
+            _logger);
+
+        await middleware.InvokeAsync(context);
+
+        context.Items.Should().ContainKey("AgentId");
+        context.Items.Should().NotContainKey("TrustScore");
+    }
+
+    [Theory]
+    [InlineData("bearer token")]
+    [InlineData("BEARER token")]
+    [InlineData("BeArEr token")]
+    public async Task InvokeAsync_BearerScheme_IsCaseInsensitive(string header)
+    {
+        var id = Guid.NewGuid();
+
+        _authenticator.ValidateAsync("token", Arg.Any<CancellationToken>())
+            .Returns(new ClaimsPrincipal(
+                new ClaimsIdentity(new[]
+                {
+                new Claim(ClaimTypes.NameIdentifier, id.ToString())
+                })));
+
+        var context = BuildContext(customAuthHeader: header);
+
+        var middleware = new Synentra.Middleware.AgentAuthMiddleware(
+            _ => Task.CompletedTask,
+            _logger);
+
+        await middleware.InvokeAsync(context);
+
+        context.Items["AgentId"].Should().Be(id);
+    }
 }
