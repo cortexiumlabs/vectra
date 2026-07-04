@@ -160,4 +160,133 @@ public class JwtAgentAuthenticatorTests
 
         result.Should().BeNull();
     }
+
+    [Fact]
+    public void Authenticate_ExternalProvider_StillUsesSelfSignedTokenService()
+    {
+        var tokenService = Substitute.For<ITokenService>();
+        tokenService.GenerateToken(Arg.Any<Agent>()).Returns("self-signed-token");
+
+        var sut = CreateSut(AgentAuthProviderType.Jwt, tokenService);
+
+        var agent = new Agent("agent", "owner", "hash");
+
+        var result = sut.Authenticate(agent);
+
+        result.Succeeded.Should().BeTrue();
+        result.Token.Should().Be("self-signed-token");
+        tokenService.Received(1).GenerateToken(agent);
+    }
+
+    [Fact]
+    public async Task ValidateAsync_ExternalFails_FallsBackToSelfSigned()
+    {
+        var tokenService = Substitute.For<ITokenService>();
+
+        var expectedPrincipal = new ClaimsPrincipal(new ClaimsIdentity(new[]
+        {
+        new Claim(ClaimTypes.Name, "fallback-user")
+    }));
+
+        tokenService.ValidateToken("some-token").Returns(expectedPrincipal);
+
+        var sut = CreateSut(
+            AgentAuthProviderType.Jwt,
+            tokenService,
+            authority: "https://identity.example.com",
+            metadataUrl: "http://localhost:9999/.well-known/openid");
+
+        var result = await sut.ValidateAsync("some-token", TestContext.Current.CancellationToken);
+
+        result.Should().NotBeNull();
+        result!.Identity!.Name.Should().Be("fallback-user");
+    }
+
+    [Fact]
+    public async Task ValidateAsync_FallbackSelfSigned_ThrowsInvalidOperation_ReturnsNull()
+    {
+        var tokenService = Substitute.For<ITokenService>();
+        tokenService.ValidateToken(Arg.Any<string>())
+            .Returns(_ => throw new InvalidOperationException("invalid self-signed config"));
+
+        var sut = CreateSut(
+            AgentAuthProviderType.Jwt,
+            tokenService,
+            authority: "https://identity.example.com",
+            metadataUrl: "http://localhost:9999/.well-known/openid");
+
+        var result = await sut.ValidateAsync("token", TestContext.Current.CancellationToken);
+
+        result.Should().BeNull();
+    }
+
+    [Fact]
+    public async Task ValidateAsync_ExternalJwt_IssuerValidationEnabled_DoesNotThrow()
+    {
+        var sut = CreateSut(
+            AgentAuthProviderType.Jwt,
+            authority: "https://identity.example.com",
+            metadataUrl: "http://localhost:9999/.well-known/openid");
+
+        var act = async () =>
+            await sut.ValidateAsync("invalid.jwt.token", TestContext.Current.CancellationToken);
+
+        await act.Should().NotThrowAsync();
+    }
+
+    [Fact]
+    public async Task ValidateAsync_ExternalJwt_AudienceValidationEnabled_DoesNotThrow()
+    {
+        var sut = CreateSut(
+            AgentAuthProviderType.Jwt,
+            authority: "https://identity.example.com",
+            metadataUrl: "http://localhost:9999/.well-known/openid");
+
+        var result = await sut.ValidateAsync("invalid.jwt.token", TestContext.Current.CancellationToken);
+
+        result.Should().BeNull();
+    }
+
+    [Fact]
+    public void Constructor_MetadataUrl_EmptyString_FallsBackToAuthority()
+    {
+        var act = () => CreateSut(
+            AgentAuthProviderType.Jwt,
+            authority: "https://identity.example.com",
+            metadataUrl: "   ");
+
+        act.Should().NotThrow();
+    }
+
+    [Fact]
+    public async Task ValidateAsync_ExplicitSelfSignedProvider_ReturnsTokenServiceResult()
+    {
+        var tokenService = Substitute.For<ITokenService>();
+        var principal = new ClaimsPrincipal(new ClaimsIdentity("test"));
+
+        tokenService.ValidateToken("token").Returns(principal);
+
+        var sut = CreateSut(AgentAuthProviderType.SelfSigned, tokenService);
+
+        var result = await sut.ValidateAsync("token", TestContext.Current.CancellationToken);
+
+        result.Should().BeSameAs(principal);
+    }
+
+    [Fact]
+    public async Task ValidateAsync_ExternalNullResult_SelfSignedAlsoReturnsNull()
+    {
+        var tokenService = Substitute.For<ITokenService>();
+        tokenService.ValidateToken(Arg.Any<string>()).Returns((ClaimsPrincipal?)null);
+
+        var sut = CreateSut(
+            AgentAuthProviderType.Jwt,
+            tokenService,
+            authority: "https://identity.example.com",
+            metadataUrl: "http://localhost:9999/.well-known/openid");
+
+        var result = await sut.ValidateAsync("token", TestContext.Current.CancellationToken);
+
+        result.Should().BeNull();
+    }
 }
