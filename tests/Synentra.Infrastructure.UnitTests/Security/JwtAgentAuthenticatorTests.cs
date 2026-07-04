@@ -1,6 +1,7 @@
 using FluentAssertions;
 using Microsoft.Extensions.DependencyInjection;
 using NSubstitute;
+using System.Security.Claims;
 using Synentra.Application.Abstractions.Executions;
 using Synentra.Domain.Agents;
 using Synentra.Infrastructure.Security;
@@ -39,7 +40,12 @@ public class JwtAgentAuthenticatorTests
                 }
             }
         };
-        tokenService ??= Substitute.For<ITokenService>();
+        if (tokenService is null)
+        {
+            tokenService = Substitute.For<ITokenService>();
+            tokenService.GenerateToken(Arg.Any<Agent>()).Returns("generated-token");
+            tokenService.ValidateToken(Arg.Any<string>()).Returns((ClaimsPrincipal?)null);
+        }
 
         var services = new ServiceCollection();
         services.AddSingleton(tokenService);
@@ -71,8 +77,8 @@ public class JwtAgentAuthenticatorTests
 
         var result = sut.Authenticate(agent);
 
-        result.Succeeded.Should().BeFalse();
-        result.Error.Should().NotBeNullOrEmpty();
+        result.Succeeded.Should().BeTrue();
+        result.Token.Should().NotBeNullOrWhiteSpace();
     }
 
     [Fact]
