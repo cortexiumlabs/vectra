@@ -56,8 +56,7 @@ public class AgentAuthMiddleware
         if (principal is null)
             return;
 
-        var sub = principal.FindFirstValue(ClaimTypes.NameIdentifier)
-               ?? principal.FindFirstValue("sub");
+        var sub = ResolveAgentIdClaimValue(principal);
 
         if (Guid.TryParse(sub, out var agentId))
         {
@@ -80,5 +79,14 @@ public class AgentAuthMiddleware
             return null;
 
         return parts[1];
+    }
+
+    private static string? ResolveAgentIdClaimValue(ClaimsPrincipal principal)
+    {
+        return principal.FindFirstValue(ClaimTypes.NameIdentifier)
+               ?? principal.FindFirstValue("agent_id")
+               ?? principal.FindFirstValue("agentId")
+               ?? principal.FindFirstValue("sub")
+               ?? principal.FindFirstValue("client_id");
     }
 }

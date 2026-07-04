@@ -26,7 +26,9 @@ public class AgentAuthMiddlewareTests
         string? authorizationHeader = null,
         bool fallbackToAuthorization = false,
         bool useCustomHeader = true,
-        string customHeaderName = "Synentra-Authorization")
+        string customHeaderName = "Synentra-Authorization",
+        AgentAuthProviderType provider = AgentAuthProviderType.SelfSigned,
+        string jwtAgentIdClaimType = "sub")
     {
         var services = new ServiceCollection();
         services.AddSingleton(_authenticator);
@@ -34,16 +36,18 @@ public class AgentAuthMiddlewareTests
         {
             AgentAuth = new AgentAuthConfiguration
             {
+                Provider = provider,
                 UseCustomHeader = useCustomHeader,
                 CustomHeaderName = customHeaderName,
-                FallbackToAuthorization = fallbackToAuthorization
+                FallbackToAuthorization = fallbackToAuthorization,
+                Jwt = new JwtProvider { }
             }
         }));
-        var provider = services.BuildServiceProvider();
+        var serviceProvider = services.BuildServiceProvider();
 
         var context = new DefaultHttpContext
         {
-            RequestServices = provider
+            RequestServices = serviceProvider
         };
 
         if (customAuthHeader is not null)
@@ -263,5 +267,53 @@ public class AgentAuthMiddlewareTests
 
         context.Items.ContainsKey("AgentId").Should().BeFalse();
         await _authenticator.DidNotReceive().ValidateAsync(Arg.Any<string>(), Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task InvokeAsync_JwtProvider_UsesConfiguredAgentIdClaimType()
+    {
+        var agentId = Guid.NewGuid();
+        var claims = new[] { new Claim("agent_id", agentId.ToString()) };
+        var principal = new ClaimsPrincipal(new ClaimsIdentity(claims));
+
+        _authenticator.ValidateAsync("valid-token", Arg.Any<CancellationToken>())
+            .Returns(principal);
+
+        var next = Substitute.For<RequestDelegate>();
+        next(Arg.Any<HttpContext>()).Returns(Task.CompletedTask);
+        var middleware = new Synentra.Middleware.AgentAuthMiddleware(next, _logger);
+
+        var context = BuildContext(
+            customAuthHeader: "Bearer valid-token",
+            provider: AgentAuthProviderType.Jwt,
+            jwtAgentIdClaimType: "agent_id");
+
+        await middleware.InvokeAsync(context);
+
+        context.Items["AgentId"].Should().Be(agentId);
+    }
+
+    [Fact]
+    public async Task InvokeAsync_JwtProvider_FallsBackToCommonAgentIdClaims()
+    {
+        var agentId = Guid.NewGuid();
+        var claims = new[] { new Claim("agent_id", agentId.ToString()) };
+        var principal = new ClaimsPrincipal(new ClaimsIdentity(claims));
+
+        _authenticator.ValidateAsync("valid-token", Arg.Any<CancellationToken>())
+            .Returns(principal);
+
+        var next = Substitute.For<RequestDelegate>();
+        next(Arg.Any<HttpContext>()).Returns(Task.CompletedTask);
+        var middleware = new Synentra.Middleware.AgentAuthMiddleware(next, _logger);
+
+        var context = BuildContext(
+            customAuthHeader: "Bearer valid-token",
+            provider: AgentAuthProviderType.Jwt,
+            jwtAgentIdClaimType: "missing_claim");
+
+        await middleware.InvokeAsync(context);
+
+        context.Items["AgentId"].Should().Be(agentId);
     }
 }
