@@ -6,5 +6,6 @@ namespace Synentra.Application.Features.Authentications.GenerateToken;
 public class GenerateTokenRequest : IRequest<Result<GenerateTokenResult>>
 {
     public Guid AgentId { get; set; }
-    public string ClientSecret { get; set; } = string.Empty;
+    public string? ClientSecret { get; set; }
+    public string? ExternalToken { get; set; }
 }
