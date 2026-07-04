@@ -50,6 +50,7 @@ public static class DependencyInjection
         // Register the selected authenticator scheme
         services.AddSingleton<IAgentAuthenticator, JwtAgentAuthenticator>();
         services.AddSingleton<ISecretHasher, BcryptSecretHasher>();
+        services.AddSingleton<IAgentAuthConfigProvider, AgentAuthConfigProvider>();
 
         // Policy engine
         services.AddSingleton<IPolicyLoader, FileSystemPolicyLoader>();
