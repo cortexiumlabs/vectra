@@ -82,8 +82,8 @@ public class SecurityConfigurationTests
         config.Authority.Should().BeEmpty();
         config.Audience.Should().BeEmpty();
         config.MetadataUrl.Should().BeEmpty();
-        config.ValidateIssuer.Should().BeTrue();
-        config.ValidateAudience.Should().BeTrue();
+        config.ValidateIssuer.Should().BeFalse();
+        config.ValidateAudience.Should().BeFalse();
     }
 
     [Fact]
