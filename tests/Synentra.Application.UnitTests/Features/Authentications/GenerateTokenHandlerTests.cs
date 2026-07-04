@@ -289,4 +289,217 @@ public class GenerateTokenHandlerTests
         var act = () => new GenerateTokenHandler(_agentRepository, _agentAuthenticator, _secretHasher, null!);
         act.Should().Throw<ArgumentNullException>().WithParameterName("authConfig");
     }
+
+    [Fact]
+    public async Task Handle_NoCredentials_ReturnsUnauthorized()
+    {
+        var id = Guid.NewGuid();
+
+        var agent = new Agent("agent", "owner", "hash");
+        SetAgentId(agent, id);
+
+        _agentRepository.GetByIdAsync(id, Arg.Any<CancellationToken>())
+            .Returns(agent);
+
+        var request = new GenerateTokenRequest
+        {
+            AgentId = id
+        };
+
+        var result = await _sut.Handle(request, TestContext.Current.CancellationToken);
+
+        result.IsSuccess.Should().BeFalse();
+        result.Error!.ErrorCode.Should().Be(ApplicationErrorCodes.InvalidClientSession);
+
+        _secretHasher.DidNotReceive()
+            .Verify(Arg.Any<string>(), Arg.Any<string>());
+
+        await _agentAuthenticator.DidNotReceive()
+            .ValidateAsync(Arg.Any<string>(), Arg.Any<CancellationToken>());
+
+        _agentAuthenticator.DidNotReceive()
+            .Authenticate(Arg.Any<Agent>());
+    }
+
+    [Theory]
+    [InlineData("")]
+    [InlineData(" ")]
+    [InlineData("   ")]
+    public async Task Handle_WhitespaceClientSecret_ReturnsUnauthorized(string secret)
+    {
+        var id = Guid.NewGuid();
+
+        var agent = new Agent("agent", "owner", "hash");
+        SetAgentId(agent, id);
+
+        _agentRepository.GetByIdAsync(id, Arg.Any<CancellationToken>())
+            .Returns(agent);
+
+        var request = new GenerateTokenRequest
+        {
+            AgentId = id,
+            ClientSecret = secret
+        };
+
+        var result = await _sut.Handle(request, TestContext.Current.CancellationToken);
+
+        result.IsSuccess.Should().BeFalse();
+
+        _secretHasher.DidNotReceive()
+            .Verify(Arg.Any<string>(), Arg.Any<string>());
+    }
+
+    [Theory]
+    [InlineData("")]
+    [InlineData(" ")]
+    public async Task Handle_WhitespaceExternalToken_FallsBackToClientSecret(string token)
+    {
+        var id = Guid.NewGuid();
+
+        var agent = new Agent("agent", "owner", "hash");
+        SetAgentId(agent, id);
+
+        _agentRepository.GetByIdAsync(id, Arg.Any<CancellationToken>())
+            .Returns(agent);
+
+        _secretHasher.Verify("secret", agent.ClientSecretHash)
+            .Returns(true);
+
+        _agentAuthenticator.Authenticate(agent)
+            .Returns(AgentAuthResult.Success("jwt"));
+
+        var request = new GenerateTokenRequest
+        {
+            AgentId = id,
+            ExternalToken = token,
+            ClientSecret = "secret"
+        };
+
+        var result = await _sut.Handle(request, TestContext.Current.CancellationToken);
+
+        result.IsSuccess.Should().BeTrue();
+
+        await _agentAuthenticator.DidNotReceive()
+            .ValidateAsync(Arg.Any<string>(), Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task Handle_AuthenticateFails_ReturnsUnauthorized()
+    {
+        var id = Guid.NewGuid();
+
+        var agent = new Agent("agent", "owner", "hash");
+        SetAgentId(agent, id);
+
+        _agentRepository.GetByIdAsync(id, Arg.Any<CancellationToken>())
+            .Returns(agent);
+
+        _secretHasher.Verify("secret", agent.ClientSecretHash)
+            .Returns(true);
+
+        _agentAuthenticator.Authenticate(agent)
+            .Returns(AgentAuthResult.Failure("authentication failed"));
+
+        var request = new GenerateTokenRequest
+        {
+            AgentId = id,
+            ClientSecret = "secret"
+        };
+
+        var result = await _sut.Handle(request, TestContext.Current.CancellationToken);
+
+        result.IsSuccess.Should().BeFalse();
+        result.Error!.Message.Should().Be("authentication failed");
+    }
+
+    [Theory]
+    [InlineData("")]
+    [InlineData(" ")]
+    public async Task Handle_AuthenticateReturnsEmptyToken_ReturnsFailure(string token)
+    {
+        var id = Guid.NewGuid();
+
+        var agent = new Agent("agent", "owner", "hash");
+        SetAgentId(agent, id);
+
+        _agentRepository.GetByIdAsync(id, Arg.Any<CancellationToken>())
+            .Returns(agent);
+
+        _secretHasher.Verify("secret", agent.ClientSecretHash)
+            .Returns(true);
+
+        _agentAuthenticator.Authenticate(agent)
+            .Returns(AgentAuthResult.Success(token));
+
+        var request = new GenerateTokenRequest
+        {
+            AgentId = id,
+            ClientSecret = "secret"
+        };
+
+        var result = await _sut.Handle(request, TestContext.Current.CancellationToken);
+
+        result.IsSuccess.Should().BeFalse();
+    }
+
+    [Fact]
+    public async Task Handle_AuthenticateFailsWithoutError_UsesDefaultMessage()
+    {
+        var id = Guid.NewGuid();
+
+        var agent = new Agent("agent", "owner", "hash");
+        SetAgentId(agent, id);
+
+        _agentRepository.GetByIdAsync(id, Arg.Any<CancellationToken>())
+            .Returns(agent);
+
+        _secretHasher.Verify("secret", agent.ClientSecretHash)
+            .Returns(true);
+
+        _agentAuthenticator.Authenticate(agent)
+            .Returns(new AgentAuthResult { Succeeded = false, Error = null, Token = null });
+
+        var request = new GenerateTokenRequest
+        {
+            AgentId = id,
+            ClientSecret = "secret"
+        };
+
+        var result = await _sut.Handle(request, TestContext.Current.CancellationToken);
+
+        result.IsSuccess.Should().BeFalse();
+        result.Error!.Message.Should().Be("Token generation failed.");
+    }
+
+    [Fact]
+    public async Task Handle_ValidExternalToken_DoesNotEvaluateClientSecret()
+    {
+        var id = Guid.NewGuid();
+
+        var agent = new Agent("agent", "owner", "hash");
+        SetAgentId(agent, id);
+
+        _agentRepository.GetByIdAsync(id, Arg.Any<CancellationToken>())
+            .Returns(agent);
+
+        _agentAuthenticator.ValidateAsync("jwt", Arg.Any<CancellationToken>())
+            .Returns(new ClaimsPrincipal(new ClaimsIdentity()));
+
+        _agentAuthenticator.Authenticate(agent)
+            .Returns(AgentAuthResult.Success("token"));
+
+        var request = new GenerateTokenRequest
+        {
+            AgentId = id,
+            ExternalToken = "jwt",
+            ClientSecret = "wrong"
+        };
+
+        var result = await _sut.Handle(request, TestContext.Current.CancellationToken);
+
+        result.IsSuccess.Should().BeTrue();
+
+        _secretHasher.DidNotReceive()
+            .Verify(Arg.Any<string>(), Arg.Any<string>());
+    }
 }
