@@ -1,9 +1,11 @@
 using FluentAssertions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
+using NSubstitute;
 using Synentra.BuildingBlocks.Configuration.System;
 using Synentra.BuildingBlocks.Configuration.System.Storage.Cache;
 using Synentra.Infrastructure.Caches;
+using Synentra.Infrastructure.Caches.Providers;
 
 namespace Synentra.Infrastructure.UnitTests.Caches;
 
@@ -91,5 +93,151 @@ public class CacheProviderFactoryTests
 
         provider.Should().NotBeNull();
         provider.Should().BeOfType<Synentra.Infrastructure.Caches.Providers.RedisCacheProvider>();
+    }
+
+    [Theory]
+    [InlineData("MEMORY")]
+    [InlineData("Memory")]
+    [InlineData("MeMoRy")]
+    public void Create_MemoryProvider_IsCaseInsensitive(string providerName)
+    {
+        var sut = CreateSut(providerName);
+
+        var provider = sut.Create();
+
+        provider.Should().NotBeNull();
+        provider.Should().BeOfType<MemoryCacheProvider>();
+    }
+
+    [Theory]
+    [InlineData(" memory")]
+    [InlineData("memory ")]
+    [InlineData("  memory  ")]
+    public void Create_MemoryProvider_TrimWhitespace(string providerName)
+    {
+        var sut = CreateSut(providerName);
+
+        var provider = sut.Create();
+
+        provider.Should().BeOfType<MemoryCacheProvider>();
+    }
+
+    [Theory]
+    [InlineData(null)]
+    [InlineData("")]
+    [InlineData(" ")]
+    public void Create_RedisWithoutAddress_Throws(string? address)
+    {
+        var services = new ServiceCollection();
+        services.AddLogging();
+        services.AddSingleton(Substitute.For<StackExchange.Redis.IConnectionMultiplexer>());
+
+        var config = new SystemConfiguration();
+
+        config.Storage.Cache.DefaultProvider = "redis";
+        config.Storage.Cache.Providers.Redis = new RedisCacheConfiguration
+        {
+            Address = address
+        };
+
+        var sut = new CacheProviderFactory(
+            Options.Create(config),
+            services.BuildServiceProvider());
+
+        var act = () => sut.Create();
+
+        act.Should().Throw<InvalidOperationException>()
+            .WithMessage("*Redis is not configured*");
+    }
+
+    [Fact]
+    public void Create_NullProvider_ThrowsNotSupported()
+    {
+        var config = new SystemConfiguration();
+
+        config.Storage.Cache.DefaultProvider = null;
+
+        config.Storage.Cache.Providers.Memory =
+            new MemoryCacheConfiguration();
+
+        var services = new ServiceCollection();
+        services.AddMemoryCache();
+
+        var sut = new CacheProviderFactory(
+            Options.Create(config),
+            services.BuildServiceProvider());
+
+        var act = () => sut.Create();
+
+        act.Should().Throw<NotSupportedException>();
+    }
+
+    [Theory]
+    [InlineData("")]
+    [InlineData(" ")]
+    public void Create_EmptyProvider_Throws(string provider)
+    {
+        var sut = CreateSut(provider);
+
+        var act = () => sut.Create();
+
+        act.Should().Throw<NotSupportedException>();
+    }
+
+    [Fact]
+    public void Constructor_MissingCacheConfiguration_Throws()
+    {
+        var config = new SystemConfiguration();
+
+        config.Storage.Cache = null!;
+
+        var services = new ServiceCollection();
+
+        var act = () => new CacheProviderFactory(
+            Options.Create(config),
+            services.BuildServiceProvider());
+
+        act.Should().Throw<InvalidOperationException>()
+            .WithMessage("*Cache configuration is missing*");
+    }
+
+    [Fact]
+    public void Create_RedisProvider_AddressWithWhitespace_ReturnsRedisProvider()
+    {
+        var services = new ServiceCollection();
+
+        services.AddLogging();
+        services.AddSingleton(
+            Substitute.For<StackExchange.Redis.IConnectionMultiplexer>());
+
+        var config = new SystemConfiguration();
+
+        config.Storage.Cache.DefaultProvider = "redis";
+
+        config.Storage.Cache.Providers.Redis =
+            new RedisCacheConfiguration
+            {
+                Address = " localhost:6379 "
+            };
+
+        var sut = new CacheProviderFactory(
+            Options.Create(config),
+            services.BuildServiceProvider());
+
+        var provider = sut.Create();
+
+        provider.Should().BeOfType<RedisCacheProvider>();
+    }
+
+    [Fact]
+    public void Create_UnsupportedProvider_MessageContainsProvider()
+    {
+        var sut = CreateSut("mongo");
+
+        var act = () => sut.Create();
+
+        act.Should()
+            .Throw<NotSupportedException>()
+            .WithMessage("*mongo*");
     }
 }
