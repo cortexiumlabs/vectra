@@ -4,11 +4,8 @@ namespace Synentra.Application.Abstractions.Security;
 
 public interface IAgentAuthConfigProvider
 {
-    AgentAuthProviderType Provider { get; }
-    bool ValidateIssuer { get; }
-    bool ValidateAudience { get; }
-    string? Authority { get; }
-    string? Audience { get; }
+    TokenIssuanceConfiguration TokenIssuance { get; }
+    ExternalIdentityConfiguration ExternalIdentity { get; }
     bool UseCustomHeader { get; }
     string CustomHeaderName { get; }
     bool FallbackToAuthorization { get; }

@@ -13,11 +13,26 @@ public class AgentAuthConfigProvider : IAgentAuthConfigProvider
         _config = options?.Value ?? new AgentAuthConfiguration();
     }
 
-    public AgentAuthProviderType Provider => _config.Provider;
-    public bool ValidateIssuer => _config.Jwt?.ValidateIssuer ?? false;
-    public bool ValidateAudience => _config.Jwt?.ValidateAudience ?? false;
-    public string? Authority => _config.Jwt?.Authority;
-    public string? Audience => _config.Jwt?.Audience;
+    public TokenIssuanceConfiguration TokenIssuance => new()
+    {
+        Issuer = _config.TokenIssuance?.Issuer ?? string.Empty,
+        Audience = _config.TokenIssuance?.Audience ?? string.Empty,
+        Secret = _config.TokenIssuance?.Secret ?? string.Empty,
+        Expiration = _config.TokenIssuance?.Expiration ?? TimeSpan.FromMinutes(15)
+    };
+
+    public ExternalIdentityConfiguration ExternalIdentity => new()
+    {
+        Provider = _config.ExternalIdentity?.Provider ?? ExternalIdentityProviderType.Jwt,
+        Jwt = new JwtIdentityConfiguration
+        {
+            Authority = _config.ExternalIdentity?.Jwt?.Authority ?? string.Empty,
+            Audience = _config.ExternalIdentity?.Jwt?.Audience ?? string.Empty,
+            ValidateIssuer = _config.ExternalIdentity?.Jwt?.ValidateIssuer ?? false,
+            ValidateAudience = _config.ExternalIdentity?.Jwt?.ValidateAudience ?? false
+        }
+    };
+
     public bool UseCustomHeader => _config.UseCustomHeader;
     public string CustomHeaderName => _config.CustomHeaderName ?? "Synentra-Authorization";
     public bool FallbackToAuthorization => _config.FallbackToAuthorization;
