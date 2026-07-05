@@ -4,7 +4,6 @@ using Synentra.Application.Abstractions.Persistence;
 using Synentra.Application.Abstractions.Security;
 using Synentra.Application.Errors;
 using Synentra.Application.Features.Authentications.GenerateToken;
-using Synentra.BuildingBlocks.Configuration.Security.AgentAuth;
 using Synentra.Domain.Agents;
 using System.Security.Claims;
 
@@ -15,19 +14,15 @@ public class GenerateTokenHandlerTests
     private readonly IAgentRepository _agentRepository = Substitute.For<IAgentRepository>();
     private readonly IAgentAuthenticator _agentAuthenticator = Substitute.For<IAgentAuthenticator>();
     private readonly ISecretHasher _secretHasher = Substitute.For<ISecretHasher>();
-    private readonly IAgentAuthConfigProvider _authConfig = Substitute.For<IAgentAuthConfigProvider>();
 
     private readonly GenerateTokenHandler _sut;
 
     public GenerateTokenHandlerTests()
     {
-        _authConfig.Provider.Returns(AgentAuthProviderType.SelfSigned);
-
         _sut = new GenerateTokenHandler(
             _agentRepository,
             _agentAuthenticator,
-            _secretHasher,
-            _authConfig);
+            _secretHasher);
     }
 
     // Helper to set the agent's Id via reflection (since it's private set)
@@ -136,8 +131,6 @@ public class GenerateTokenHandlerTests
                 new System.Security.Claims.Claim("sub", agentId.ToString())
             }));
 
-        _authConfig.Provider.Returns(AgentAuthProviderType.Jwt);
-
         _agentRepository.GetByIdAsync(agentId, CancellationToken.None).Returns(agent);
         _agentAuthenticator.ValidateAsync(externalToken, CancellationToken.None).Returns(principal);
         _agentAuthenticator.Authenticate(agent).Returns(AgentAuthResult.Success("jwt-token"));
@@ -161,7 +154,6 @@ public class GenerateTokenHandlerTests
         var agent = new Agent("TestAgent", "owner-1", "hashed-secret");
         SetAgentId(agent, agentId);
 
-        _authConfig.Provider.Returns(AgentAuthProviderType.Jwt);
         _agentRepository.GetByIdAsync(agentId, CancellationToken.None).Returns(agent);
         _agentAuthenticator.ValidateAsync("invalid-token", CancellationToken.None).Returns((System.Security.Claims.ClaimsPrincipal?)null);
 
@@ -183,8 +175,6 @@ public class GenerateTokenHandlerTests
         var agent = new Agent("TestAgent", "owner-1", "hashed-secret");
         SetAgentId(agent, agentId);
         var externalToken = "invalid-external-jwt";
-
-        _authConfig.Provider.Returns(AgentAuthProviderType.Jwt);
 
         _agentRepository.GetByIdAsync(agentId, CancellationToken.None).Returns(agent);
         _agentAuthenticator.ValidateAsync(externalToken, CancellationToken.None).Returns((ClaimsPrincipal?)null);
@@ -215,8 +205,6 @@ public class GenerateTokenHandlerTests
                 new System.Security.Claims.Claim("sub", agentId.ToString())
             }));
 
-        _authConfig.Provider.Returns(AgentAuthProviderType.Jwt);
-
         _agentRepository.GetByIdAsync(agentId, CancellationToken.None).Returns(agent);
         _agentAuthenticator.ValidateAsync(externalToken, CancellationToken.None).Returns(principal);
         _agentAuthenticator.Authenticate(agent).Returns(AgentAuthResult.Success("jwt-token"));
@@ -237,14 +225,12 @@ public class GenerateTokenHandlerTests
     }
 
     [Fact]
-    public async Task Handle_ShouldFallbackToClientSecret_WhenExternalTokenIsNotProvided()
+    public async Task Handle_ShouldAuthenticateUsingClientSecret_WhenExternalTokenIsMissing()
     {
         // Arrange
         var agentId = Guid.NewGuid();
         var agent = new Agent("TestAgent", "owner-1", "hashed-secret");
         SetAgentId(agent, agentId);
-
-        _authConfig.Provider.Returns(AgentAuthProviderType.Jwt); // config says Jwt, but agent sends no external token
 
         _agentRepository.GetByIdAsync(agentId, CancellationToken.None).Returns(agent);
         _secretHasher.Verify("plainSecret", agent.ClientSecretHash).Returns(true);
@@ -265,29 +251,22 @@ public class GenerateTokenHandlerTests
     [Fact]
     public void Constructor_ShouldThrowArgumentNullException_WhenRepositoryIsNull()
     {
-        var act = () => new GenerateTokenHandler(null!, _agentAuthenticator, _secretHasher, _authConfig);
+        var act = () => new GenerateTokenHandler(null!, _agentAuthenticator, _secretHasher);
         act.Should().Throw<ArgumentNullException>().WithParameterName("agentRepository");
     }
 
     [Fact]
     public void Constructor_ShouldThrowArgumentNullException_WhenAuthenticatorIsNull()
     {
-        var act = () => new GenerateTokenHandler(_agentRepository, null!, _secretHasher, _authConfig);
+        var act = () => new GenerateTokenHandler(_agentRepository, null!, _secretHasher);
         act.Should().Throw<ArgumentNullException>().WithParameterName("agentAuthenticator");
     }
 
     [Fact]
     public void Constructor_ShouldThrowArgumentNullException_WhenSecretHasherIsNull()
     {
-        var act = () => new GenerateTokenHandler(_agentRepository, _agentAuthenticator, null!, _authConfig);
+        var act = () => new GenerateTokenHandler(_agentRepository, _agentAuthenticator, null!);
         act.Should().Throw<ArgumentNullException>().WithParameterName("secretHasher");
-    }
-
-    [Fact]
-    public void Constructor_ShouldThrowArgumentNullException_WhenAuthConfigIsNull()
-    {
-        var act = () => new GenerateTokenHandler(_agentRepository, _agentAuthenticator, _secretHasher, null!);
-        act.Should().Throw<ArgumentNullException>().WithParameterName("authConfig");
     }
 
     [Fact]

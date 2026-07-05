@@ -13,18 +13,15 @@ internal class GenerateTokenHandler : IActionHandler<GenerateTokenRequest, Resul
     private readonly IAgentRepository _agentRepository;
     private readonly IAgentAuthenticator _agentAuthenticator;
     private readonly ISecretHasher _secretHasher;
-    private readonly IAgentAuthConfigProvider _authConfig;
 
     public GenerateTokenHandler(
         IAgentRepository agentRepository,
         IAgentAuthenticator agentAuthenticator,
-        ISecretHasher secretHasher,
-        IAgentAuthConfigProvider authConfig)
+        ISecretHasher secretHasher)
     {
         _agentRepository = agentRepository ?? throw new ArgumentNullException(nameof(agentRepository));
         _agentAuthenticator = agentAuthenticator ?? throw new ArgumentNullException(nameof(agentAuthenticator));
         _secretHasher = secretHasher ?? throw new ArgumentNullException(nameof(secretHasher));
-        _authConfig = authConfig ?? throw new ArgumentNullException(nameof(authConfig));
     }
 
     public async Task<Result<GenerateTokenResult>> Handle(GenerateTokenRequest request, CancellationToken cancellationToken = default)
