@@ -20,9 +20,9 @@ public class SecurityConfigurationTests
     {
         var config = new AgentAuthConfiguration();
 
-        config.Provider.Should().Be(AgentAuthProviderType.SelfSigned);
-        config.SelfSigned.Should().NotBeNull();
-        config.Jwt.Should().NotBeNull();
+        config.ExternalIdentity.Provider.Should().Be(ExternalIdentityProviderType.Jwt);
+        config.TokenIssuance.Should().NotBeNull();
+        config.ExternalIdentity.Should().NotBeNull();
         config.UseCustomHeader.Should().BeTrue();
         config.CustomHeaderName.Should().Be("Synentra-Authorization");
         config.FallbackToAuthorization.Should().BeFalse();
@@ -38,9 +38,9 @@ public class SecurityConfigurationTests
             FallbackToAuthorization = true
         };
 
-        config.Provider.Should().Be(AgentAuthProviderType.SelfSigned);
-        config.SelfSigned.Should().NotBeNull();
-        config.Jwt.Should().NotBeNull();
+        config.ExternalIdentity.Provider.Should().Be(ExternalIdentityProviderType.Jwt);
+        config.TokenIssuance.Should().NotBeNull();
+        config.ExternalIdentity.Should().NotBeNull();
         config.UseCustomHeader.Should().BeTrue();
         config.CustomHeaderName.Should().Be("X-Custom-Auth");
         config.FallbackToAuthorization.Should().BeTrue();
@@ -49,7 +49,7 @@ public class SecurityConfigurationTests
     [Fact]
     public void SelfSignedProvider_DefaultValues_ShouldBeCorrect()
     {
-        var config = new SelfSignedProvider();
+        var config = new TokenIssuanceConfiguration();
 
         config.Secret.Should().BeEmpty();
         config.Issuer.Should().BeEmpty();
@@ -60,7 +60,7 @@ public class SecurityConfigurationTests
     [Fact]
     public void SelfSignedProvider_ShouldAllowCustomValues()
     {
-        var config = new SelfSignedProvider
+        var config = new TokenIssuanceConfiguration
         {
             Secret = "my-secret",
             Issuer = "my-issuer",
@@ -77,7 +77,7 @@ public class SecurityConfigurationTests
     [Fact]
     public void JwtProvider_DefaultValues_ShouldBeCorrect()
     {
-        var config = new JwtProvider();
+        var config = new JwtIdentityConfiguration();
 
         config.Authority.Should().BeEmpty();
         config.Audience.Should().BeEmpty();
@@ -89,7 +89,7 @@ public class SecurityConfigurationTests
     [Fact]
     public void JwtProvider_ShouldAllowCustomValues()
     {
-        var config = new JwtProvider
+        var config = new JwtIdentityConfiguration
         {
             Authority = "https://auth.example.com",
             Audience = "api",
@@ -105,9 +105,8 @@ public class SecurityConfigurationTests
     }
 
     [Theory]
-    [InlineData(AgentAuthProviderType.SelfSigned)]
-    [InlineData(AgentAuthProviderType.Jwt)]
-    public void AgentAuthProviderType_AllValues_ShouldBeDefined(AgentAuthProviderType providerType)
+    [InlineData(ExternalIdentityProviderType.Jwt)]
+    public void ExternalIdentityProviderType_AllValues_ShouldBeDefined(ExternalIdentityProviderType providerType)
     {
         Enum.IsDefined(providerType).Should().BeTrue();
     }

@@ -1,6 +1,6 @@
 ﻿namespace Synentra.BuildingBlocks.Configuration.Security.AgentAuth;
 
-public class SelfSignedProvider
+public class TokenIssuanceConfiguration
 {
     public string Secret { get; set; } = string.Empty;
     public string Issuer { get; set; } = string.Empty;

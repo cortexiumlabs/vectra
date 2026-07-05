@@ -1,7 +1,6 @@
 ﻿namespace Synentra.BuildingBlocks.Configuration.Security.AgentAuth;
 
-public enum AgentAuthProviderType
+public enum ExternalIdentityProviderType
 {
-    SelfSigned,
     Jwt
 }
