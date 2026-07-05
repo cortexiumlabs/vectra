@@ -30,7 +30,7 @@ public class JwtTokenServiceTests
         {
             AgentAuth = new AgentAuthConfiguration
             {
-                SelfSigned = new SelfSignedProvider
+                TokenIssuance = new TokenIssuanceConfiguration
                 {
                     Secret = secret,
                     Issuer = issuer,
@@ -134,8 +134,8 @@ public class JwtTokenServiceTests
         Environment.SetEnvironmentVariable("SYNENTRA_SELF_SIGNED_SECRET", null);
         try
         {
-            var generatorConfig = new SecurityConfiguration { AgentAuth = new AgentAuthConfiguration { SelfSigned = null! } };
-            var validatorConfig = new SecurityConfiguration { AgentAuth = new AgentAuthConfiguration { SelfSigned = null! } };
+            var generatorConfig = new SecurityConfiguration { AgentAuth = new AgentAuthConfiguration { TokenIssuance = null! } };
+            var validatorConfig = new SecurityConfiguration { AgentAuth = new AgentAuthConfiguration { TokenIssuance = null! } };
 
             var devEnv = new FakeHostEnvironment { EnvironmentName = Environments.Development };
             var generator = new JwtTokenService(Options.Create(generatorConfig), devEnv);
@@ -165,7 +165,7 @@ public class JwtTokenServiceTests
         {
             AgentAuth = new AgentAuthConfiguration
             {
-                SelfSigned = new SelfSignedProvider
+                TokenIssuance = new TokenIssuanceConfiguration
                 {
                     Secret = string.Empty,
                     Issuer = "synentra-issuer",

@@ -28,7 +28,7 @@ public class JwtTokenService : ITokenService
 
     public JwtTokenService(IOptions<SecurityConfiguration> authSettings, IHostEnvironment? hostEnvironment = null)
     {
-        var selfSigned = authSettings.Value?.AgentAuth?.SelfSigned;
+        var selfSigned = authSettings.Value?.AgentAuth?.TokenIssuance;
 
         _secret = ResolveSecret(selfSigned?.Secret, hostEnvironment);
 
