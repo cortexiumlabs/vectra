@@ -16,13 +16,20 @@ public class AgentAuthConfigProviderTests
         // Arrange
         var config = new AgentAuthConfiguration
         {
-            Provider = AgentAuthProviderType.Jwt,
-            Jwt = new JwtProvider
+            TokenIssuance = new TokenIssuanceConfiguration
             {
-                ValidateIssuer = true,
-                ValidateAudience = true,
-                Authority = "https://auth.example.com",
-                Audience = "api://default"
+                Expiration = TimeSpan.FromMinutes(15)
+            },
+            ExternalIdentity = new ExternalIdentityConfiguration
+            {
+                Provider = ExternalIdentityProviderType.Jwt,
+                Jwt = new JwtIdentityConfiguration
+                {
+                    ValidateIssuer = true,
+                    ValidateAudience = true,
+                    Authority = "https://auth.example.com",
+                    Audience = "api://default"
+                }
             },
             UseCustomHeader = true,
             CustomHeaderName = "X-Custom-Auth",
@@ -34,11 +41,11 @@ public class AgentAuthConfigProviderTests
         var provider = new AgentAuthConfigProvider(options);
 
         // Assert
-        provider.Provider.Should().Be(AgentAuthProviderType.Jwt);
-        provider.ValidateIssuer.Should().BeTrue();
-        provider.ValidateAudience.Should().BeTrue();
-        provider.Authority.Should().Be("https://auth.example.com");
-        provider.Audience.Should().Be("api://default");
+        provider.ExternalIdentity.Provider.Should().Be(ExternalIdentityProviderType.Jwt);
+        provider.ExternalIdentity.Jwt.ValidateIssuer.Should().BeTrue();
+        provider.ExternalIdentity.Jwt.ValidateAudience.Should().BeTrue();
+        provider.ExternalIdentity.Jwt.Authority.Should().Be("https://auth.example.com");
+        provider.ExternalIdentity.Jwt.Audience.Should().Be("api://default");
         provider.UseCustomHeader.Should().BeTrue();
         provider.CustomHeaderName.Should().Be("X-Custom-Auth");
         provider.FallbackToAuthorization.Should().BeTrue();
@@ -51,11 +58,11 @@ public class AgentAuthConfigProviderTests
         var provider = new AgentAuthConfigProvider(null!);
 
         // Assert
-        provider.Provider.Should().Be(default(AgentAuthProviderType));
-        provider.ValidateIssuer.Should().BeFalse();
-        provider.ValidateAudience.Should().BeFalse();
-        provider.Authority.Should().BeEmpty();
-        provider.Audience.Should().BeEmpty();
+        provider.ExternalIdentity.Provider.Should().Be(default(ExternalIdentityProviderType));
+        provider.ExternalIdentity.Jwt.ValidateIssuer.Should().BeFalse();
+        provider.ExternalIdentity.Jwt.ValidateAudience.Should().BeFalse();
+        provider.ExternalIdentity.Jwt.Authority.Should().BeEmpty();
+        provider.ExternalIdentity.Jwt.Audience.Should().BeEmpty();
         provider.UseCustomHeader.Should().BeTrue();
         provider.CustomHeaderName.Should().Be("Synentra-Authorization");
         provider.FallbackToAuthorization.Should().BeFalse();
@@ -65,17 +72,17 @@ public class AgentAuthConfigProviderTests
     public void JwtSection_WhenNull_ShouldReturnDefaultValues()
     {
         // Arrange
-        var config = new AgentAuthConfiguration { Jwt = null };
+        var config = new AgentAuthConfiguration { ExternalIdentity = new ExternalIdentityConfiguration { Jwt = null } };
         var options = CreateOptions(config);
 
         // Act
         var provider = new AgentAuthConfigProvider(options);
 
         // Assert
-        provider.ValidateIssuer.Should().BeFalse();
-        provider.ValidateAudience.Should().BeFalse();
-        provider.Authority.Should().BeNull();
-        provider.Audience.Should().BeNull();
+        provider.ExternalIdentity.Jwt.ValidateIssuer.Should().BeFalse();
+        provider.ExternalIdentity.Jwt.ValidateAudience.Should().BeFalse();
+        provider.ExternalIdentity.Jwt.Authority.Should().BeEmpty();
+        provider.ExternalIdentity.Jwt.Audience.Should().BeEmpty();
     }
 
     [Fact]
