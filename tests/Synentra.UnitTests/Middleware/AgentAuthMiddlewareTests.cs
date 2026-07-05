@@ -27,7 +27,7 @@ public class AgentAuthMiddlewareTests
         bool fallbackToAuthorization = false,
         bool useCustomHeader = true,
         string customHeaderName = "Synentra-Authorization",
-        AgentAuthProviderType provider = AgentAuthProviderType.SelfSigned,
+        ExternalIdentityProviderType provider = ExternalIdentityProviderType.Jwt,
         string jwtAgentIdClaimType = "sub")
     {
         var services = new ServiceCollection();
@@ -36,11 +36,16 @@ public class AgentAuthMiddlewareTests
         {
             AgentAuth = new AgentAuthConfiguration
             {
-                Provider = provider,
                 UseCustomHeader = useCustomHeader,
                 CustomHeaderName = customHeaderName,
                 FallbackToAuthorization = fallbackToAuthorization,
-                Jwt = new JwtProvider { }
+                ExternalIdentity = new ExternalIdentityConfiguration
+                {
+                    Provider = provider,
+                    Jwt = new JwtIdentityConfiguration
+                    {
+                    }
+                }
             }
         }));
         var serviceProvider = services.BuildServiceProvider();
@@ -285,7 +290,7 @@ public class AgentAuthMiddlewareTests
 
         var context = BuildContext(
             customAuthHeader: "Bearer valid-token",
-            provider: AgentAuthProviderType.Jwt,
+            provider: ExternalIdentityProviderType.Jwt,
             jwtAgentIdClaimType: "agent_id");
 
         await middleware.InvokeAsync(context);
@@ -309,7 +314,7 @@ public class AgentAuthMiddlewareTests
 
         var context = BuildContext(
             customAuthHeader: "Bearer valid-token",
-            provider: AgentAuthProviderType.Jwt,
+            provider: ExternalIdentityProviderType.Jwt,
             jwtAgentIdClaimType: "missing_claim");
 
         await middleware.InvokeAsync(context);

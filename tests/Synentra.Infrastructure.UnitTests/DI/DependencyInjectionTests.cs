@@ -45,19 +45,22 @@ public class DependencyInjectionTests
         {
             cfg.AgentAuth = new AgentAuthConfiguration
             {
-                Provider = AgentAuthProviderType.SelfSigned,
-                SelfSigned = new SelfSignedProvider
+                TokenIssuance = new TokenIssuanceConfiguration
                 {
                     Secret = "super-secret-key-for-tests-1234567890",
                     Issuer = "test-issuer",
                     Audience = "test-audience",
                     Expiration = TimeSpan.FromMinutes(15)
                 },
-                Jwt = new JwtProvider
+                ExternalIdentity = new ExternalIdentityConfiguration
                 {
-                    Authority = "https://identity.example.com",
-                    ValidateIssuer = false,
-                    ValidateAudience = false
+                    Provider = ExternalIdentityProviderType.Jwt,
+                    Jwt = new JwtIdentityConfiguration
+                    {
+                        Authority = "https://identity.example.com",
+                        ValidateIssuer = false,
+                        ValidateAudience = false
+                    }
                 }
             };
         });
@@ -218,15 +221,21 @@ public class DependencyInjectionTests
         {
             cfg.AgentAuth = new AgentAuthConfiguration
             {
-                Provider = AgentAuthProviderType.SelfSigned,
-                SelfSigned = new SelfSignedProvider
+                TokenIssuance = new TokenIssuanceConfiguration
                 {
                     Secret = "super-secret-key-for-tests-1234567890",
                     Issuer = "test-issuer",
                     Audience = "test-audience",
                     Expiration = TimeSpan.FromMinutes(15)
                 },
-                Jwt = new JwtProvider { Authority = "https://identity.example.com" }
+                ExternalIdentity = new ExternalIdentityConfiguration
+                {
+                    Provider = ExternalIdentityProviderType.Jwt,
+                    Jwt = new JwtIdentityConfiguration
+                    {
+                        Authority = "https://identity.example.com"
+                    }
+                }
             };
         });
         infrastructure.Configure<PolicyConfiguration>(cfg => { cfg.DefaultProvider = "internal"; cfg.Enabled = true; });
@@ -383,15 +392,21 @@ public class DependencyInjectionTests
         {
             cfg.AgentAuth = new AgentAuthConfiguration
             {
-                Provider = AgentAuthProviderType.SelfSigned,
-                SelfSigned = new SelfSignedProvider
+                TokenIssuance = new TokenIssuanceConfiguration
                 {
                     Secret = "super-secret-key-for-tests-1234567890",
                     Issuer = "test-issuer",
                     Audience = "test-audience",
                     Expiration = TimeSpan.FromMinutes(15)
                 },
-                Jwt = new JwtProvider { Authority = "https://identity.example.com" }
+                ExternalIdentity = new ExternalIdentityConfiguration
+                {
+                    Provider = ExternalIdentityProviderType.Jwt,
+                    Jwt = new JwtIdentityConfiguration
+                    {
+                        Authority = "https://identity.example.com"
+                    }
+                }
             };
         });
         services.Configure<PolicyConfiguration>(cfg => { cfg.DefaultProvider = policyProvider; cfg.Enabled = true; });
