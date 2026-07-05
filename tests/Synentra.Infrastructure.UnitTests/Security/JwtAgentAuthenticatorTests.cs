@@ -14,7 +14,6 @@ namespace Synentra.Infrastructure.UnitTests.Security;
 public class JwtAgentAuthenticatorTests
 {
     private static JwtAgentAuthenticator CreateSut(
-        AgentAuthProviderType provider = AgentAuthProviderType.SelfSigned,
         ITokenService? tokenService = null,
         string? authority = null,
         string? metadataUrl = null)
@@ -23,20 +22,23 @@ public class JwtAgentAuthenticatorTests
         {
             AgentAuth = new AgentAuthConfiguration
             {
-                Provider = provider,
-                SelfSigned = new SelfSignedProvider
+                ExternalIdentity = new ExternalIdentityConfiguration
+                {
+                    Provider = ExternalIdentityProviderType.Jwt,
+                    Jwt = new JwtIdentityConfiguration
+                    {
+                        Authority = authority ?? "https://identity.example.com",
+                        MetadataUrl = metadataUrl,
+                        ValidateIssuer = false,
+                        ValidateAudience = false
+                    }
+                },
+                TokenIssuance = new TokenIssuanceConfiguration
                 {
                     Secret = "super-secret-key-for-tests-1234567890",
                     Issuer = "synentra-issuer",
                     Audience = "synentra-audience",
                     Expiration = TimeSpan.FromMinutes(15)
-                },
-                Jwt = new JwtProvider
-                {
-                    Authority = authority ?? "https://identity.example.com",
-                    MetadataUrl = metadataUrl,
-                    ValidateIssuer = false,
-                    ValidateAudience = false
                 }
             }
         };
@@ -48,6 +50,7 @@ public class JwtAgentAuthenticatorTests
         }
 
         var services = new ServiceCollection();
+        services.AddLogging();
         services.AddSingleton(tokenService);
         var serviceProvider = services.BuildServiceProvider();
 
@@ -55,11 +58,11 @@ public class JwtAgentAuthenticatorTests
     }
 
     [Fact]
-    public void Authenticate_SelfSignedProvider_GeneratesToken()
+    public void Authenticate_GeneratesToken()
     {
         var tokenService = Substitute.For<ITokenService>();
         tokenService.GenerateToken(Arg.Any<Agent>()).Returns("generated-token");
-        var sut = CreateSut(AgentAuthProviderType.SelfSigned, tokenService);
+        var sut = CreateSut(tokenService);
         var agent = new Agent("TestAgent", "owner-1", "hash");
 
         var result = sut.Authenticate(agent);
@@ -70,24 +73,12 @@ public class JwtAgentAuthenticatorTests
     }
 
     [Fact]
-    public void Authenticate_ExternalProvider_ReturnsFailure()
-    {
-        var sut = CreateSut(AgentAuthProviderType.Jwt);
-        var agent = new Agent("TestAgent", "owner-1", "hash");
-
-        var result = sut.Authenticate(agent);
-
-        result.Succeeded.Should().BeTrue();
-        result.Token.Should().NotBeNullOrWhiteSpace();
-    }
-
-    [Fact]
-    public async Task ValidateAsync_SelfSigned_DelegatesToTokenService()
+    public async Task ValidateAsync_DelegatesToTokenService()
     {
         var tokenService = Substitute.For<ITokenService>();
         var expectedPrincipal = new System.Security.Claims.ClaimsPrincipal();
         tokenService.ValidateToken(Arg.Any<string>()).Returns(expectedPrincipal);
-        var sut = CreateSut(AgentAuthProviderType.SelfSigned, tokenService);
+        var sut = CreateSut(tokenService);
 
         var result = await sut.ValidateAsync("some-token", TestContext.Current.CancellationToken);
 
@@ -96,11 +87,11 @@ public class JwtAgentAuthenticatorTests
     }
 
     [Fact]
-    public async Task ValidateAsync_SelfSigned_InvalidToken_ReturnsNull()
+    public async Task ValidateAsync_InvalidToken_ReturnsNull()
     {
         var tokenService = Substitute.For<ITokenService>();
         tokenService.ValidateToken(Arg.Any<string>()).Returns((System.Security.Claims.ClaimsPrincipal?)null);
-        var sut = CreateSut(AgentAuthProviderType.SelfSigned, tokenService);
+        var sut = CreateSut(tokenService);
 
         var result = await sut.ValidateAsync("bad-token", TestContext.Current.CancellationToken);
 
@@ -112,7 +103,6 @@ public class JwtAgentAuthenticatorTests
     {
         // Exercises the Lazy constructor path with explicit MetadataUrl
         var act = () => CreateSut(
-            AgentAuthProviderType.Jwt,
             metadataUrl: "http://localhost:8080/.well-known/openid-configuration");
 
         act.Should().NotThrow();
@@ -123,7 +113,6 @@ public class JwtAgentAuthenticatorTests
     {
         // Exercises path where MetadataUrl is null → derived from Authority
         var act = () => CreateSut(
-            AgentAuthProviderType.Jwt,
             authority: "https://identity.example.com",
             metadataUrl: null);
 
@@ -136,7 +125,6 @@ public class JwtAgentAuthenticatorTests
         // External provider with clearly invalid token → ValidateExternalTokenAsync
         // must catch the exception and return null
         var sut = CreateSut(
-            AgentAuthProviderType.Jwt,
             authority: "https://identity.example.com",
             metadataUrl: "http://localhost:9999/.well-known/oidc-that-doesnt-exist");
 
@@ -151,7 +139,6 @@ public class JwtAgentAuthenticatorTests
     {
         // Exercises the localhost check (RequireHttps = false branch)
         var sut = CreateSut(
-            AgentAuthProviderType.Jwt,
             authority: "http://localhost:8080",
             metadataUrl: "http://localhost:8080/.well-known/openid-configuration");
 
@@ -162,12 +149,12 @@ public class JwtAgentAuthenticatorTests
     }
 
     [Fact]
-    public void Authenticate_ExternalProvider_StillUsesSelfSignedTokenService()
+    public void Authenticate_UsesTokenService()
     {
         var tokenService = Substitute.For<ITokenService>();
         tokenService.GenerateToken(Arg.Any<Agent>()).Returns("self-signed-token");
 
-        var sut = CreateSut(AgentAuthProviderType.Jwt, tokenService);
+        var sut = CreateSut(tokenService);
 
         var agent = new Agent("agent", "owner", "hash");
 
@@ -179,7 +166,7 @@ public class JwtAgentAuthenticatorTests
     }
 
     [Fact]
-    public async Task ValidateAsync_ExternalFails_FallsBackToSelfSigned()
+    public async Task ValidateAsync_ExternalValidationFails_FallsBackToTokenService()
     {
         var tokenService = Substitute.For<ITokenService>();
 
@@ -191,7 +178,6 @@ public class JwtAgentAuthenticatorTests
         tokenService.ValidateToken("some-token").Returns(expectedPrincipal);
 
         var sut = CreateSut(
-            AgentAuthProviderType.Jwt,
             tokenService,
             authority: "https://identity.example.com",
             metadataUrl: "http://localhost:9999/.well-known/openid");
@@ -203,14 +189,13 @@ public class JwtAgentAuthenticatorTests
     }
 
     [Fact]
-    public async Task ValidateAsync_FallbackSelfSigned_ThrowsInvalidOperation_ReturnsNull()
+    public async Task ValidateAsync_TokenServiceThrows_ReturnsNull()
     {
         var tokenService = Substitute.For<ITokenService>();
         tokenService.ValidateToken(Arg.Any<string>())
             .Returns(_ => throw new InvalidOperationException("invalid self-signed config"));
 
         var sut = CreateSut(
-            AgentAuthProviderType.Jwt,
             tokenService,
             authority: "https://identity.example.com",
             metadataUrl: "http://localhost:9999/.well-known/openid");
@@ -224,7 +209,6 @@ public class JwtAgentAuthenticatorTests
     public async Task ValidateAsync_ExternalJwt_IssuerValidationEnabled_DoesNotThrow()
     {
         var sut = CreateSut(
-            AgentAuthProviderType.Jwt,
             authority: "https://identity.example.com",
             metadataUrl: "http://localhost:9999/.well-known/openid");
 
@@ -238,7 +222,6 @@ public class JwtAgentAuthenticatorTests
     public async Task ValidateAsync_ExternalJwt_AudienceValidationEnabled_DoesNotThrow()
     {
         var sut = CreateSut(
-            AgentAuthProviderType.Jwt,
             authority: "https://identity.example.com",
             metadataUrl: "http://localhost:9999/.well-known/openid");
 
@@ -251,7 +234,6 @@ public class JwtAgentAuthenticatorTests
     public void Constructor_MetadataUrl_EmptyString_FallsBackToAuthority()
     {
         var act = () => CreateSut(
-            AgentAuthProviderType.Jwt,
             authority: "https://identity.example.com",
             metadataUrl: "   ");
 
@@ -259,14 +241,14 @@ public class JwtAgentAuthenticatorTests
     }
 
     [Fact]
-    public async Task ValidateAsync_ExplicitSelfSignedProvider_ReturnsTokenServiceResult()
+    public async Task ValidateAsync_ReturnsTokenServiceResult()
     {
         var tokenService = Substitute.For<ITokenService>();
         var principal = new ClaimsPrincipal(new ClaimsIdentity("test"));
 
         tokenService.ValidateToken("token").Returns(principal);
 
-        var sut = CreateSut(AgentAuthProviderType.SelfSigned, tokenService);
+        var sut = CreateSut(tokenService);
 
         var result = await sut.ValidateAsync("token", TestContext.Current.CancellationToken);
 
@@ -274,13 +256,12 @@ public class JwtAgentAuthenticatorTests
     }
 
     [Fact]
-    public async Task ValidateAsync_ExternalNullResult_SelfSignedAlsoReturnsNull()
+    public async Task ValidateAsync_ExternalValidationFails_AndTokenServiceReturnsNull()
     {
         var tokenService = Substitute.For<ITokenService>();
         tokenService.ValidateToken(Arg.Any<string>()).Returns((ClaimsPrincipal?)null);
 
         var sut = CreateSut(
-            AgentAuthProviderType.Jwt,
             tokenService,
             authority: "https://identity.example.com",
             metadataUrl: "http://localhost:9999/.well-known/openid");

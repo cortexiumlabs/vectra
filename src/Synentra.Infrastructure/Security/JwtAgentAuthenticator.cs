@@ -10,43 +10,33 @@ using Synentra.Application.Abstractions.Security;
 using Synentra.Domain.Agents;
 using Synentra.BuildingBlocks.Configuration.Security;
 using Synentra.BuildingBlocks.Configuration.Security.AgentAuth;
+using Microsoft.Extensions.Logging;
 
 namespace Synentra.Infrastructure.Security;
 
 public sealed class JwtAgentAuthenticator : IAgentAuthenticator
 {
     private readonly AgentAuthConfiguration _options;
-    private readonly Lazy<ITokenService> _selfSignedService;
+    private readonly Lazy<ITokenService> _tokenService;
     private readonly Lazy<ConfigurationManager<OpenIdConnectConfiguration>> _oidcConfigManager;
+    private readonly ILogger<JwtAgentAuthenticator> _logger;
 
-    public JwtAgentAuthenticator(IOptions<SecurityConfiguration> options, IServiceProvider serviceProvider)
+    public JwtAgentAuthenticator(
+        IOptions<SecurityConfiguration> options, 
+        IServiceProvider serviceProvider)
     {
-        // Fall back to a default SelfSigned configuration if none is provided.
-        var agentAuth = options?.Value?.AgentAuth;
-        if (agentAuth == null)
-        {
-            agentAuth = new AgentAuthConfiguration
-            {
-                Provider = AgentAuthProviderType.SelfSigned
-                // All other properties remain default (null/empty).
-            };
-        }
-
-        _options = agentAuth;
-        _selfSignedService = new Lazy<ITokenService>(() => serviceProvider.GetRequiredService<ITokenService>());
+        _options = options?.Value?.AgentAuth ?? new AgentAuthConfiguration();
+        _tokenService = new Lazy<ITokenService>(serviceProvider.GetRequiredService<ITokenService>);
+        _logger = serviceProvider.GetRequiredService<ILogger<JwtAgentAuthenticator>>();
 
         // The Lazy is only evaluated when Provider != SelfSigned.
         // If Jwt config is missing, an exception will be thrown at that point,
         // which is acceptable because external providers require configuration.
         _oidcConfigManager = new Lazy<ConfigurationManager<OpenIdConnectConfiguration>>(() =>
         {
-            var jwt = _options.Jwt;
-            if (jwt == null)
-            {
-                throw new InvalidOperationException(
+            var jwt = _options.ExternalIdentity.Jwt ?? throw new InvalidOperationException(
                     "JWT configuration is missing. To use an external identity provider, " +
                     "configure Security:AgentAuth:Jwt.");
-            }
 
             var metadataUrl = !string.IsNullOrWhiteSpace(jwt.MetadataUrl)
                 ? jwt.MetadataUrl
@@ -57,21 +47,21 @@ public sealed class JwtAgentAuthenticator : IAgentAuthenticator
                 new OpenIdConnectConfigurationRetriever(),
                 new HttpDocumentRetriever
                 {
-                    RequireHttps = !metadataUrl.StartsWith("http://localhost", StringComparison.OrdinalIgnoreCase)
+                    RequireHttps = metadataUrl.StartsWith("https://", StringComparison.OrdinalIgnoreCase)
                 });
         });
     }
 
     public AgentAuthResult Authenticate(Agent agent)
     {
-        var token = _selfSignedService.Value.GenerateToken(agent);
+        var token = _tokenService.Value.GenerateToken(agent);
         return AgentAuthResult.Success(token);
     }
 
     public async Task<ClaimsPrincipal?> ValidateAsync(string credential, CancellationToken cancellationToken = default)
     {
-        if (_options.Provider == AgentAuthProviderType.SelfSigned)
-            return _selfSignedService.Value.ValidateToken(credential);
+        if (_options.ExternalIdentity.Provider != ExternalIdentityProviderType.Jwt)
+            return _tokenService.Value.ValidateToken(credential);
 
         var externalPrincipal = await ValidateExternalTokenAsync(credential, cancellationToken);
         if (externalPrincipal is not null)
@@ -79,7 +69,7 @@ public sealed class JwtAgentAuthenticator : IAgentAuthenticator
 
         try
         {
-            return _selfSignedService.Value.ValidateToken(credential);
+            return _tokenService.Value.ValidateToken(credential);
         }
         catch (InvalidOperationException)
         {
@@ -92,7 +82,7 @@ public sealed class JwtAgentAuthenticator : IAgentAuthenticator
         try
         {
             var oidcConfig = await _oidcConfigManager.Value.GetConfigurationAsync(cancellationToken);
-            var jwt = _options.Jwt!;
+            var jwt = _options.ExternalIdentity.Jwt!;
 
             // Start with minimal validation
             var validationParameters = new TokenValidationParameters
@@ -129,8 +119,9 @@ public sealed class JwtAgentAuthenticator : IAgentAuthenticator
             var principal = handler.ValidateToken(token, validationParameters, out _);
             return principal;
         }
-        catch
+        catch (Exception ex)
         {
+            _logger.LogWarning(ex, "Failed to validate external token.");
             return null;
         }
     }
