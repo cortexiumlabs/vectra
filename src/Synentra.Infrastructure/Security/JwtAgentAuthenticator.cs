@@ -40,7 +40,17 @@ public sealed class JwtAgentAuthenticator : IAgentAuthenticator
 
             var metadataUrl = !string.IsNullOrWhiteSpace(jwt.MetadataUrl)
                 ? jwt.MetadataUrl
-                : $"{jwt.Authority.TrimEnd('/')}/.well-known/openid-configuration";
+                : !string.IsNullOrWhiteSpace(jwt.Authority)
+                    ? $"{jwt.Authority.TrimEnd('/')}/.well-known/openid-configuration"
+                    : throw new InvalidOperationException(
+                        "JWT Authority or MetadataUrl is required. To use an external identity provider, " +
+                        "configure Security:AgentAuth:Jwt with a valid Authority or MetadataUrl.");
+
+            if (!Uri.IsWellFormedUriString(metadataUrl, UriKind.Absolute))
+                throw new InvalidOperationException(
+                    $"The configured JWT metadata URL '{metadataUrl}' is not a valid absolute URI. " +
+                    "Please check your JWT Authority or MetadataUrl configuration.");
+
 
             return new ConfigurationManager<OpenIdConnectConfiguration>(
                 metadataUrl,
@@ -60,18 +70,26 @@ public sealed class JwtAgentAuthenticator : IAgentAuthenticator
 
     public async Task<ClaimsPrincipal?> ValidateAsync(string credential, CancellationToken cancellationToken = default)
     {
-        if (_options.ExternalIdentity.Provider != ExternalIdentityProviderType.Jwt)
-            return _tokenService.Value.ValidateToken(credential);
+        if (_options.ExternalIdentity.Enabled == true && _options.ExternalIdentity.Provider == ExternalIdentityProviderType.Jwt)
+        {
+            try
+            {
+                var externalPrincipal = await ValidateExternalTokenAsync(credential, cancellationToken);
+                if (externalPrincipal is not null)
+                    return externalPrincipal;
+            }
+            catch
+            {
+                // ignore, fall through to internal validation
+            }
+        }
 
-        var externalPrincipal = await ValidateExternalTokenAsync(credential, cancellationToken);
-        if (externalPrincipal is not null)
-            return externalPrincipal;
-
+        // Fallback to internal validation
         try
         {
             return _tokenService.Value.ValidateToken(credential);
         }
-        catch (InvalidOperationException)
+        catch (Exception)
         {
             return null;
         }
@@ -79,6 +97,9 @@ public sealed class JwtAgentAuthenticator : IAgentAuthenticator
 
     private async Task<ClaimsPrincipal?> ValidateExternalTokenAsync(string token, CancellationToken cancellationToken)
     {
+        if (_options.ExternalIdentity.Enabled != true)
+            return null;
+
         try
         {
             var oidcConfig = await _oidcConfigManager.Value.GetConfigurationAsync(cancellationToken);
