@@ -84,7 +84,7 @@ public class CacheProviderFactoryTests
         config.Storage.Cache.DefaultProvider = "redis";
         config.Storage.Cache.Providers.Redis = new Synentra.BuildingBlocks.Configuration.System.Storage.Cache.RedisCacheConfiguration
         {
-            Address = "localhost:6379"
+            Endpoint = "localhost:6379"
         };
 
         var sut = new CacheProviderFactory(Options.Create(config), sp);
@@ -137,7 +137,7 @@ public class CacheProviderFactoryTests
         config.Storage.Cache.DefaultProvider = "redis";
         config.Storage.Cache.Providers.Redis = new RedisCacheConfiguration
         {
-            Address = address
+            Endpoint = address
         };
 
         var sut = new CacheProviderFactory(
@@ -217,7 +217,7 @@ public class CacheProviderFactoryTests
         config.Storage.Cache.Providers.Redis =
             new RedisCacheConfiguration
             {
-                Address = " localhost:6379 "
+                Endpoint = " localhost:6379 "
             };
 
         var sut = new CacheProviderFactory(

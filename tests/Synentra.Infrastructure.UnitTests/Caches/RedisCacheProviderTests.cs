@@ -16,7 +16,7 @@ public class RedisCacheProviderTests
     private RedisCacheProvider CreateSut(TimeSpan? ttl = null)
     {
         _multiplexer.GetDatabase().Returns(_db);
-        var config = new RedisCacheConfiguration { Address = "localhost:6379", TimeToLive = ttl };
+        var config = new RedisCacheConfiguration { Endpoint = "localhost:6379", TimeToLive = ttl };
         var services = new ServiceCollection();
         services.AddLogging();
         services.AddSingleton(_multiplexer);

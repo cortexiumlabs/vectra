@@ -32,14 +32,14 @@ public class RedisCacheProvider : ICacheProvider
             JsonSerializer.Serialize(value), 
             _config.TimeToLive ?? _ttl);
 
-        _logger.LogInformation($"Redis ({_config.Address}) SET {key}");
+        _logger.LogInformation($"Redis ({_config.Endpoint}) SET {key}");
     }
 
     public async Task<object?> GetAsync(object key)
     {
         var db = _redis.GetDatabase();
         var value = await db.StringGetAsync($"hitl:{key}");
-        _logger.LogInformation($"Redis ({_config.Address}) GET {key}");
+        _logger.LogInformation($"Redis ({_config.Endpoint}) GET {key}");
         return value.ToString();
     }
 
@@ -47,7 +47,7 @@ public class RedisCacheProvider : ICacheProvider
     {
         var db = _redis.GetDatabase();
         var value = await db.StringGetAsync($"hitl:{key}");
-        _logger.LogInformation($"Redis ({_config.Address}) GET {key}");
+        _logger.LogInformation($"Redis ({_config.Endpoint}) GET {key}");
         return JsonSerializer.Deserialize<TItem>(value.ToString());
     }
 
@@ -60,7 +60,7 @@ public class RedisCacheProvider : ICacheProvider
             serializedValue, 
             _config.TimeToLive ?? _ttl);
 
-        _logger.LogInformation($"Redis ({_config.Address}) SET {key}");
+        _logger.LogInformation($"Redis ({_config.Endpoint}) SET {key}");
         return value;
     }
         
@@ -71,7 +71,7 @@ public class RedisCacheProvider : ICacheProvider
         if (redisValue.HasValue)
         {
             var value = JsonSerializer.Deserialize<TItem>(redisValue.ToString());
-            _logger.LogInformation($"Redis ({_config.Address}) GET {key}");
+            _logger.LogInformation($"Redis ({_config.Endpoint}) GET {key}");
             return (true, value);
         }
         return (false, default);
@@ -81,6 +81,6 @@ public class RedisCacheProvider : ICacheProvider
     {
         var db = _redis.GetDatabase();
         await db.KeyDeleteAsync($"hitl:{key}");
-        _logger.LogInformation($"Redis ({_config.Address}) DEL {key}");
+        _logger.LogInformation($"Redis ({_config.Endpoint}) DEL {key}");
     }
 }

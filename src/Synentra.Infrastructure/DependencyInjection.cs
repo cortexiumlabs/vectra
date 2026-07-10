@@ -150,7 +150,7 @@ public static class DependencyInjection
             var config = sp.GetRequiredService<IOptions<SystemConfiguration>>().Value;
             var redisConfig = config.Storage.Cache.Providers.Redis;
 
-            var options = ConfigurationOptions.Parse(redisConfig.Address);
+            var options = ConfigurationOptions.Parse(redisConfig.Endpoint);
             options.AbortOnConnectFail = redisConfig.AbortOnConnectFail ?? false;
             options.ConnectRetry = redisConfig.ConnectRetry ?? 5;
             options.ConnectTimeout = (int)(redisConfig.ConnectTimeout?.TotalMilliseconds ?? 5000);

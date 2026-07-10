@@ -2,7 +2,7 @@
 
 public class RedisCacheConfiguration
 {
-    public string Address { get; set; } = string.Empty;
+    public string Endpoint { get; set; } = string.Empty;
     public TimeSpan? TimeToLive { get; set; } = TimeSpan.FromHours(24);
     public bool? AbortOnConnectFail { get; set; } = false;
     public int? ConnectRetry { get; set; } = 5;

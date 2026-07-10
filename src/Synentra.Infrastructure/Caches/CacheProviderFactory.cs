@@ -32,7 +32,7 @@ public sealed class CacheProviderFactory : ICacheProviderFactory
             "memory" => CreateMemory(),
 
             "redis" when !string.IsNullOrWhiteSpace(
-                _config.Providers.Redis.Address) =>
+                _config.Providers.Redis.Endpoint) =>
                 CreateRedis(),
 
             "redis" =>

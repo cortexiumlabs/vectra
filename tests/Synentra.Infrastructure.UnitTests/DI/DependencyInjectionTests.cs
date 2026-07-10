@@ -81,7 +81,7 @@ public class DependencyInjectionTests
                     Providers = new CacheProviders
                     {
                         Memory = new MemoryCacheConfiguration { TimeToLive = TimeSpan.FromMinutes(5) },
-                        Redis = new RedisCacheConfiguration { Address = "localhost:6379" }
+                        Redis = new RedisCacheConfiguration { Endpoint = "localhost:6379" }
                     }
                 }
             };
@@ -243,7 +243,7 @@ public class DependencyInjectionTests
         {
             cfg.Storage.Cache.DefaultProvider = "memory";
             cfg.Storage.Cache.Providers.Memory = new MemoryCacheConfiguration { TimeToLive = TimeSpan.FromMinutes(5) };
-            cfg.Storage.Cache.Providers.Redis = new RedisCacheConfiguration { Address = "localhost:6379" };
+            cfg.Storage.Cache.Providers.Redis = new RedisCacheConfiguration { Endpoint = "localhost:6379" };
         });
         infrastructure.Configure<SemanticConfiguration>(cfg =>
         {
@@ -369,7 +369,7 @@ public class DependencyInjectionTests
         {
             cfg.Storage.Cache.DefaultProvider = "memory";
             cfg.Storage.Cache.Providers.Memory = new MemoryCacheConfiguration { TimeToLive = TimeSpan.FromMinutes(5) };
-            cfg.Storage.Cache.Providers.Redis = new RedisCacheConfiguration { Address = "localhost:6379" };
+            cfg.Storage.Cache.Providers.Redis = new RedisCacheConfiguration { Endpoint = "localhost:6379" };
         });
         services.AddCache();
         var sp = services.BuildServiceProvider();
@@ -414,7 +414,7 @@ public class DependencyInjectionTests
         {
             cfg.Storage.Cache.DefaultProvider = "memory";
             cfg.Storage.Cache.Providers.Memory = new MemoryCacheConfiguration { TimeToLive = TimeSpan.FromMinutes(5) };
-            cfg.Storage.Cache.Providers.Redis = new RedisCacheConfiguration { Address = "localhost:6379" };
+            cfg.Storage.Cache.Providers.Redis = new RedisCacheConfiguration { Endpoint = "localhost:6379" };
         });
         services.Configure<SemanticConfiguration>(cfg =>
         {
