@@ -57,7 +57,7 @@ public class JwtTokenService : ITokenService
             return GetOrCreateDevelopmentSecret();
 
         throw new InvalidOperationException(
-            $"Self-signed token secret is missing. Configure Security:AgentAuth:SelfSigned:Secret or set {SelfSignedSecretEnvironmentVariable}.");
+            $"Self-signed token secret is missing. Configure Security:AgentAuth:TokenIssuance:Secret or set {SelfSignedSecretEnvironmentVariable}.");
     }
 
     private static string GetOrCreateDevelopmentSecret()
