@@ -13,4 +13,4 @@ Copyright (c) Microsoft Corporation.
 Source:
 https://github.com/microsoft/onnxruntime
 
-A copy of the MPL-2.0 license is included in `licenses/MPL-2.0.txt`.
+A copy of the MPL-2.0 license is included in [licenses/MPL-2.0.txt](licenses/MPL-2.0.txt).
