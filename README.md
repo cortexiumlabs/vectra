@@ -271,6 +271,9 @@ Join the Synentra community:
 SYNENTRA is open-source and licensed under the **Apache 2.0 License**.  
 See [LICENSE](https://github.com/synentra/synentra/blob/main/LICENSE) for details.
 
+Some dependencies are licensed under other open-source licenses.
+See [THIRD PARTY NOTICES](https://github.com/synentra/synentra/blob/main/THIRD-PARTY-NOTICES.md) for details.
+
 ## Support SYNENTRA
 [![⭐ Star on GitHub](https://img.shields.io/badge/⭐%20Star%20on%20GitHub-555555?style=flat&logo=github)](https://github.com/synentra/synentra)  
 ✨ **Support SYNENTRA by giving it a star!** ✨  
