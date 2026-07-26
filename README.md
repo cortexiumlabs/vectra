@@ -252,8 +252,9 @@ Please read [CONTRIBUTING.md](https://github.com/synentra/synentra/blob/main/CON
 
 Join the Synentra community:
 
-- 💬 Discussions: https://github.com/synentra/synentra/discussions
-- 📖 Documentation: https://synentra.io/docs
+- **Discord:** [https://discord.synentra.io](https://discord.synentra.io)
+- **Discussions**: https://github.com/synentra/synentra/discussions
+- **Documentation**: https://synentra.io/docs
 
 ### Discussion Categories
 
