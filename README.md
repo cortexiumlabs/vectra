@@ -115,7 +115,7 @@ Synentra is the **only open‑source, intent‑aware governance gateway** purpos
 
 ## Architecture
 
-![SYNENTRA Architecture](/img/architecture.jpg)
+![SYNENTRA Architecture](/img/architecture.png)
 
 Every inbound HTTP request from an AI Agent flows through three layers inside the **SYNENTRA Gateway**:
 
