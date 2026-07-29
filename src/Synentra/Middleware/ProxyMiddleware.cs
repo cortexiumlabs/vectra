@@ -128,7 +128,7 @@ public class ProxyMiddleware
         {
             var hitlId = await hitlService.SuspendRequestAsync(requestContext, decision.Reason ?? "HITL required");
             context.Response.StatusCode = 202;
-            context.Response.Headers.Location = $"/hitl/status/{hitlId}";
+            context.Response.Headers.Location = $"/hitls/{hitlId}";
             await context.Response.WriteAsync($"Request pending approval. Poll {context.Response.Headers.Location}");
             return;
         }
