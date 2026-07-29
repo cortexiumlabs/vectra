@@ -47,6 +47,7 @@ jobs:
             --platform linux/amd64 \
             --file .docker/Dockerfile \
             --build-arg APP_VERSION="${RELEASE_VERSION}" \
+            --build-arg REVISION="${{ github.sha }}" \
             --tag ${IMAGE}:${RELEASE_VERSION}-linux-amd64 \
             .
           docker push ${IMAGE}:${RELEASE_VERSION}-linux-amd64
@@ -64,6 +65,7 @@ jobs:
             --platform linux/arm64 \
             --file .docker/Dockerfile \
             --build-arg APP_VERSION="${RELEASE_VERSION}" \
+            --build-arg REVISION="${{ github.sha }}" \
             --tag ${IMAGE}:${RELEASE_VERSION}-linux-arm64 \
             .
           docker push ${IMAGE}:${RELEASE_VERSION}-linux-arm64
