@@ -1,5 +1,5 @@
 using FluentAssertions;
-using Microsoft.Extensions.Hosting;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.Extensions.Options;
 using Synentra.BuildingBlocks.Configuration.Security;
 using Synentra.BuildingBlocks.Configuration.Security.AgentAuth;
@@ -8,15 +8,33 @@ using Synentra.Infrastructure.Security;
 
 namespace Synentra.Infrastructure.UnitTests.Security;
 
-public class JwtTokenServiceTests
+public class JwtTokenServiceTests : IDisposable
 {
-    private sealed class FakeHostEnvironment : IHostEnvironment
+    private readonly List<string> _tempFiles = new();
+
+    /// <summary>
+    /// Sets <c>SYNENTRA_PROTECTED_SECRET_PATH</c> to a temporary file,
+    /// so the protected‑file fallback writes to an isolated location.
+    /// Returns the path for cleanup.
+    /// </summary>
+    private string UseTempProtectedSecretPath()
     {
-        public string EnvironmentName { get; set; } = Environments.Development;
-        public string ApplicationName { get; set; } = "Synentra.Tests";
-        public string ContentRootPath { get; set; } = AppContext.BaseDirectory;
-        public Microsoft.Extensions.FileProviders.IFileProvider ContentRootFileProvider { get; set; }
-            = new Microsoft.Extensions.FileProviders.NullFileProvider();
+        var path = Path.Combine(Path.GetTempPath(), $"synentra-secret-{Guid.NewGuid():N}.protected");
+        Environment.SetEnvironmentVariable("SYNENTRA_PROTECTED_SECRET_PATH", path);
+        _tempFiles.Add(path);
+        return path;
+    }
+
+    public void Dispose()
+    {
+        // Clean up environment variable and temp files
+        Environment.SetEnvironmentVariable("SYNENTRA_PROTECTED_SECRET_PATH", null);
+        Environment.SetEnvironmentVariable("SYNENTRA_SELF_SIGNED_SECRET", null);
+
+        foreach (var file in _tempFiles)
+        {
+            try { File.Delete(file); } catch { /* best effort */ }
+        }
     }
 
     private static JwtTokenService CreateSut(
@@ -24,7 +42,7 @@ public class JwtTokenServiceTests
         string issuer = "synentra-issuer",
         string audience = "synentra-audience",
         TimeSpan? expiration = null,
-        IHostEnvironment? hostEnvironment = null)
+        IDataProtectionProvider? dataProtectionProvider = null)
     {
         var config = new SecurityConfiguration
         {
@@ -39,7 +57,9 @@ public class JwtTokenServiceTests
                 }
             }
         };
-        return new JwtTokenService(Options.Create(config), hostEnvironment);
+
+        dataProtectionProvider ??= new EphemeralDataProtectionProvider();
+        return new JwtTokenService(Options.Create(config), dataProtectionProvider);
     }
 
     [Fact]
@@ -54,8 +74,10 @@ public class JwtTokenServiceTests
     }
 
     [Fact]
-    public void GenerateToken_EmptySecret_UsesDefaultSecretAndReturnsToken()
+    public void GenerateToken_EmptySecret_AutoGeneratesSecretAndReturnsToken()
     {
+        // Simulate that no secret is provided anywhere – protected file will be generated.
+        UseTempProtectedSecretPath();
         var sut = CreateSut(secret: string.Empty);
         var agent = new Agent("TestAgent", "owner-1", "hash");
 
@@ -91,8 +113,15 @@ public class JwtTokenServiceTests
     [Fact]
     public void ValidateToken_TokenSignedWithDifferentSecret_ReturnsNull()
     {
-        var generator = CreateSut(secret: "super-secret-key-for-testing-1234567890");
-        var validator = CreateSut(secret: "different-secret-key-for-testing-9999999");
+        var generatorSecret = Convert.ToBase64String(
+            Enumerable.Repeat((byte)0x11, 32).ToArray());
+
+        var validatorSecret = Convert.ToBase64String(
+            Enumerable.Repeat((byte)0x22, 32).ToArray());
+
+        var generator = CreateSut(secret: generatorSecret);
+        var validator = CreateSut(secret: validatorSecret);
+
         var agent = new Agent("TestAgent", "owner-1", "hash");
         var token = generator.GenerateToken(agent);
 
@@ -114,52 +143,42 @@ public class JwtTokenServiceTests
     }
 
     [Fact]
-    public void ValidateToken_EmptySecret_UsesDefaultSecretAndReturnsPrincipal()
+    public void ValidateToken_EmptySecret_SameInstance_Validates()
     {
-        var generator = CreateSut(secret: string.Empty);
-        var validator = CreateSut(secret: string.Empty);
+        // Both generation and validation happen with the same auto‑generated secret.
+        var protectedFilePath = UseTempProtectedSecretPath();
+        var sut = CreateSut(secret: string.Empty);
+        var agent = new Agent("TestAgent", "owner-1", "hash");
+        var token = sut.GenerateToken(agent);
+
+        var principal = sut.ValidateToken(token);
+
+        principal.Should().NotBeNull();
+    }
+
+    [Fact]
+    public void ValidateToken_EmptySecret_DifferentInstances_ShareSecretViaProtectedFile()
+    {
+        var protectedFilePath = UseTempProtectedSecretPath();
+
+        // Use one provider so the key is the same for both instances
+        var sharedProtectionProvider = new EphemeralDataProtectionProvider();
+
+        var generator = CreateSut(secret: string.Empty, dataProtectionProvider: sharedProtectionProvider);
         var agent = new Agent("TestAgent", "owner-1", "hash");
         var token = generator.GenerateToken(agent);
 
+        var validator = CreateSut(secret: string.Empty, dataProtectionProvider: sharedProtectionProvider);
         var principal = validator.ValidateToken(token);
 
         principal.Should().NotBeNull();
     }
 
     [Fact]
-    public void ValidateToken_MissingSelfSignedConfiguration_UsesDeterministicDefaults()
+    public void Constructor_MissingSecret_DoesNotThrow_AndGeneratesToken()
     {
-        var secretFile = Path.Combine(Path.GetTempPath(), $"synentra-jwt-secret-{Guid.NewGuid():N}.txt");
-        Environment.SetEnvironmentVariable("SYNENTRA_SELF_SIGNED_DEV_SECRET_FILE", secretFile);
-        Environment.SetEnvironmentVariable("SYNENTRA_SELF_SIGNED_SECRET", null);
-        try
-        {
-            var generatorConfig = new SecurityConfiguration { AgentAuth = new AgentAuthConfiguration { TokenIssuance = null! } };
-            var validatorConfig = new SecurityConfiguration { AgentAuth = new AgentAuthConfiguration { TokenIssuance = null! } };
-
-            var devEnv = new FakeHostEnvironment { EnvironmentName = Environments.Development };
-            var generator = new JwtTokenService(Options.Create(generatorConfig), devEnv);
-            var validator = new JwtTokenService(Options.Create(validatorConfig), devEnv);
-            var agent = new Agent("TestAgent", "owner-1", "hash");
-            var token = generator.GenerateToken(agent);
-
-            var principal = validator.ValidateToken(token);
-
-            principal.Should().NotBeNull();
-        }
-        finally
-        {
-            Environment.SetEnvironmentVariable("SYNENTRA_SELF_SIGNED_DEV_SECRET_FILE", null);
-            if (File.Exists(secretFile))
-                File.Delete(secretFile);
-        }
-    }
-
-    [Fact]
-    public void Constructor_NonDevelopmentAndMissingSecret_ThrowsInvalidOperationException()
-    {
-        Environment.SetEnvironmentVariable("SYNENTRA_SELF_SIGNED_SECRET", null);
-        var prodEnv = new FakeHostEnvironment { EnvironmentName = Environments.Production };
+        // In any environment, missing secret should auto‑generate, never throw.
+        UseTempProtectedSecretPath();
 
         var config = new SecurityConfiguration
         {
@@ -175,8 +194,10 @@ public class JwtTokenServiceTests
             }
         };
 
-        var act = () => new JwtTokenService(Options.Create(config), prodEnv);
+        var sut = new JwtTokenService(Options.Create(config), new EphemeralDataProtectionProvider());
+        var agent = new Agent("TestAgent", "owner-1", "hash");
 
-        act.Should().Throw<InvalidOperationException>();
+        var token = sut.GenerateToken(agent);
+        token.Should().NotBeNullOrEmpty();
     }
 }

@@ -1,10 +1,11 @@
 ﻿using Microsoft.AspNetCore.DataProtection;
-using System.Diagnostics.CodeAnalysis;
-using System.Text.Json.Serialization;
+using Synentra.Application;
 using Synentra.Extensions;
 using Synentra.Infrastructure;
 using Synentra.Middleware;
-using Synentra.Application;
+using System.Diagnostics.CodeAnalysis;
+using System.Runtime.InteropServices;
+using System.Text.Json.Serialization;
 
 namespace Synentra.Services;
 
@@ -18,8 +19,21 @@ internal sealed class StartupConfiguration : IStartupConfiguration
         var environment = builder.Environment;
 
         // Data Protection
-        services.AddDataProtection()
-                .SetApplicationName("SynentraGateway");
+        var dpKeysDir = Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData),
+            "Synentra",
+            "DataProtection",
+            "Keys");
+
+        Directory.CreateDirectory(dpKeysDir);
+
+        var dataProtectionBuilder = services.AddDataProtection()
+            .PersistKeysToFileSystem(new DirectoryInfo(dpKeysDir))
+            .SetApplicationName("Synentra");
+
+        // Apply DPAPI encryption only on Windows
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            dataProtectionBuilder.ProtectKeysWithDpapi();
 
         // JSON options
         services.ConfigureHttpJsonOptions(options =>
