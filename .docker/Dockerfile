@@ -19,6 +19,10 @@ RUN dotnet restore src/Synentra/Synentra.csproj --runtime linux-x64
 
 COPY src/ src/
 
+# Copy legal files that are required during publish and must be in the final image
+COPY LICENSE THIRD-PARTY-NOTICES.md ./
+COPY licenses/ ./licenses/
+
 RUN dotnet publish "./src/Synentra/Synentra.csproj" -c Release -o /app/publish \
     /p:UseAppHost=false \
     /p:Version=${APP_VERSION} \
