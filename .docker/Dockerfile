@@ -28,11 +28,22 @@ RUN dotnet publish "./src/Synentra/Synentra.csproj" -c Release -o /app/publish \
 FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS runtime
 WORKDIR /app
 
+# Static OCI image metadata
+LABEL org.opencontainers.image.title="Synentra"
+LABEL org.opencontainers.image.description="Intent-aware governance gateway for autonomous AI agents"
+LABEL org.opencontainers.image.source="https://github.com/synentra/synentra"
+LABEL org.opencontainers.image.licenses="Apache-2.0"
+
 ENV ASPNETCORE_URLS=http://+:7080
 ENV DOTNET_RUNNING_IN_CONTAINER=true
 
 COPY --from=build /app/publish .
 
 EXPOSE 7080
+
+ARG APP_VERSION
+ARG REVISION
+LABEL org.opencontainers.image.version="${APP_VERSION}"
+LABEL org.opencontainers.image.revision="${REVISION}"
 
 ENTRYPOINT ["dotnet", "synentra.dll"]
