@@ -61,6 +61,8 @@ public static class DependencyInjection
         services.AddScoped<IRiskScoringService, RiskScoringService>();
 
         // Semantic providers
+        services.AddSingleton<InternalOnnxProvider>();
+        services.AddHostedService<InternalOnnxInitializer>();
         services.AddScoped<ISemanticProvider>(CreateSemanticProvider);
 
         services.AddMemoryCache();
@@ -107,7 +109,7 @@ public static class DependencyInjection
             "openai" => ActivatorUtilities.CreateInstance<OpenAiProvider>(sp),
             "gemini" => ActivatorUtilities.CreateInstance<GeminiProvider>(sp),
             "ollama" => ActivatorUtilities.CreateInstance<OllamaProvider>(sp),
-            _ => ActivatorUtilities.CreateInstance<InternalOnnxProvider>(sp)
+            _ => sp.GetRequiredService<InternalOnnxProvider>()
         };
     }
 
