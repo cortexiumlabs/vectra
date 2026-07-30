@@ -1,175 +1,104 @@
 <div align="center">
   <img src="/img/banner.png" alt="Synentra Banner" />
-  <h2>An open‑source, intent‑aware governance gateway designed specifically for autonomous AI agents that interact with enterprise APIs</h2>
 
-  [![dotnet][dotnet-budge]][dotnet-url]
-  [![Build Status][actions-badge]][actions-url]
-  [![Quality Gate Status][sonarcloud-quality-gate-badge]][sonarcloud-quality-gate-url]
-  [![Reliability Gate Status][sonarcloud-reliability-gate-badge]][sonarcloud-reliability-gate-url]
-  [![Maintainability Gate Status][sonarcloud-maintainability-gate-badge]][sonarcloud-maintainability-gate-url]
-  [![Security Gate Status][sonarcloud-security-gate-badge]][sonarcloud-security-gate-url]
-  [![Vulnerabilities Gate Status][sonarcloud-vulnerabilities-gate-badge]][sonarcloud-vulnerabilities-gate-url]
-  [![License: Apache 2.0][apache-badge]][apache-url]
-  [![FOSSA License Status][fossa-license-badge]][fossa-license-url]
-  [![FOSSA Security Status][fossa-security-badge]][fossa-security-url]
-  [![Good First Issues][github-good-first-issue-badge]][github-good-first-issue-url]
+  <h2>Intent-aware governance for AI agents acting on enterprise APIs</h2>
+
+  <p>
+    Synentra sits between autonomous AI agents and your HTTP APIs. It evaluates
+    request context, classifies likely intent, applies policies and risk controls,
+    and allows, blocks, or pauses high-risk actions for human approval.
+  </p>
+
+[![Build Status][actions-badge]][actions-url]
+[![Quality Gate Status][sonarcloud-quality-gate-badge]][sonarcloud-quality-gate-url]
+[![License: Apache 2.0][apache-badge]][apache-url]
+[![FOSSA License Status][fossa-license-badge]][fossa-license-url]
+[![Good First Issues][github-good-first-issue-badge]][github-good-first-issue-url]
+
+**[Documentation](https://synentra.io/docs)** ·
+**[Quick Start](#quick-start)** ·
+**[Discord](https://discord.synentra.io)** ·
+**[Discussions](https://github.com/synentra/synentra/discussions)**
+
 </div>
 
-> ⭐ **If Synentra helps you secure your AI agents, consider starring the repo to help others discover it.**
->
-> <div align="center" style="padding:2px; background:#dcd4fc; border: 2px solid #eeeeee;"><img src="/img/starring.gif" /></div>
+---
 
-## Table of Contents
+## See Synentra in Action
 
-- [Overview](#overview-synentra)
-  - [Key Capabilities](#key-capabilities)
-  - [Why Synentra](#why-synentra)
-	- [Differentiators](#differentiators)
-	- [Core Advantages](#core-advantages)
-	- [TL;DR](#tldr)
-	- [What Synentra is Not](#what-synentra-is-not)
-	- [Who Should Use Synentra](#who-should-use-synentra)
-- [Key Features](#key-features)
-- [Architecture](#architecture)
-- [Roadmap](#roadmap)
-- [Quick Start](#quick-start)
-  - [Run via Docker](#run-via-docker)
-  - [Use a Pre-Built Binary](#use-a-pre-built-binary)
-  - [Build from Source](#build-from-source)
-- [Security](#security)
-  - [Reporting a Vulnerability](#reporting-a-vulnerability)
-  - [Security Policy](#security-policy)
-  - [Dependency Scanning](#dependency-scanning)
-- [Community & Contributing](#community-%26-contributing)
-  - [Ways to Get Involved](#ways-to-get-involved)
-  - [Contributing Code](#contributing-code)
-  - [Community](#community)
-- [License](#license)
-- [Support Synentra](#support-synentra)
+An AI agent sends a request:
 
-## Overview: SYNENTRA
+```http
+DELETE http://localhost:7080/proxy/https://localhost:8080/v1/customers?status=inactive
+Synentra-Authorization: Bearer <agent-token>
+Content-Type: application/json
 
-> 📖 For full documentation, visit **[synentra.io/docs](https://synentra.io/docs)**.
+{
+  "instruction": "Clean up old customer accounts"
+}
+```
 
-**SYNENTRA**
+Synentra evaluates the request:
 
-While traditional API gateways route traffic based on static endpoints and basic authentication, SYNENTRA introduces a semantic layer of security by evaluating the *actual intent* behind every API call. This allows developers to establish dynamic guardrails, ensuring that AI agents and automated systems operate strictly within defined behavioral boundaries.
+```text
+Agent       : customer-maintenance-agent
+Intent      : destructive_delete
+Risk Score  : 0.91
+Decision    : Human approval required
+```
 
-### Key Capabilities
+A traditional API gateway can authenticate the caller and match the HTTP method and path.
 
-* **Intent-Based Policy Enforcement:** Move beyond standard Role-Based Access Control (RBAC). SYNENTRA analyzes the underlying purpose of a request, allowing you to build context-aware policies that govern *what* an agent is trying to achieve, rather than just *who* the agent is.
-* **Human-in-the-Loop (HITL) Safeguards:** Not all automated actions should happen instantly. When SYNENTRA identifies an agent's intent as high-risk, potentially destructive, or malicious, it automatically intercepts the request. The gateway holds the action and routes it to a human operator for manual review and approval before execution.
-* **Precise Agent Governance:** As AI agents become more autonomous, the risk of unintended actions grows. SYNENTRA provides the fine-grained control necessary to oversee agent behavior, preventing systemic damage and ensuring compliance.
-
-### Why SYNENTRA
-
-Synentra is the **only open‑source, intent‑aware governance gateway** purpose‑built for **autonomous AI agents that interact with enterprise APIs**. It unifies deterministic policies, local semantic intent classification, and adaptive agent trust scoring – all delivered with **sub‑30ms end‑to-end latency**.
-
-### Differentiators
-
-> **Real‑time, intent‑aware governance for AI agent *actions* – far beyond LLM chat supervision.**
-
-| Problem | Synentra Solution |
-|---------|-------------------|
-| Traditional API gateways (Kong, Tyk) block by path and method only – they cannot detect a dangerous request like “export all customers” in the payload. | **Semantic intent classification** (local ONNX model) understands *what the agent is trying to do*. |
-| AI gateways (Portkey, Cloudflare) focus on LLM cost management and prompt security, not on governing downstream agent actions. | **Agent trust scoring** – each agent carries a dynamic risk score that evolves with every request. |
-| Human‑in‑the‑loop typically demands custom code or external tools. | **Built‑in HITL** – suspend, approve, or deny actions directly via API, Slack, Microsoft Teams, or PagerDuty. |
-| No visibility into *which* agent performed which operation. | **Agent identity + JWT** – provides a complete, per‑agent audit trail. |
-
-### Core Advantages
-
-| Advantage | How Synentra Delivers It |
-|-----------|---------------------------|
-| **Local, low‑latency intent classification** | A fine‑tuned ONNX model (DistilBERT) runs inside the gateway – inference completes in under 20ms, with no external API dependency. |
-| **Agent trust scoring** | A dynamic risk score (0.0–1.0) is continuously updated based on violation rate, HITL history, and anomaly detection. Policies can automatically quarantine low‑trust agents. |
-| **Hybrid semantic + deterministic policy engine** | Combine fast JSON‑based attribute‑based access control (ABAC) with intent‑aware conditions such as `input.intent == "bulk_export"`. Policies are hot‑reloadable and designed for GitOps. |
-
-### TL;DR
-
-> “Synentra bridges the gap between conventional API gateways and slow, cloud‑dependent LLM guards. It empowers enterprises to let AI agents act autonomously – while understanding *why* they act, continuously scoring their trust, and requiring human approval for high‑risk intents – all in under 20 milliseconds.”
-
-### What Synentra Is Not
-
-- ❌ A generic LLM proxy (no token counting, no prompt caching)
-- ❌ A cost‑control tool for the OpenAI API
-- ❌ A load balancer or canary deployment tool
-- ❌ A sidecar exclusively for MCP servers – it works with **any HTTP API**
-
-### Who Should Use Synentra
-
-- **Platform engineers** – secure AI agent traffic without adding latency or operational complexity.
-- **Security architects** – enforce compliance and maintain a complete audit record for every agent action.
-- **Compliance officers** – achieve SOC 2/HIPAA readiness with built‑in human‑in‑the‑loop and auditable logs.
-- **AI agent developers** (LangChain, Semantic Kernel, custom frameworks) – integrate once and govern every agent uniformly.
-
-## Key Features
-
-* ✅**Semantic Intent Analysis:** Evaluates the underlying purpose of every request using natural language understanding, going far beyond simple endpoint matching.
-* ✅ **Dynamic Policy Enforcement:** Define and apply context-aware governance rules that adapt to agent behavior and request semantics in real time.
-* ✅ **Human-in-the-Loop (HITL):** Automatically intercepts high-risk or ambiguous requests and holds them for manual operator review before execution.
-* ✅ **HITL Notifications:** When a request is suspended for review, SYNENTRA can notify reviewers via Slack, Microsoft Teams, PagerDuty, or a generic webhook.
-* ✅ **Agent Governance:** Provides fine-grained controls to monitor, restrict, and audit autonomous AI agent actions across your systems.
-* ✅ **Agent Quarantine:** Automatically quarantine agents that fall below a trust score threshold, blocking all subsequent requests until manually lifted.
-* ✅ **Audit & Observability:** Maintains a full audit trail of agent intent classifications, policy decisions, and HITL review outcomes.
-* ✅ **High-Performance Gateway:** Designed for low-latency interception with minimal overhead, keeping your automated workflows fast and responsive.
-
-## Architecture
-
-![SYNENTRA Architecture](/img/architecture.png)
-
-Every inbound HTTP request from an AI Agent flows through three layers inside the **SYNENTRA Gateway**:
-
-1. **Request Validation** — checks the API version header, authenticates the caller via JWT, and enforces rate limits. Failures are blocked immediately and recorded in the audit log.
-2. **Decision Engine** — valid requests are evaluated by three sequential steps:
-   - **Policy Evaluation** — applies configured rules and contextual conditions.
-   - **Risk Scoring** — weighs contextual factors including request body, path, anomaly signals, and historical behaviour.
-   - **Semantic Analysis** — classifies the underlying intent of the request.
-3. **Routing outcome** — based on the decision engine result, the request is one of:
-   - ✅ **Direct Allow** → forwarded to the upstream service via the proxy, audit recorded.
-   - ⏳ **Pending Review** → held in the **HITL Review** queue for human approval. Approved requests are proxied; disapproved requests are blocked and audited.
-   - 🚫 **Policy Block** → blocked immediately, audit recorded.
-
-## Roadmap
-
-Our roadmap is actively maintained and outlines upcoming features, milestones, and long-term direction.
-
-👉 View the full roadmap: [ROADMAP.md](ROADMAP.md)
+Synentra additionally evaluates the request context and likely intent before deciding whether the action should proceed.
 
 ## Quick Start
 
-### Run via Docker
+### Run with Docker
 
-The fastest way to get SYNENTRA running is with Docker:
+For start Synentra:
 
 ```bash
-docker pull ghcr.io/synentra/synentra:latest
-docker run -p 708:7080 ghcr.io/synentra/synentra:latest
+docker run --name synentra -p 7080:7080 ghcr.io/synentra/synentra:latest
 ```
 
-SYNENTRA will be available at `http://localhost:7080`.
+Synentra will be available at:
 
-To supply your own configuration, mount a config file:
+```text
+http://localhost:7080
+```
+
+> Production deployments require an appropriate security configuration, including token issuance and secret management. See the [Security configuration documentation](https://synentra.io/docs/configuration/security) before deploying Synentra in production.
+
+To provide your own configuration file:
 
 ```bash
-docker run -p 7080:7080 \
-  -v $(pwd)/synentra.json:/app/synentra.json \
+docker run \
+  --name synentra \
+  -p 7080:7080 \
+  -v "$(pwd)/appsettings.json:/app/appsettings.json:ro" \
   ghcr.io/synentra/synentra:latest
 ```
 
+For a complete Docker setup, see the
+[Synentra Docker Deployment](https://synentra.io/docs/operations/deployment/docker)
+documentation.
+
 ### Use a Pre-Built Binary
 
-Pre-built binaries for Linux, macOS, and Windows are available on the [Releases](https://github.com/synentra/synentra/releases) page.
+Pre-built binaries for supported platforms are available on the
+[Releases](https://github.com/synentra/synentra/releases) page.
 
-1. Download the archive for your platform.
-2. Extract and make the binary executable (Linux/macOS):
+Download and extract the appropriate archive for your platform.
+
+On Linux:
 
 ```bash
-tar -xzf synentra-<version>-linux-x64.tar.gz
+tar -xzf synentra-linux-x64.tar.gz
 chmod +x synentra
 ./synentra
 ```
 
-3. On Windows, run the extracted executable directly:
+On Windows:
 
 ```powershell
 .\synentra.exe
@@ -177,108 +106,410 @@ chmod +x synentra
 
 ### Build from Source
 
-**Prerequisites:** [.NET 10 SDK](https://dotnet.microsoft.com/en-us/download/dotnet/10.0)
+**Prerequisite:** [.NET 10 SDK](https://dotnet.microsoft.com/en-us/download/dotnet/10.0)
 
 ```bash
-# Clone the repository
 git clone https://github.com/synentra/synentra.git
 cd synentra
 
-# Restore dependencies
 dotnet restore
-
-# Build the solution
 dotnet build --configuration Release
+dotnet test --configuration Release
 
-# Run the gateway
-dotnet run --project src/Synentra.Gateway --configuration Release
+dotnet run --project src/Synentra --configuration Release
 ```
 
-To run the full test suite before running:
+## Why Synentra?
+
+AI agents can make authenticated and technically valid API requests while still taking actions that are unintended, excessive, or dangerous.
+
+Traditional gateways primarily answer questions such as:
+
+* Is the caller authenticated?
+* Is the caller authorized to access this route?
+* Is the request within its rate limit?
+
+Synentra adds another governance layer:
+
+* What is the agent likely trying to accomplish?
+* How risky is this action in the current context?
+* Does the request comply with behavioral and semantic policies?
+* Should this action require human approval?
+* Has the agent's previous behavior reduced its trust level?
+
+| Without Synentra                                              | With Synentra                                                                                     |
+| ------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| Decisions are primarily based on identity, route, and method. | Decisions can also consider likely intent, risk, trust, and historical behavior.                  |
+| An authorized destructive request may execute immediately.    | High-risk actions can be blocked or suspended for human approval.                                 |
+| Agent behavior must be correlated across separate systems.    | Agent identity, classifications, policy decisions, and review outcomes are recorded together.     |
+| Semantic controls often require custom integrations.          | Semantic analysis, risk scoring, policy enforcement, and HITL are coordinated inside the gateway. |
+
+## Core Capabilities
+
+### Semantic Intent Classification
+
+Synentra evaluates request context such as the HTTP method, path, payload, agent identity, and configured policy state. 
+Local inference keeps request data inside your environment and avoids requiring an external classification API.
+
+### Policy Enforcement
+
+Synentra combines deterministic policy rules with semantic conditions.
+
+Policies can evaluate:
+
+* Agent identity and attributes
+* HTTP method and path
+* Request headers and payload
+* Classified intent
+* Confidence level
+* Risk score
+* Historical behavior
+
+Policies can return one of three primary outcomes:
+
+```text
+Allow
+Deny
+HITL (Require human approval)
+```
+
+### Risk and Trust Scoring
+
+Synentra evaluates contextual risk signals for each request.
+
+These signals can include:
+
+* HTTP method
+* Target path
+* Request body characteristics
+* Time-based conditions
+* Agent history
+* Anomaly signals
+* Previous policy violations
+* Previous HITL decisions
+
+Agent trust can evolve over time based on observed behavior. Agents that fall below a configured trust threshold can be quarantined until manually reviewed.
+
+### Human-in-the-Loop
+
+High-risk or ambiguous requests can be suspended before they reach the upstream API.
+
+A reviewer can:
+
+* Inspect the request and decision context
+* Approve the action
+* Deny the action
+* Record the reason for the decision
+
+Synentra can notify reviewers through:
+
+* Slack
+* Microsoft Teams
+* PagerDuty
+* Generic webhooks
+
+### Agent Identity and Auditability
+
+Synentra associates requests and decisions with registered agent identities.
+
+Audit records can include:
+
+* Agent identity
+* Request metadata
+* Classified intent
+* Classification confidence
+* Risk score
+* Policy result
+* HITL status
+* Reviewer decision
+* Final routing outcome
+
+### Observability
+
+Synentra supports structured logging and distributed observability for governance decisions and request processing.
+
+Supported capabilities include:
+
+* Structured application logs
+* File and console logging
+* OpenTelemetry export
+* Audit records
+* Health endpoints
+* Decision and latency telemetry
+
+## Architecture
+
+![Synentra Architecture](/img/architecture.png)
+
+Each inbound request passes through the Synentra governance pipeline.
+
+### 1. Request Validation
+
+Synentra first validates the request and its caller.
+
+This stage can include:
+
+* API version validation
+* Agent authentication
+* JWT validation
+* Rate limiting
+* Request-size limits
+
+Requests that fail validation are blocked and recorded.
+
+### 2. Decision Engine
+
+Valid requests are evaluated through the governance pipeline.
+
+#### Policy Evaluation
+
+Configured policies evaluate the agent, request, environment, and available semantic context.
+
+A policy can immediately allow, deny, or require human approval.
+
+#### Risk Scoring
+
+Risk calculators evaluate contextual signals such as the HTTP method, target path, payload characteristics, request timing, agent history, and anomaly indicators.
+
+#### Semantic Analysis
+
+The semantic provider classifies the likely intent of the request and returns a confidence score.
+
+The resulting intent can be used by policies and the final decision process.
+
+### 3. Routing Outcome
+
+The request receives one of the following outcomes:
+
+* ✅ **Allow** — the request is forwarded to the upstream service.
+* ⏳ **Pending review** — the request is suspended until a reviewer approves or denies it.
+* 🚫 **Block** — the request is rejected before reaching the upstream service.
+
+Each outcome is recorded for auditing and observability.
+
+## Key Features
+
+* **Intent-aware request evaluation** using local semantic classification
+* **Deterministic and semantic policies** for context-aware enforcement
+* **Risk scoring** using configurable request and behavioral signals
+* **Dynamic agent trust** based on historical behavior
+* **Human-in-the-loop workflows** for sensitive actions
+* **Multi-channel HITL notifications**
+* **Agent quarantine** for identities that fall below a trust threshold
+* **Per-agent audit trails**
+* **Structured logging and OpenTelemetry support**
+* **Memory and Redis caching**
+* **SQLite and PostgreSQL storage options**
+* **External identity provider integration**
+* **Local operation without a required cloud classification service**
+
+## What Synentra Is Not
+
+Synentra is not intended to replace every component in an AI or API platform.
+
+It is not:
+
+* A general-purpose LLM proxy
+* A token accounting or prompt-caching platform
+* An OpenAI API cost-management service
+* A load balancer
+* A canary deployment system
+* A replacement for your identity provider
+* Limited to MCP servers or a specific agent framework
+
+Synentra governs AI-agent actions against HTTP APIs and can be used with LangChain, Semantic Kernel, custom agents, MCP-based systems, and other frameworks.
+
+## Who Is Synentra For?
+
+### Platform Engineers
+
+Add a centralized governance layer between AI agents and internal APIs without implementing separate controls in every service.
+
+### Security Architects
+
+Apply policies using agent identity, request context, likely intent, risk, and historical behavior.
+
+### AI Agent Developers
+
+Integrate agents with one governance gateway instead of building policy enforcement, risk evaluation, audit logging, and approval workflows independently.
+
+### Governance and Compliance Teams
+
+Use policy decisions, human approvals, and audit records as technical controls that can support broader organizational governance and compliance programs.
+
+> Synentra provides technical governance controls. Using Synentra alone does not establish compliance with standards or regulations such as SOC 2 or HIPAA.
+
+## Performance
+
+Synentra is designed for low-latency, local request evaluation.
+
+Performance depends on factors including:
+
+* Hardware
+* Model configuration
+* Payload size
+* Enabled policies
+* Storage provider
+* Cache provider
+* Logging configuration
+* Semantic provider
+
+Published performance results should be interpreted together with their test environment and benchmark methodology.
+
+See the documentation for current performance measurements and configuration guidance:
+
+**[Performance documentation](https://synentra.io/docs)**
+
+## Roadmap
+
+The project roadmap describes planned capabilities, upcoming releases, and longer-term direction.
+
+👉 [View the Synentra roadmap](ROADMAP.md)
+
+## Documentation
+
+Full documentation is available at:
+
+**https://synentra.io/docs**
+
+Useful starting points:
+
+* [Getting Started](https://synentra.io/docs/getting-started)
+* [Docker Initialization](https://synentra.io/docs/getting-started/initialize-synentra-docker)
+* [System Configuration](https://synentra.io/docs/configuration/system)
+* [Security Configuration](https://synentra.io/docs/configuration/security)
+* [Semantic Configuration](https://synentra.io/docs/configuration/semantic)
+* [Policy Configuration](https://synentra.io/docs/configuration/policy)
+* [HITL Configuration](https://synentra.io/docs/configuration/hitl)
+* [Observability](https://synentra.io/docs/configuration/observability)
+
+## Security
+
+Security is a core concern for Synentra. The project follows a responsible disclosure process for reported vulnerabilities.
+
+### Reporting a Vulnerability
+
+**Do not report security vulnerabilities through a public GitHub issue.**
+
+Use one of the following private channels:
+
+* **GitHub Private Vulnerability Reporting:**
+  [Report a vulnerability](https://github.com/synentra/synentra/security/advisories/new)
+
+* **Email:**
+  [security@synentra.io](mailto:security@synentra.io)
+  Subject: `[Synentra] Security Vulnerability`
+
+Include, where possible:
+
+* A description of the vulnerability
+* Its potential impact
+* Steps to reproduce
+* A proof of concept
+* Relevant environment information
+* The affected Synentra version
+
+We aim to acknowledge security reports within 48 hours and provide an initial remediation timeline within several days.
+
+### Security Policy
+
+Supported versions and the complete disclosure process are documented in:
+
+**[SECURITY.md](SECURITY.md)**
+
+### Dependency and Code Analysis
+
+Synentra uses:
+
+* [FOSSA](https://fossa.com) for dependency license and vulnerability analysis
+* [SonarCloud](https://sonarcloud.io) for static analysis, reliability, maintainability, and security checks
+
+Additional project-health badges are available in the [Project Health](#project-health) section.
+
+## Community and Contributing
+
+Synentra is developed in the open. Contributions may include code, tests, documentation, integrations, issue reports, feature proposals, and design discussions.
+
+### Ways to Participate
+
+* 🐛 [Report a bug](https://github.com/synentra/synentra/issues/new?template=bug_report.md)
+* 💡 [Request a feature](https://github.com/synentra/synentra/issues/new?template=feature_request.md)
+* 🔍 [Browse good first issues](https://github.com/synentra/synentra/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22)
+* 📖 Improve the documentation
+* 🧪 Add tests and examples
+* 🔌 Propose or implement integrations
+* 💬 Join project discussions
+
+### Contributing Code
+
+1. Fork the repository.
+2. Create a branch from `main`.
+3. Implement the change.
+4. Add or update tests.
+5. Run the test suite:
 
 ```bash
 dotnet test --configuration Release
 ```
 
-## Security
+6. Open a pull request against `main` with a clear explanation of the change.
 
-Security is a first-class concern in SYNENTRA. We follow responsible disclosure practices and take all reports seriously.
+Read [CONTRIBUTING.md](CONTRIBUTING.md) before submitting a pull request.
 
-### Reporting a Vulnerability
+### Community Channels
 
-**Please do not open a public GitHub issue for security vulnerabilities.**
-
-If you discover a security vulnerability, report it privately through one of the following channels:
-
-* **GitHub Private Vulnerability Reporting:** Use the [Report a vulnerability](https://github.com/synentra/synentra/security/advisories/new) button in the **Security** tab of the repository.
-* **Email:** Send details to [contact@synentra.io](mailto:contact@synentra.io) with the subject line `[SYNENTRA] Security Vulnerability`.
-
-Please include:
-- A description of the vulnerability and its potential impact.
-- Steps to reproduce or a proof-of-concept.
-- Any relevant environment details (OS, .NET version, Docker image tag, etc.).
-
-We aim to acknowledge reports within **48 hours** and provide a remediation timeline within **7 days**.
-
-### Security Policy
-
-The full security policy, including supported versions and disclosure process, is available in [SECURITY.md](https://github.com/synentra/synentra/blob/main/SECURITY.md).
-
-### Dependency Scanning
-
-SYNENTRA uses [FOSSA](https://fossa.com) for continuous license and security scanning of all dependencies, and [SonarCloud](https://sonarcloud.io) for static analysis. Badge statuses are shown at the top of this file.
-
-## Community & Contributing
-
-SYNENTRA is built in the open and welcomes contributions of all kinds — bug reports, feature requests, documentation improvements, and code.
-
-### Ways to Get Involved
-
-* 🐛 **Report a bug** — [Open an issue](https://github.com/synentra/synentra/issues/new?template=bug_report.md) with steps to reproduce and expected vs. actual behaviour.
-* 💡 **Request a feature** — [Open a feature request issue](https://github.com/synentra/synentra/issues/new?template=feature_request.md).
-* 🔍 **Pick up a good first issue** — Browse issues labelled [good first issue](https://github.com/synentra/synentra/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22) for beginner-friendly starting points.
-* 📖 **Improve the docs** — Spotted something unclear or missing? PRs to docs are always welcome.
-
-### Contributing Code
-
-1. **Fork** the repository and create a feature branch from `main`.
-2. **Write tests** for any new behaviour — the project uses `dotnet test`.
-3. **Follow** the existing code style and conventions in the codebase.
-4. **Open a Pull Request** against `main` with a clear description of what changed and why.
-
-Please read [CONTRIBUTING.md](https://github.com/synentra/synentra/blob/main/CONTRIBUTING.md) for the full contribution guidelines, code of conduct, and PR checklist before submitting.
-
-### Community
-
-Join the Synentra community:
-
-- **Discord:** [https://discord.synentra.io](https://discord.synentra.io)
-- **Discussions**: https://github.com/synentra/synentra/discussions
-- **Documentation**: https://synentra.io/docs
+* **Discord:** https://discord.synentra.io
+* **GitHub Discussions:** https://github.com/synentra/synentra/discussions
+* **Documentation:** https://synentra.io/docs
 
 ### Discussion Categories
 
-| Category | Purpose |
-|-----------|----------|
-| Q&A | Ask questions and get help |
-| Ideas | Feature requests and proposals |
-| Contributors | Contributor coordination |
-| Governance | Project direction and decisions |
-| Show & Tell | Share your integrations and projects |
-| Announcements | Project updates and releases |
+| Category      | Purpose                                 |
+| ------------- | --------------------------------------- |
+| Q&A           | Ask questions and receive help          |
+| Ideas         | Propose features and improvements       |
+| Contributors  | Coordinate contribution work            |
+| Governance    | Discuss project direction and decisions |
+| Show and Tell | Share integrations and projects         |
+| Announcements | Follow releases and project updates     |
+
+## Project Health
+
+[![.NET][dotnet-budge]][dotnet-url]
+[![Build Status][actions-badge]][actions-url]
+[![Quality Gate Status][sonarcloud-quality-gate-badge]][sonarcloud-quality-gate-url]
+[![Reliability Gate Status][sonarcloud-reliability-gate-badge]][sonarcloud-reliability-gate-url]
+[![Maintainability Gate Status][sonarcloud-maintainability-gate-badge]][sonarcloud-maintainability-gate-url]
+[![Security Gate Status][sonarcloud-security-gate-badge]][sonarcloud-security-gate-url]
+[![Vulnerabilities Gate Status][sonarcloud-vulnerabilities-gate-badge]][sonarcloud-vulnerabilities-gate-url]
+[![FOSSA License Status][fossa-license-badge]][fossa-license-url]
+[![FOSSA Security Status][fossa-security-badge]][fossa-security-url]
+
+## Governance
+
+Project governance and maintainer responsibilities are documented in:
+
+* [GOVERNANCE.md](GOVERNANCE.md)
+* [MAINTAINERS.md](MAINTAINERS.md)
+* [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md)
+* [ROADMAP.md](ROADMAP.md)
 
 ## License
 
-SYNENTRA is open-source and licensed under the **Apache 2.0 License**.  
-See [LICENSE](https://github.com/synentra/synentra/blob/main/LICENSE) for details.
+Synentra is open source and licensed under the
+[Apache License 2.0](LICENSE).
 
-Some dependencies are licensed under other open-source licenses.
-See [THIRD PARTY NOTICES](https://github.com/synentra/synentra/blob/main/THIRD-PARTY-NOTICES.md) for details.
+Some dependencies use other open-source licenses. Their notices and attribution requirements are documented in:
 
-## Support SYNENTRA
-[![⭐ Star on GitHub](https://img.shields.io/badge/⭐%20Star%20on%20GitHub-555555?style=flat&logo=github)](https://github.com/synentra/synentra)  
-✨ **Support SYNENTRA by giving it a star!** ✨  
-Your support helps others discover the project and drives continued innovation.
+**[THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md)**
+
+## Support Synentra
+
+If Synentra solves a problem for your team, consider starring the repository. It helps other developers discover the project and follow its development.
+
+[![Star Synentra on GitHub](https://img.shields.io/badge/Star%20Synentra%20on%20GitHub-555555?style=flat\&logo=github)](https://github.com/synentra/synentra)
+
+---
 
 [dotnet-budge]: https://img.shields.io/badge/.NET-10.0-purple
 [dotnet-url]: https://dotnet.microsoft.com/en-us/download/dotnet/10.0
