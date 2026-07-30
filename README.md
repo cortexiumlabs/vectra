@@ -509,8 +509,6 @@ If Synentra solves a problem for your team, consider starring the repository. It
 
 [![Star Synentra on GitHub](https://img.shields.io/badge/Star%20Synentra%20on%20GitHub-555555?style=flat\&logo=github)](https://github.com/synentra/synentra)
 
----
-
 [dotnet-budge]: https://img.shields.io/badge/.NET-10.0-purple
 [dotnet-url]: https://dotnet.microsoft.com/en-us/download/dotnet/10.0
 [apache-badge]: https://img.shields.io/badge/License-Apache%202.0-blue.svg?style=flat&logo=github
