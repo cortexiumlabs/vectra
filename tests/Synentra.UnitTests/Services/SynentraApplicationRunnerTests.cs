@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Serilog.Core;
 using Synentra.Services;
 
 namespace Synentra.UnitTests.Services;
@@ -38,16 +39,25 @@ public class SynentraApplicationRunnerTests
     {
         var builder = WebApplication.CreateBuilder();
 
-        var services = new ServiceCollection();
+        var logger = Substitute.For<ILogger<Program>>();
+        builder.Services.AddSingleton(logger);
 
-        builder.Services.AddSingleton<ILogger<Program>>(_ =>
-            Substitute.For<ILogger<Program>>());
-
-        SynentraApplicationRunner.ExitAction = _ => { };
+        int capturedExitCode = -1;
+        SynentraApplicationRunner.ExitAction = code => capturedExitCode = code;
 
         var ex = new Exception("boom");
-
         await SynentraApplicationRunner.HandleStartupFailureAsync(builder, ex);
+
+        // Verify the exit code
+        capturedExitCode.Should().Be(1);
+
+        // Verify that a critical log was written with the exception
+        logger.Received(1).Log(
+            LogLevel.Critical,
+            Arg.Any<EventId>(),
+            Arg.Is<object>(state => state.ToString()!.Contains("Unhandled exception during application startup")),
+            ex,
+            Arg.Any<Func<object, Exception?, string>>());
     }
 
     [Fact]
