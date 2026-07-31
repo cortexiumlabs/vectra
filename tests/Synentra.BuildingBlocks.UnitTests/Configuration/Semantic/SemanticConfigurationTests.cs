@@ -11,7 +11,7 @@ public class SemanticConfigurationTests
     {
         var config = new SemanticConfiguration();
 
-        config.Enabled.Should().BeFalse();
+        config.Enabled.Should().BeTrue();
         config.ConfidenceThreshold.Should().Be(0.7);
         config.AllowLowConfidence.Should().BeFalse();
         config.DefaultProvider.Should().Be("Internal");

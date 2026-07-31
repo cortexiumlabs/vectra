@@ -2,7 +2,7 @@
 
 public class SemanticConfiguration
 {
-    public bool? Enabled { get; set; } = false;
+    public bool? Enabled { get; set; } = true;
     public double? ConfidenceThreshold { get; set; } = 0.7;
     public bool? AllowLowConfidence { get; set; } = false;
     public string DefaultProvider { get; set; } = "Internal";
