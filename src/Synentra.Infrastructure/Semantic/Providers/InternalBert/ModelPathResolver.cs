@@ -25,15 +25,23 @@ public static class ModelPathResolver
 
     private static string GetDefaultPackagePath()
     {
-        // Use Environment.SpecialFolder.LocalApplicationData to get a writable per‑user directory
-        string folder = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData,
+        // 1. Try the per‑user local application data folder (preferred)
+        string? folder = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData,
             Environment.SpecialFolderOption.Create);
-        if (string.IsNullOrWhiteSpace(folder))
+        if (!string.IsNullOrWhiteSpace(folder))
+            return Path.Combine(folder, "Synentra", "models", DefaultModelFileName);
+
+        // 2. Fall back to a hidden folder inside the user’s home directory
+        string? home = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+        if (!string.IsNullOrWhiteSpace(home))
         {
-            // Ultimate fallback – should rarely happen
-            folder = Path.GetTempPath();
+            string privateFolder = Path.Combine(home, ".synentra", "models");
+            return Path.Combine(privateFolder, DefaultModelFileName);
         }
 
-        return Path.Combine(folder, "Synentra", "models", DefaultModelFileName);
+        // 3. Neither typical safe location is available – throw with guidance
+        throw new InvalidOperationException(
+            "Unable to determine a secure, user‑specific folder for the community model. " +
+            "Please set 'PackagePath' manually in the Semantic configuration.");
     }
 }
