@@ -8,10 +8,22 @@ namespace Synentra.Infrastructure.Semantic.Providers.InternalBert;
 public class ModelDownloader : IModelDownloader
 {
     private readonly ILogger<ModelDownloader> _logger;
+    private readonly IGitHubReleaseClient _gitHub;
+    private readonly IHttpClientFactory _httpClientFactory;
 
-    public ModelDownloader(ILogger<ModelDownloader> logger)
+    public ModelDownloader(
+        ILogger<ModelDownloader> logger,
+        IGitHubReleaseClient gitHub = null!,
+        IHttpClientFactory httpClientFactory = null!)
     {
-        _logger = logger;
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        _gitHub = gitHub ?? new GitHubReleaseClient();
+        _httpClientFactory = httpClientFactory ?? new DefaultHttpClientFactory();
+    }
+
+    private sealed class DefaultHttpClientFactory : IHttpClientFactory
+    {
+        public HttpClient CreateClient(string name) => new HttpClient();
     }
 
     public async Task EnsureModelExistsAsync(
@@ -41,7 +53,7 @@ public class ModelDownloader : IModelDownloader
         Release release;
         try
         {
-            release = await client.Repository.Release.GetLatest(owner, repo);
+            release = await _gitHub.GetLatestReleaseAsync(owner, repo);
         }
         catch (NotFoundException)
         {
@@ -78,7 +90,7 @@ public class ModelDownloader : IModelDownloader
         string sizeText = FormatSize(asset.Size);
         _logger.LogInformation("Downloading {ModelName} ({Size})...", displayModelName, sizeText);
 
-        using var httpClient = new HttpClient();
+        var httpClient = _httpClientFactory.CreateClient("ModelDownloader");
         httpClient.DefaultRequestHeaders.UserAgent.ParseAdd("Synentra");
         httpClient.Timeout = TimeSpan.FromMinutes(10);
 
@@ -126,7 +138,7 @@ public class ModelDownloader : IModelDownloader
     /// </summary>
     private async Task<string> DownloadChecksumAsync(string url, CancellationToken ct)
     {
-        using var httpClient = new HttpClient();
+        var httpClient = _httpClientFactory.CreateClient("ChecksumDownloader");
         httpClient.DefaultRequestHeaders.UserAgent.ParseAdd("Synentra");
         string content = await httpClient.GetStringAsync(url, ct);
         // Typical format: "<hash>  <filename>" or just "<hash>"
