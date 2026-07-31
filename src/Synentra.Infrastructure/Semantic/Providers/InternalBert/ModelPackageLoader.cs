@@ -9,27 +9,53 @@ namespace Synentra.Infrastructure.Semantic.Providers.InternalBert;
 /// For Community models the ONNX is used as-is; for Pro models it is decrypted in memory
 /// using the AES-256-GCM key from the license file. The key is zeroed immediately after use.
 /// </summary>
-internal static class ModelPackageLoader
+public class ModelPackageLoader: IModelPackageLoader
 {
-    internal static ModelAssets Load(InternalOnnxConfiguration config)
+    private readonly IModelDownloader _downloader;
+
+    public ModelPackageLoader(IModelDownloader downloader)
     {
-        var packagePath = config.PackagePath
-            ?? throw new InvalidOperationException("Internal ONNX model PackagePath is not configured.");
+        _downloader = downloader ?? throw new ArgumentNullException(nameof(downloader));
+    }
 
-        string fullPath = Path.IsPathRooted(packagePath)
-            ? packagePath
-            : Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, packagePath));
-
-        if (!File.Exists(fullPath))
-            throw new FileNotFoundException("Model package not found.", fullPath);
-
-        var packageBytes = File.ReadAllBytes(fullPath);
-        var isPro = string.Equals(
+    public async Task<ModelAssets> LoadAsync(
+        InternalOnnxConfiguration config, 
+        CancellationToken cancellationToken)
+    {
+        bool isPro = string.Equals(
             (config.ModelType ?? string.Empty).Trim(),
             "Pro",
             StringComparison.OrdinalIgnoreCase);
 
-        var onnxEntryName = isPro
+        string fullPath;
+
+        if (isPro)
+        {
+            // Pro models require an explicit path – no default, no download
+            if (string.IsNullOrWhiteSpace(config.PackagePath))
+                throw new InvalidOperationException("PackagePath must be configured for Pro model.");
+
+            fullPath = ModelPathResolver.GetFullPackagePath(config.PackagePath);
+        }
+        else
+        {
+            // Community models may use a default path, and download is allowed
+            fullPath = ModelPathResolver.GetFullPackagePath(config.PackagePath);
+        }
+
+        // Community: attempt auto‑download if the file doesn't exist
+        if (!isPro && !File.Exists(fullPath))
+        {
+            await _downloader.EnsureModelExistsAsync(config, cancellationToken);
+        }
+
+        // After possible download, the file must exist
+        if (!File.Exists(fullPath))
+            throw new FileNotFoundException($"Model package not found: {fullPath}");
+
+        byte[] packageBytes = await File.ReadAllBytesAsync(fullPath, cancellationToken);
+
+        string onnxEntryName = isPro
             ? ModelPackageExtractor.OnnxEncEntryName
             : ModelPackageExtractor.OnnxEntryName;
 

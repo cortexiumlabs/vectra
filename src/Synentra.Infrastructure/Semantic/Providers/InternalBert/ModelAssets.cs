@@ -1,6 +1,6 @@
 namespace Synentra.Infrastructure.Semantic.Providers.InternalBert;
 
-internal sealed record ModelAssets(
+public sealed record ModelAssets(
     ReadOnlyMemory<byte> OnnxBytes,
     string[] VocabLines,
     string[] IntentLabels);

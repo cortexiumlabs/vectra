@@ -22,6 +22,7 @@
 		<PackageReference Include="Microsoft.ML.OnnxRuntime" Version="1.27.1" />
 		<PackageReference Include="Microsoft.ML.OnnxRuntime.Extensions" Version="0.14.0" />
 		<PackageReference Include="Mscc.GenerativeAI" Version="3.1.0" />
+		<PackageReference Include="Octokit" Version="14.0.0" />
 		<PackageReference Include="OllamaSharp" Version="5.4.27" />
 		<PackageReference Include="OpenAI" Version="2.12.0" />
 		<PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.17.0" />

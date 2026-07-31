@@ -61,6 +61,8 @@ public static class DependencyInjection
         services.AddScoped<IRiskScoringService, RiskScoringService>();
 
         // Semantic providers
+        services.AddSingleton<IModelDownloader, ModelDownloader>();
+        services.AddSingleton<IModelPackageLoader, ModelPackageLoader>();
         services.AddSingleton<InternalOnnxProvider>();
         services.AddHostedService<InternalOnnxInitializer>();
         services.AddScoped<ISemanticProvider>(CreateSemanticProvider);

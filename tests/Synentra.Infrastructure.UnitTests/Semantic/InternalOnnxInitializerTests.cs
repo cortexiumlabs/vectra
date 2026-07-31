@@ -1,6 +1,7 @@
 ﻿using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using NSubstitute;
 using Synentra.Application.Abstractions.Caches;
 using Synentra.BuildingBlocks.Configuration.Semantic;
 using Synentra.Infrastructure.Caches;
@@ -125,7 +126,8 @@ public class InternalOnnxInitializerTests
         var options = Options.Create(new SemanticConfiguration { Enabled = false });
         var cacheService = new DummyCacheService();
         var logger = new FakeLogger<InternalOnnxProvider>();
-        return new InternalOnnxProvider(options, cacheService, logger);
+        var loader = Substitute.For<IModelPackageLoader>();
+        return new InternalOnnxProvider(options, cacheService, loader, logger);
     }
 
     // --------------------------------------------------

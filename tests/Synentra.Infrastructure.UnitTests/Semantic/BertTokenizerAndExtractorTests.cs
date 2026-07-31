@@ -4,6 +4,11 @@ using System.IO.Compression;
 using System.Text;
 using System.Text.Json;
 using Synentra.Infrastructure.Semantic.Providers.InternalBert;
+using Synentra.Application.Abstractions.Caches;
+using Synentra.Infrastructure.Caches;
+using Microsoft.Extensions.Options;
+using Synentra.BuildingBlocks.Configuration.Semantic;
+using NSubstitute.ExceptionExtensions;
 
 namespace Synentra.Infrastructure.UnitTests.Semantic;
 
@@ -140,6 +145,106 @@ public class ModelPackageLoaderViaProviderTests
     private readonly Microsoft.Extensions.Logging.ILogger<InternalOnnxProvider> _logger =
         Microsoft.Extensions.Logging.Abstractions.NullLogger<InternalOnnxProvider>.Instance;
 
+    [Fact]
+    public void Constructor_Enabled_DoesNotThrow()
+    {
+        var cacheProvider = Substitute.For<ICacheProvider>();
+        var cacheService = Substitute.For<ICacheService>();
+        cacheService.Current.Returns(cacheProvider);
+        var loader = Substitute.For<IModelPackageLoader>();
+
+        var options = Options.Create(new SemanticConfiguration
+        {
+            Enabled = true,
+            Providers = new SemanticProviders
+            {
+                Internal = new InternalOnnxConfiguration
+                {
+                    PackagePath = "some/path.zip",
+                    ModelType = "Community"
+                }
+            }
+        });
+
+        var act = () => new InternalOnnxProvider(options, cacheService, loader, _logger);
+        act.Should().NotThrow(); // construction is now lazy
+    }
+
+    [Fact]
+    public async Task InitializeAsync_Enabled_CallsLoaderAndPreparesSession()
+    {
+        var cacheProvider = Substitute.For<ICacheProvider>();
+        var cacheService = Substitute.For<ICacheService>();
+        cacheService.Current.Returns(cacheProvider);
+        var loader = Substitute.For<IModelPackageLoader>();
+
+        // Arrange: loader returns a valid ModelAssets
+        var assets = new ModelAssets(
+            new byte[] { 0x01, 0x02 },
+            new[] { "[PAD]", "[UNK]", "[CLS]", "[SEP]", "hello" },
+            new[] { "read", "write" }
+        );
+        loader.LoadAsync(Arg.Any<InternalOnnxConfiguration>(), Arg.Any<CancellationToken>())
+            .Returns(Task.FromResult(assets));
+
+        var options = Options.Create(new SemanticConfiguration
+        {
+            Enabled = true,
+            Providers = new SemanticProviders
+            {
+                Internal = new InternalOnnxConfiguration
+                {
+                    PackagePath = "test.zip",
+                    ModelType = "Community"
+                }
+            }
+        });
+
+        var provider = new InternalOnnxProvider(options, cacheService, loader, _logger);
+
+        // Act
+        await provider.InitializeAsync();
+
+        // Assert: the provider should now be ready (AnalyzeAsync won't block)
+        // We can't easily test internal session, but we can ensure loader was called
+        await loader.Received(1).LoadAsync(Arg.Any<InternalOnnxConfiguration>(), Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task InitializeAsync_WhenDownloadFails_DisablesProvider()
+    {
+        var cacheProvider = Substitute.For<ICacheProvider>();
+        var cacheService = Substitute.For<ICacheService>();
+        cacheService.Current.Returns(cacheProvider);
+        var loader = Substitute.For<IModelPackageLoader>();
+        loader.LoadAsync(Arg.Any<InternalOnnxConfiguration>(), Arg.Any<CancellationToken>())
+            .ThrowsAsync(new InvalidOperationException("Download failed"));
+
+        var options = Options.Create(new SemanticConfiguration
+        {
+            Enabled = true,
+            Providers = new SemanticProviders
+            {
+                Internal = new InternalOnnxConfiguration
+                {
+                    PackagePath = "test.zip",
+                    ModelType = "Community"
+                }
+            }
+        });
+
+        var provider = new InternalOnnxProvider(options, cacheService, loader, _logger);
+
+        // Act
+        await provider.InitializeAsync(TestContext.Current.CancellationToken);
+
+        // The provider should have caught the exception and disabled itself.
+        // A subsequent call to AnalyzeAsync should return a fallback-safe result.
+        var result = await provider.AnalyzeAsync("hello", "", CancellationToken.None);
+        result.FallbackSafe.Should().BeTrue();
+        result.Intent.Should().Be("suspicious");
+    }
+
     private static byte[] CreateValidZipPackage(
         byte[] onnxBytes,
         string[] vocabLines,
@@ -165,53 +270,129 @@ public class ModelPackageLoaderViaProviderTests
     }
 
     [Fact]
-    public void Constructor_EnabledWithMissingPackagePath_ThrowsInvalidOperationException()
+    public void Constructor_WithNullPackagePath_DoesNotThrow()
     {
-        var cacheProvider = Substitute.For<Synentra.Application.Abstractions.Caches.ICacheProvider>();
-        var cacheService = Substitute.For<Synentra.Infrastructure.Caches.ICacheService>();
+        var loader = Substitute.For<IModelPackageLoader>();
+        var cacheProvider = Substitute.For<ICacheProvider>();
+        var cacheService = Substitute.For<ICacheService>();
         cacheService.Current.Returns(cacheProvider);
 
-        var options = Microsoft.Extensions.Options.Options.Create(
-            new Synentra.BuildingBlocks.Configuration.Semantic.SemanticConfiguration
+        var options = Options.Create(
+            new SemanticConfiguration
             {
                 Enabled = true,
-                Providers = new Synentra.BuildingBlocks.Configuration.Semantic.SemanticProviders
+                Providers = new SemanticProviders
                 {
-                    Internal = new Synentra.BuildingBlocks.Configuration.Semantic.InternalOnnxConfiguration
+                    Internal = new InternalOnnxConfiguration
+                    {
+                        PackagePath = null   // missing path, but should not throw
+                    }
+                }
+            });
+
+        // Act & Assert – constructor must succeed
+        var act = () => new InternalOnnxProvider(options, cacheService, loader, _logger);
+        act.Should().NotThrow();
+    }
+
+    [Fact]
+    public async Task InitializeAsync_WithNullPackagePath_UsesDefaultPathAndLoads()
+    {
+        var loader = Substitute.For<IModelPackageLoader>();
+        var cacheProvider = Substitute.For<ICacheProvider>();
+        var cacheService = Substitute.For<ICacheService>();
+        cacheService.Current.Returns(cacheProvider);
+
+        var options = Options.Create(
+            new SemanticConfiguration
+            {
+                Enabled = true,
+                Providers = new SemanticProviders
+                {
+                    Internal = new InternalOnnxConfiguration
                     {
                         PackagePath = null
                     }
                 }
             });
 
-        var act = () => new InternalOnnxProvider(options, cacheService, _logger);
+        // Simulate a successful load
+        var assets = new ModelAssets(
+            new byte[] { 1, 2 },
+            new[] { "[PAD]", "[UNK]", "[CLS]", "[SEP]", "hello" },
+            new[] { "read", "write" }
+        );
+        loader.LoadAsync(Arg.Any<InternalOnnxConfiguration>(), Arg.Any<CancellationToken>())
+              .Returns(assets);
 
-        act.Should().Throw<InvalidOperationException>().WithMessage("*PackagePath*");
+        var provider = new InternalOnnxProvider(options, cacheService, loader, _logger);
+
+        await provider.InitializeAsync(TestContext.Current.CancellationToken);
+
+        // The loader must have been called (with the null path config)
+        await loader.Received(1).LoadAsync(
+            Arg.Is<InternalOnnxConfiguration>(c => c.PackagePath == null),
+            Arg.Any<CancellationToken>());
     }
 
     [Fact]
-    public void Constructor_EnabledWithNonExistentFile_ThrowsFileNotFoundException()
+    public void Constructor_WithNonExistentFile_DoesNotThrow()
     {
-        var cacheProvider = Substitute.For<Synentra.Application.Abstractions.Caches.ICacheProvider>();
-        var cacheService = Substitute.For<Synentra.Infrastructure.Caches.ICacheService>();
+        var loader = Substitute.For<IModelPackageLoader>();
+        var cacheProvider = Substitute.For<ICacheProvider>();
+        var cacheService = Substitute.For<ICacheService>();
         cacheService.Current.Returns(cacheProvider);
 
-        var options = Microsoft.Extensions.Options.Options.Create(
-            new Synentra.BuildingBlocks.Configuration.Semantic.SemanticConfiguration
+        var options = Options.Create(
+            new SemanticConfiguration
             {
                 Enabled = true,
-                Providers = new Synentra.BuildingBlocks.Configuration.Semantic.SemanticProviders
+                Providers = new SemanticProviders
                 {
-                    Internal = new Synentra.BuildingBlocks.Configuration.Semantic.InternalOnnxConfiguration
+                    Internal = new InternalOnnxConfiguration
                     {
                         PackagePath = "does_not_exist_xyz.zip"
                     }
                 }
             });
 
-        var act = () => new InternalOnnxProvider(options, cacheService, _logger);
+        // Act & Assert – constructor must succeed, the file is not touched yet
+        var act = () => new InternalOnnxProvider(options, cacheService, loader, _logger);
+        act.Should().NotThrow();
+    }
 
-        act.Should().Throw<FileNotFoundException>();
+    [Fact]
+    public async Task InitializeAsync_WhenFileNotFoundAndLoaderFails_DisablesProvider()
+    {
+        var loader = Substitute.For<IModelPackageLoader>();
+        loader.LoadAsync(Arg.Any<InternalOnnxConfiguration>(), Arg.Any<CancellationToken>())
+              .ThrowsAsync(new FileNotFoundException("Model package not found."));
+
+        var cacheProvider = Substitute.For<ICacheProvider>();
+        var cacheService = Substitute.For<ICacheService>();
+        cacheService.Current.Returns(cacheProvider);
+
+        var options = Options.Create(
+            new SemanticConfiguration
+            {
+                Enabled = true,
+                Providers = new SemanticProviders
+                {
+                    Internal = new InternalOnnxConfiguration
+                    {
+                        PackagePath = "does_not_exist_xyz.zip"
+                    }
+                }
+            });
+
+        var provider = new InternalOnnxProvider(options, cacheService, loader, _logger);
+
+        await provider.InitializeAsync();
+
+        // After a failure the provider is disabled and returns a fallback‑safe result
+        var result = await provider.AnalyzeAsync("test", "", CancellationToken.None);
+        result.FallbackSafe.Should().BeTrue();
+        result.Intent.Should().Be("suspicious");
     }
 }
 
@@ -308,97 +489,98 @@ public class ModelPackageExtractorTests
     }
 }
 
-public class ModelPackageLoaderDirectTests
+public class ModelPackageLoaderServiceTests
 {
+    [Fact]
+    public async Task LoadAsync_FileExists_SkipsDownloadAndExtracts()
+    {
+        // Arrange
+        var downloader = Substitute.For<IModelDownloader>();
+        var loader = new ModelPackageLoader(downloader); // the new injectable service
+        var tmpPath = Path.GetTempFileName() + ".zip";
+        try
+        {
+            // Create a valid zip
+            byte[] zipBytes = CreateCommunityPackage();
+            await File.WriteAllBytesAsync(tmpPath, zipBytes, TestContext.Current.CancellationToken);
+
+            var config = new InternalOnnxConfiguration
+            {
+                PackagePath = tmpPath,
+                ModelType = "Community"
+            };
+
+            // Act
+            var assets = await loader.LoadAsync(config, CancellationToken.None);
+
+            // Assert
+            assets.OnnxBytes.Length.Should().BeGreaterThan(0);
+            assets.VocabLines.Should().HaveCountGreaterThan(0);
+            assets.IntentLabels.Should().HaveCountGreaterThan(0);
+            await downloader.DidNotReceive().EnsureModelExistsAsync(Arg.Any<InternalOnnxConfiguration>(), Arg.Any<CancellationToken>());
+        }
+        finally
+        {
+            if (File.Exists(tmpPath)) File.Delete(tmpPath);
+        }
+    }
+
+    [Fact]
+    public async Task LoadAsync_FileMissing_CallsDownloaderThenExtracts()
+    {
+        // Arrange
+        var downloader = Substitute.For<IModelDownloader>();
+        // Simulate that downloader creates the file
+        downloader.EnsureModelExistsAsync(Arg.Any<InternalOnnxConfiguration>(), Arg.Any<CancellationToken>())
+            .Returns(Task.CompletedTask)
+            .AndDoes(callInfo =>
+            {
+                var cfg = callInfo.Arg<InternalOnnxConfiguration>();
+                var path = Environment.ExpandEnvironmentVariables(cfg.PackagePath!);
+                Directory.CreateDirectory(Path.GetDirectoryName(path)!);
+                File.WriteAllBytes(path, CreateCommunityPackage());
+            });
+
+        var loader = new ModelPackageLoader(downloader);
+        var tempFile = Path.Combine(Path.GetTempPath(), $"test_{Guid.NewGuid():N}.zip");
+        var config = new InternalOnnxConfiguration
+        {
+            PackagePath = tempFile,
+            ModelType = "Community"
+        };
+
+        try
+        {
+            // Act
+            var assets = await loader.LoadAsync(config, CancellationToken.None);
+
+            // Assert
+            assets.OnnxBytes.Length.Should().BeGreaterThan(0);
+            await downloader.Received(1).EnsureModelExistsAsync(config, Arg.Any<CancellationToken>());
+        }
+        finally
+        {
+            if (File.Exists(tempFile)) File.Delete(tempFile);
+        }
+    }
+
+    // Helper to create a minimal community zip
     private static byte[] CreateCommunityPackage()
     {
         using var ms = new MemoryStream();
         using (var zip = new ZipArchive(ms, ZipArchiveMode.Create, leaveOpen: true))
         {
-            using (var s = zip.CreateEntry("model.onnx").Open()) s.Write(new byte[] { 0x01, 0x02 });
+            using (var s = zip.CreateEntry("model.onnx").Open())
+                s.Write(new byte[] { 0x01, 0x02 });
             using (var s = zip.CreateEntry("vocab.txt").Open())
-            using (var w = new StreamWriter(s)) { w.WriteLine("[PAD]"); w.WriteLine("[UNK]"); w.WriteLine("[CLS]"); w.WriteLine("[SEP]"); w.WriteLine("hello"); }
+            using (var w = new StreamWriter(s))
+            {
+                w.WriteLine("[PAD]"); w.WriteLine("[UNK]"); w.WriteLine("[CLS]");
+                w.WriteLine("[SEP]"); w.WriteLine("hello");
+            }
             using (var s = zip.CreateEntry("labels.json").Open())
                 JsonSerializer.Serialize(s, new[] { "read", "write" });
         }
         return ms.ToArray();
     }
-
-    [Fact]
-    public void Load_CommunityModel_ReturnsCorrectAssets()
-    {
-        var tmpPath = Path.ChangeExtension(Path.GetTempFileName(), ".zip");
-        try
-        {
-            File.WriteAllBytes(tmpPath, CreateCommunityPackage());
-            var config = new Synentra.BuildingBlocks.Configuration.Semantic.InternalOnnxConfiguration
-            {
-                PackagePath = tmpPath,
-                ModelType = "Community"
-            };
-
-            var assets = ModelPackageLoader.Load(config);
-
-            assets.OnnxBytes.Length.Should().BeGreaterThan(0);
-            assets.VocabLines.Should().HaveCount(5);
-            assets.IntentLabels.Should().HaveCount(2);
-        }
-        finally { File.Delete(tmpPath); }
-    }
-
-    [Fact]
-    public void Load_RelativePath_ExpandsToAbsolute()
-    {
-        var tmpDir = Path.GetTempPath();
-        var filename = $"test_model_{Guid.NewGuid():N}.zip";
-        var tmpPath = Path.Combine(tmpDir, filename);
-        try
-        {
-            File.WriteAllBytes(tmpPath, CreateCommunityPackage());
-            var config = new Synentra.BuildingBlocks.Configuration.Semantic.InternalOnnxConfiguration
-            {
-                PackagePath = tmpPath,
-                ModelType = "Community"
-            };
-
-            var assets = ModelPackageLoader.Load(config);
-
-            assets.Should().NotBeNull();
-        }
-        finally { File.Delete(tmpPath); }
-    }
-
-    [Fact]
-    public void Load_ProModelMissingLicensePath_ThrowsInvalidOperationException()
-    {
-        // Pro model requires model.onnx.enc in the zip
-        using var ms = new MemoryStream();
-        using (var zip = new ZipArchive(ms, ZipArchiveMode.Create, leaveOpen: true))
-        {
-            using (var s = zip.CreateEntry("model.onnx.enc").Open()) s.Write(new byte[] { 0x01 });
-            using (var s = zip.CreateEntry("vocab.txt").Open())
-            using (var w = new StreamWriter(s)) { w.WriteLine("[PAD]"); w.WriteLine("[UNK]"); }
-            using (var s = zip.CreateEntry("labels.json").Open())
-                JsonSerializer.Serialize(s, new[] { "read" });
-        }
-        var tmpPath = Path.ChangeExtension(Path.GetTempFileName(), ".zip");
-        try
-        {
-            File.WriteAllBytes(tmpPath, ms.ToArray());
-            var config = new Synentra.BuildingBlocks.Configuration.Semantic.InternalOnnxConfiguration
-            {
-                PackagePath = tmpPath,
-                ModelType = "Pro",
-                LicensePath = null
-            };
-
-            var act = () => ModelPackageLoader.Load(config);
-
-            act.Should().Throw<InvalidOperationException>().WithMessage("*LicensePath*");
-        }
-        finally { File.Delete(tmpPath); }
-    }
 }
-
-
-

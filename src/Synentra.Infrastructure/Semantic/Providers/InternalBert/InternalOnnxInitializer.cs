@@ -32,7 +32,21 @@ internal sealed class InternalOnnxInitializer : IHostedService
         if (!provider.Equals("internal", StringComparison.OrdinalIgnoreCase))
             return Task.CompletedTask;
 
-        _ = _serviceProvider.GetRequiredService<InternalOnnxProvider>();
+        // Resolve the singleton provider (this triggers its constructor registration)
+        var onnxProvider = _serviceProvider.GetRequiredService<InternalOnnxProvider>();
+
+        // Fire‑and‑forget the actual async initialisation (download + model load)
+        _ = Task.Run(async () =>
+        {
+            try
+            {
+                await onnxProvider.InitializeAsync(cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to initialise Internal ONNX provider.");
+            }
+        }, cancellationToken);
 
         return Task.CompletedTask;
     }
