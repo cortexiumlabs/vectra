@@ -1,12 +1,10 @@
 ﻿using Synentra.Application.Models;
-using Synentra.Domain.Agents;
-
 namespace Synentra.Infrastructure.Risk.Calculators;
 
 public class MethodRiskCalculator : IRiskCalculator
 {
-    public string Name => "method";
-    public double Weight { get; set; } = 0.2;
+    public string Name => "MethodRisk";
+    public double Weight { get; set; } = 0.15;
 
     private static readonly Dictionary<string, double> MethodRisk = new(StringComparer.OrdinalIgnoreCase)
     {
@@ -21,9 +19,10 @@ public class MethodRiskCalculator : IRiskCalculator
         ["CONNECT"] = 0.8
     };
 
-    public Task<double> CalculateAsync(RequestContext context, AgentHistory? history, CancellationToken cancellationToken)
+    public Task<RiskCalculatorResult> CalculateAsync(RiskEvaluationContext context, CancellationToken cancellationToken)
     {
-        var risk = MethodRisk.TryGetValue(context.Method, out var value) ? value : 0.5;
-        return Task.FromResult(risk);
+        var method = context.RequestContext.Method;
+        var risk = MethodRisk.TryGetValue(method, out var value) ? value : 0.5;
+        return Task.FromResult(RiskCalculatorResult.Create(Name, risk, Weight));
     }
 }

@@ -25,6 +25,7 @@ using Synentra.Infrastructure.Dispatchers;
 using Synentra.Infrastructure.HumanInTheLoop;
 using Synentra.Infrastructure.HumanInTheLoop.Notifiers;
 using Synentra.Infrastructure.Policy;
+using Synentra.Infrastructure.Policy.Opa;
 using Synentra.Infrastructure.Policy.Providers;
 using Synentra.Infrastructure.RateLimit;
 using Synentra.Infrastructure.Risk;
@@ -54,11 +55,9 @@ public static class DependencyInjection
 
         // Policy engine
         services.AddSingleton<IPolicyLoader, FileSystemPolicyLoader>();
+        services.AddSingleton<IOpaInputMapper, OpaInputMapper>();
         services.AddHttpClient("opa-policy");
         services.AddScoped<IPolicyProvider>(CreatePolicyProvider);
-
-        // Risk scoring
-        services.AddScoped<IRiskScoringService, RiskScoringService>();
 
         // Semantic providers
         services.AddSingleton<IGitHubReleaseClient, GitHubReleaseClient>();
@@ -175,6 +174,7 @@ public static class DependencyInjection
         services.AddScoped<IRiskCalculator, TimeBasedCalculator>();
         services.AddScoped<IRiskCalculator, BodySizeRiskCalculator>();
         services.AddScoped<IRiskCalculator, AnomalyDetectionCalculator>();
+        services.AddSingleton<IRiskCalculator, IntentRiskCalculator>();
 
         services.AddScoped<IAnomalyDetector, StatisticalAnomalyDetector>();
 

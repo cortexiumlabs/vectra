@@ -1,7 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
-using System.Data;
 using Synentra.Application.Abstractions.Caches;
 using Synentra.Application.Abstractions.Executions;
+using Synentra.Application.Models;
 using Synentra.Domain.Policies;
 using Synentra.Infrastructure.Caches;
 
@@ -25,16 +25,19 @@ public class InternalPolicyProvider : IPolicyProvider
     }
 
     public async Task<PolicyDecision> EvaluateAsync(
-        string? policyName, 
-        Dictionary<string, object> input, 
+        PolicyEvaluationContext context,
         CancellationToken cancellationToken)
     {
+        var policyName = context.RequestContext.PolicyName;
+
         if (string.IsNullOrEmpty(policyName))
             return PolicyDecision.Allow("No policy assigned");
 
         var policy = await GetPolicyAsync(policyName, cancellationToken);
         if (policy == null)
             return PolicyDecision.Deny($"Policy {policyName} not found");
+
+        var input = BuildPolicyInput(context);
 
         foreach (var rule in policy.Rules.OrderByDescending(r => r.Priority))
         {
@@ -64,6 +67,31 @@ public class InternalPolicyProvider : IPolicyProvider
             _ => PolicyDecision.Deny()
         };
     }
+
+    private static Dictionary<string, object> BuildPolicyInput(PolicyEvaluationContext context)
+        => new()
+        {
+            ["method"] = context.RequestContext.Method,
+            ["path"] = context.RequestContext.Path,
+            ["headers"] = context.RequestContext.Headers,
+            ["agent"] = new Dictionary<string, object>
+            {
+                ["id"] = context.RequestContext.AgentId,
+                ["trust_score"] = context.Risk.TrustScore
+            },
+            ["intent"] = new Dictionary<string, object>
+            {
+                ["label"] = context.Intent.Label,
+                ["original_label"] = context.Intent.OriginalLabel ?? context.Intent.Label,
+                ["confidence"] = context.Intent.Confidence,
+                ["status"] = context.Intent.Status.ToString()
+            },
+            ["risk"] = new Dictionary<string, object>
+            {
+                ["score"] = context.Risk.RiskScore,
+                ["level"] = context.Risk.RiskLevel
+            }
+        };
 
     private async Task<PolicyDefinition?> GetPolicyAsync(string policyName, CancellationToken cancellationToken)
     {

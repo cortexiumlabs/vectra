@@ -1,13 +1,12 @@
 ﻿using Synentra.Application.Abstractions.Persistence;
 using Synentra.Application.Models;
-using Synentra.Domain.Agents;
 
 namespace Synentra.Infrastructure.Risk.Calculators;
 
 public class AgentHistoryCalculator : IRiskCalculator
 {
-    public string Name => "agent_history";
-    public double Weight { get; set; } = 0.35;
+    public string Name => "AgentHistoryRisk";
+    public double Weight { get; set; } = 0.15;
 
     private readonly IAgentHistoryRepository _historyRepo;
     public AgentHistoryCalculator(IAgentHistoryRepository historyRepo)
@@ -15,12 +14,13 @@ public class AgentHistoryCalculator : IRiskCalculator
         _historyRepo = historyRepo;
     }
 
-    public async Task<double> CalculateAsync(RequestContext context, AgentHistory? history, CancellationToken cancellationToken)
+    public async Task<RiskCalculatorResult> CalculateAsync(RiskEvaluationContext context, CancellationToken cancellationToken)
     {
-        // Use provided history if already loaded (to avoid extra DB call)
-        if (history == null)
-            history = await _historyRepo.GetRecentAsync(context.AgentId, TimeSpan.FromMinutes(5), cancellationToken);
-        if (history == null) return 0.3; // unknown
+        var requestContext = context.RequestContext;
+
+        var history = await _historyRepo.GetRecentAsync(requestContext.AgentId, TimeSpan.FromMinutes(5), cancellationToken);
+
+        if (history == null) return RiskCalculatorResult.Create(Name, 0.3, Weight); // unknown
 
         double risk = 0.0;
         // Factor 1: violation rate in last 5 minutes
@@ -36,9 +36,9 @@ public class AgentHistoryCalculator : IRiskCalculator
         else if (rpm > 10) risk += 0.05;
 
         // Factor 3: trust score decay (if agent trust score is low, increase risk)
-        if (context.TrustScore < 0.3) risk += 0.4;
-        else if (context.TrustScore < 0.6) risk += 0.2;
+        if (requestContext.TrustScore < 0.3) risk += 0.4;
+        else if (requestContext.TrustScore < 0.6) risk += 0.2;
 
-        return Math.Min(1.0, risk);
+        return RiskCalculatorResult.Create(Name, Math.Min(1.0, risk), Weight);
     }
 }

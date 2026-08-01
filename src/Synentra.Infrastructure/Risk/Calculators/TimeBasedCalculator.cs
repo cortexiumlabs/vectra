@@ -1,14 +1,13 @@
 ﻿using Synentra.Application.Models;
-using Synentra.Domain.Agents;
 
 namespace Synentra.Infrastructure.Risk.Calculators;
 
 public class TimeBasedCalculator : IRiskCalculator
 {
-    public string Name => "time_of_day";
-    public double Weight { get; set; } = 0.1;
+    public string Name => "TimeBasedRisk";
+    public double Weight { get; set; } = 0.05;
 
-    public Task<double> CalculateAsync(RequestContext context, AgentHistory? history, CancellationToken cancellationToken)
+    public Task<RiskCalculatorResult> CalculateAsync(RiskEvaluationContext context, CancellationToken cancellationToken)
     {
         var now = DateTime.UtcNow;
         var hour = now.Hour;
@@ -19,6 +18,6 @@ public class TimeBasedCalculator : IRiskCalculator
         if (hour < 6 || hour > 20) risk += 0.3; // night time
         else if (hour < 8 || hour > 18) risk += 0.1; // early morning / late evening
 
-        return Task.FromResult(Math.Min(0.5, risk));
+        return Task.FromResult(RiskCalculatorResult.Create(Name, Math.Min(0.5, risk), Weight));
     }
 }

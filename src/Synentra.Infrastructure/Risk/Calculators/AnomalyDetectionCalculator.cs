@@ -1,13 +1,12 @@
 ﻿using Synentra.Application.Models;
-using Synentra.Domain.Agents;
 using Synentra.Infrastructure.Semantic;
 
 namespace Synentra.Infrastructure.Risk.Calculators;
 
 public class AnomalyDetectionCalculator : IRiskCalculator
 {
-    public string Name => "anomaly";
-    public double Weight { get; set; } = 0.2;
+    public string Name => "AnomalyRisk";
+    public double Weight { get; set; } = 0.15;
 
     private readonly IAnomalyDetector _anomalyDetector; // ML service
 
@@ -16,9 +15,9 @@ public class AnomalyDetectionCalculator : IRiskCalculator
         _anomalyDetector = anomalyDetector;
     }
 
-    public async Task<double> CalculateAsync(RequestContext context, AgentHistory? history, CancellationToken cancellationToken)
+    public async Task<RiskCalculatorResult> CalculateAsync(RiskEvaluationContext context, CancellationToken cancellationToken)
     {
-        var anomalyScore = await _anomalyDetector.DetectAsync(context, cancellationToken);
-        return anomalyScore;
+        var anomalyScore = await _anomalyDetector.DetectAsync(context.RequestContext, cancellationToken);
+        return RiskCalculatorResult.Create(Name, anomalyScore, Weight);
     }
 }

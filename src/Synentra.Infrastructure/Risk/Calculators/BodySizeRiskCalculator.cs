@@ -1,20 +1,23 @@
 ﻿using Synentra.Application.Models;
-using Synentra.Domain.Agents;
 
 namespace Synentra.Infrastructure.Risk.Calculators;
 
 public class BodySizeRiskCalculator : IRiskCalculator
 {
-    public string Name => "body_size";
-    public double Weight { get; set; } = 0.1;
+    public string Name => "BodySizeRisk";
+    public double Weight { get; set; } = 0.05;
 
-    public Task<double> CalculateAsync(RequestContext context, AgentHistory? history, CancellationToken cancellationToken)
+    public Task<RiskCalculatorResult> CalculateAsync(RiskEvaluationContext context, CancellationToken cancellationToken)
     {
-        if (string.IsNullOrEmpty(context.Body)) return Task.FromResult(0.0);
-        var size = context.Body.Length;
-        if (size > 1024 * 1024) return Task.FromResult(0.8);      // >1MB
-        if (size > 100 * 1024) return Task.FromResult(0.5);       // >100KB
-        if (size > 10 * 1024) return Task.FromResult(0.2);        // >10KB
-        return Task.FromResult(0.0);
+        var body = context.RequestContext.Body;
+
+        if (string.IsNullOrEmpty(body))
+            return Task.FromResult(RiskCalculatorResult.Create(Name, 0.0, Weight));
+
+        var size = body.Length;
+        if (size > 1024 * 1024) return Task.FromResult(RiskCalculatorResult.Create(Name, 0.8, Weight));      // >1MB
+        if (size > 100 * 1024) return Task.FromResult(RiskCalculatorResult.Create(Name, 0.5, Weight));       // >100KB
+        if (size > 10 * 1024) return Task.FromResult(RiskCalculatorResult.Create(Name, 0.2, Weight));        // >10KB
+        return Task.FromResult(RiskCalculatorResult.Create(Name, 0.0, Weight));
     }
 }

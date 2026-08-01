@@ -1,13 +1,12 @@
 ﻿using System.Text.RegularExpressions;
 using Synentra.Application.Models;
-using Synentra.Domain.Agents;
 
 namespace Synentra.Infrastructure.Risk.Calculators;
 
 public class PathRiskCalculator : IRiskCalculator
 {
-    public string Name => "path";
-    public double Weight { get; set; } = 0.25;
+    public string Name => "PathRisk";
+    public double Weight { get; set; } = 0.20;
 
     private static readonly List<(Regex Pattern, double Risk)> PathPatterns = new()
     {
@@ -20,9 +19,9 @@ public class PathRiskCalculator : IRiskCalculator
         (new Regex(@"/v[0-9]+/", RegexOptions.IgnoreCase, TimeSpan.FromSeconds(3)), 0.2)  // versioned API slightly higher
     };
 
-    public Task<double> CalculateAsync(RequestContext context, AgentHistory? history, CancellationToken cancellationToken)
+    public Task<RiskCalculatorResult> CalculateAsync(RiskEvaluationContext context, CancellationToken cancellationToken)
     {
-        var path = context.Path;
+        var path = context.RequestContext.Path;
         double maxRisk = 0.1; // default low risk
         foreach (var (pattern, risk) in PathPatterns)
         {
@@ -31,6 +30,6 @@ public class PathRiskCalculator : IRiskCalculator
                 maxRisk = Math.Max(maxRisk, risk);
             }
         }
-        return Task.FromResult(maxRisk);
+        return Task.FromResult(RiskCalculatorResult.Create(Name, maxRisk, Weight));
     }
 }

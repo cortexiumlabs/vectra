@@ -3,7 +3,9 @@ using System.Text.Json;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Synentra.Application.Abstractions.Executions;
+using Synentra.Application.Models;
 using Synentra.BuildingBlocks.Configuration.Policy;
+using Synentra.Infrastructure.Policy.Opa;
 
 namespace Synentra.Infrastructure.Policy.Providers;
 
@@ -11,22 +13,32 @@ public class OpaPolicyProvider : IPolicyProvider
 {
     private readonly IHttpClientFactory _httpClientFactory;
     private readonly IOptions<PolicyConfiguration> _policyConfiguration;
+    private readonly IOpaInputMapper _opaInputMapper;
     private readonly ILogger<OpaPolicyProvider> _logger;
     private const string OpaHttpClientName = "opa-policy";
 
     public OpaPolicyProvider(
         IHttpClientFactory httpClientFactory,
         IOptions<PolicyConfiguration> policyConfiguration,
+        IOpaInputMapper opaInputMapper,
         ILogger<OpaPolicyProvider> logger)
     {
         _httpClientFactory = httpClientFactory ?? throw new ArgumentNullException(nameof(httpClientFactory));
         _policyConfiguration = policyConfiguration ?? throw new ArgumentNullException(nameof(policyConfiguration));
+        _opaInputMapper = opaInputMapper ?? throw new ArgumentNullException(nameof(opaInputMapper));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
+    public OpaPolicyProvider(
+        IHttpClientFactory httpClientFactory,
+        IOptions<PolicyConfiguration> policyConfiguration,
+        ILogger<OpaPolicyProvider> logger)
+        : this(httpClientFactory, policyConfiguration, new OpaInputMapper(), logger)
+    {
+    }
+
     public async Task<PolicyDecision> EvaluateAsync(
-        string? policyName, 
-        Dictionary<string, object> input, 
+        PolicyEvaluationContext context,
         CancellationToken cancellationToken)
     {
         var opa = _policyConfiguration.Value.Providers.Opa;
@@ -37,13 +49,7 @@ public class OpaPolicyProvider : IPolicyProvider
         client.BaseAddress = new Uri(opa.BaseUrl, UriKind.Absolute);
         client.Timeout = opa.Timeout ?? TimeSpan.FromSeconds(5);
 
-        var body = new
-        {
-            input = new Dictionary<string, object>(input)
-            {
-                ["policyName"] = policyName
-            }
-        };
+        var body = new { input = _opaInputMapper.Map(context) };
 
         using var response = await client.PostAsJsonAsync(opa.Path, body, cancellationToken);
         if (!response.IsSuccessStatusCode)

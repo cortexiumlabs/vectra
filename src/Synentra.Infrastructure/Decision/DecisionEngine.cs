@@ -53,111 +53,141 @@ public class DecisionEngine : IDecisionEngine
 
     public async Task<DecisionResult> EvaluateAsync(RequestContext context, CancellationToken cancellationToken = default)
     {
-        // 1. Policy
-        var policyDecision = await EvaluatePolicyAsync(context, cancellationToken);
-        if (policyDecision != null)
-            return await FinalizeAsync(context, policyDecision, cancellationToken);
+        var intentResult = await EvaluateSemanticAsync(context, cancellationToken);
 
-        // 2. Risk
-        var riskScore = await _riskScoring.ComputeRiskScoreAsync(context, cancellationToken);
-        var riskDecision = EvaluateRisk(riskScore);
-        if (riskDecision != null)
-            return await FinalizeAsync(context, riskDecision, cancellationToken);
+        var riskResult = await _riskScoring.ComputeRiskScoreAsync(
+            new RiskEvaluationContext
+            {
+                RequestContext = context,
+                Intent = intentResult
+            },
+            cancellationToken);
 
-        // 3. Semantic
-        var semanticDecision = await EvaluateSemanticAsync(context, cancellationToken);
-        if (semanticDecision != null)
-            return await FinalizeAsync(context, semanticDecision, cancellationToken);
+        var policyResult = await EvaluatePolicyAsync(
+            new PolicyEvaluationContext
+            {
+                RequestContext = context,
+                Intent = intentResult,
+                Risk = riskResult
+            },
+            cancellationToken);
 
-        // 4. Allow
-        return await FinalizeAsync(context, DecisionResult.Allow(riskScore), cancellationToken);
+        var decision = HandlePolicyDecision(intentResult, riskResult, policyResult);
+        return await FinalizeAsync(context, decision, cancellationToken);
     }
 
     public async Task<DecisionResult> SimulateAsync(RequestContext context, CancellationToken cancellationToken = default)
     {
-        // 1. Policy
-        var policyDecision = await EvaluatePolicyAsync(context, cancellationToken);
-        if (policyDecision != null)
-            return policyDecision;
+        var intentResult = await EvaluateSemanticAsync(context, cancellationToken);
 
-        // 2. Risk
-        var riskScore = await _riskScoring.ComputeRiskScoreAsync(context, cancellationToken);
-        var riskDecision = EvaluateRisk(riskScore);
-        if (riskDecision != null)
-            return riskDecision;
+        var riskResult = await _riskScoring.ComputeRiskScoreAsync(
+            new RiskEvaluationContext
+            {
+                RequestContext = context,
+                Intent = intentResult
+            },
+            cancellationToken);
 
-        // 3. Semantic
-        var semanticDecision = await EvaluateSemanticAsync(context, cancellationToken);
-        if (semanticDecision != null)
-            return semanticDecision;
+        var policyResult = await EvaluatePolicyAsync(
+            new PolicyEvaluationContext
+            {
+                RequestContext = context,
+                Intent = intentResult,
+                Risk = riskResult
+            },
+            cancellationToken);
 
-        // 4. Allow
-        return DecisionResult.Allow(riskScore);
+        return HandlePolicyDecision(intentResult, riskResult, policyResult);
     }
 
-    private async Task<DecisionResult?> EvaluatePolicyAsync(RequestContext context, CancellationToken cancellationToken = default)
+    private async Task<PolicyDecision> EvaluatePolicyAsync(
+        PolicyEvaluationContext context,
+        CancellationToken cancellationToken = default)
     {
         if (_policy.Enabled == false)
-            return null;
+            return PolicyDecision.Allow("Policy is disabled");
 
-        var input = BuildPolicyInput(context);
-        var result = await _policyProvider.EvaluateAsync(context.PolicyName, input, cancellationToken);
-
-        if (result.IsDenied)
-            return DecisionResult.Deny(result.Reason ?? "Policy denied", 0);
-
-        if (result.IsHitl)
-            return DecisionResult.Hitl(result.Reason ?? "Policy requires HITL", 0);
-
-        return null;
+        return await _policyProvider.EvaluateAsync(context, cancellationToken);
     }
 
-    private DecisionResult? EvaluateRisk(double riskScore)
+    private DecisionResult HandlePolicyDecision(
+        IntentClassificationResult intentResult,
+        RiskEvaluationResult riskResult,
+        PolicyDecision policyDecision)
     {
+        policyDecision ??= PolicyDecision.Allow();
+
         var threshold = _hitl.Threshold ?? 0.8;
 
-        if (riskScore > threshold)
-            return DecisionResult.Hitl($"High risk score: {riskScore:F2}", riskScore);
+        if (policyDecision.IsDenied)
+            return DecisionResult.Deny(policyDecision.Reason ?? "Policy denied", riskResult.RiskScore);
 
-        return null;
+        if (policyDecision.IsHitl)
+            return DecisionResult.Hitl(policyDecision.Reason ?? "Policy requires HITL", riskResult.RiskScore);
+
+        if (intentResult.Status == IntentClassificationStatus.LowConfidence && _semantic.AllowLowConfidence != true)
+            return DecisionResult.Hitl($"Low semantic confidence: {intentResult.Confidence:F2}", riskResult.RiskScore);
+
+        if (riskResult.RiskScore > threshold)
+            return DecisionResult.Hitl($"High risk score: {riskResult.RiskScore:F2}", riskResult.RiskScore);
+
+        return DecisionResult.Allow(riskResult.RiskScore);
     }
 
-    private async Task<DecisionResult?> EvaluateSemanticAsync(RequestContext context, CancellationToken ct)
+    private async Task<IntentClassificationResult> EvaluateSemanticAsync(RequestContext context, CancellationToken ct)
     {
         if (_semantic.Enabled == false)
-            return null;
-
-        var result = await _semanticProvider.AnalyzeAsync(context.Body, context.Path, ct);
-        var threshold = _semantic.ConfidenceThreshold ?? 0.7;
-
-        if (result.Confidence >= threshold)
-            return null;
-
-        if (_semantic.AllowLowConfidence == true)
         {
-            _logger.LogWarning(
-                "Low semantic confidence ({Confidence}) allowed by configuration",
-                result.Confidence);
-            return null;
+            return new IntentClassificationResult
+            {
+                Label = "suspicious",
+                Confidence = 0,
+                Status = IntentClassificationStatus.Unavailable,
+                FailureReason = "Semantic classifier is disabled"
+            };
         }
 
-        return DecisionResult.Hitl(
-            $"Low semantic confidence: {result.Confidence:F2}",
-            result.Confidence);
-    }
-
-    private static Dictionary<string, object> BuildPolicyInput(RequestContext context)
-        => new()
+        try
         {
-            ["method"] = context.Method,
-            ["path"] = context.Path,
-            ["headers"] = context.Headers,
-            ["agent"] = new Dictionary<string, object>
+            var result = await _semanticProvider.AnalyzeAsync(context.Body, context.Path, ct);
+            var threshold = _semantic.ConfidenceThreshold ?? 0.7;
+
+            if (result.Confidence >= threshold)
             {
-                ["id"] = context.AgentId,
-                ["trust_score"] = context.TrustScore
+                return new IntentClassificationResult
+                {
+                    Label = result.Intent,
+                    Confidence = result.Confidence,
+                    Status = IntentClassificationStatus.Classified
+                };
             }
-        };
+
+            _logger.LogWarning(
+                "Low semantic confidence ({Confidence}) for intent {Intent}",
+                result.Confidence,
+                result.Intent);
+
+            return new IntentClassificationResult
+            {
+                OriginalLabel = result.Intent,
+                Label = "suspicious",
+                Confidence = result.Confidence,
+                Status = IntentClassificationStatus.LowConfidence
+            };
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Semantic classification failed for agent {AgentId}", context.AgentId);
+
+            return new IntentClassificationResult
+            {
+                Label = "suspicious",
+                Confidence = 0,
+                Status = IntentClassificationStatus.Failed,
+                FailureReason = ex.Message
+            };
+        }
+    }
 
     private async Task<DecisionResult> FinalizeAsync(
         RequestContext context,
