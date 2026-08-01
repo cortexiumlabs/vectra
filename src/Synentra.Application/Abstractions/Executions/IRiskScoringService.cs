@@ -4,5 +4,5 @@ namespace Synentra.Application.Abstractions.Executions;
 
 public interface IRiskScoringService
 {
-    Task<double> ComputeRiskScoreAsync(RequestContext context, CancellationToken cancellationToken = default);
+    Task<RiskEvaluationResult> ComputeRiskScoreAsync(RiskEvaluationContext context, CancellationToken cancellationToken = default);
 }

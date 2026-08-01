@@ -1,13 +1,11 @@
 ﻿using Synentra.Domain.Policies;
+using Synentra.Application.Models;
 
 namespace Synentra.Application.Abstractions.Executions;
 
 public interface IPolicyProvider
 {
-    Task<PolicyDecision> EvaluateAsync(
-        string? policyName, 
-        Dictionary<string, object> input, 
-        CancellationToken cancellationToken);
+    Task<PolicyDecision> EvaluateAsync(PolicyEvaluationContext context, CancellationToken cancellationToken);
 }
 
 public record PolicyDecision
