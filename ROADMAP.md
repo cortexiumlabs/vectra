@@ -7,7 +7,7 @@
 - 🚧 **In Progress**
 - 📅 **Planned**
 
-## v1.9.0 – Planned (Q4 2026)
+## v1.10.0 – Planned (Q4 2026)
 - 📅 Horizontal scaling guide (multi-replica production deployments)
 - 📅 Kubernetes operator (policy as CRDs)
 - 📅 Built-in Prometheus alerting rules
@@ -19,6 +19,13 @@
 - 📅 Policy visual editor (web UI)
 - 📅 Agent grouping and policy assignment
 - 📅 Python SDK for integrations
+
+## v1.9.0 – Expand intent labels (Q3 2026)
+
+- ✅ Add full MPL-2.0 license text to MPL-2.0.txt
+- ✅ Preload the ONNX Model During Application Startup
+- ✅ Auto‑download community model on first launch when Semantic is enabled
+- 🚧 Reordering evaluation pipeline for intent labels
 
 ## v1.8.0 – Expand intent labels (Q3 2026)
 
