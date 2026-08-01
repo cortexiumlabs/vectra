@@ -9,6 +9,7 @@ using Synentra.BuildingBlocks.Configuration.Policy;
 using Synentra.BuildingBlocks.Configuration.SecretManagement;
 using Synentra.BuildingBlocks.Configuration.Security;
 using Synentra.BuildingBlocks.Configuration.Semantic;
+using Synentra.BuildingBlocks.Configuration.Risk;
 using Synentra.BuildingBlocks.Configuration.System;
 using Synentra.Infrastructure.Persistence.Sqlite;
 using Synentra.Services;
@@ -24,6 +25,7 @@ public static class ServiceCollectionExtensions
     private const string HumanInTheLoopConfigurationName = "HumanInTheLoop";
     private const string PolicyConfigurationName = "Policy";
     private const string SecretManagementConfigurationName = "SecretManagement";
+    private const string RiskConfigurationName = "Risk";
 
     #region Simple registrations
 
@@ -47,6 +49,7 @@ public static class ServiceCollectionExtensions
         services.Configure<HumanInTheLoopConfiguration>(configuration.GetSection(HumanInTheLoopConfigurationName));
         services.Configure<PolicyConfiguration>(configuration.GetSection(PolicyConfigurationName));
         services.Configure<SecretManagementConfiguration>(configuration.GetSection(SecretManagementConfigurationName));
+        services.Configure<RiskConfiguration>(configuration.GetSection(RiskConfigurationName));
 
         return services;
     }
