@@ -8,6 +8,18 @@ public class MethodRiskCalculatorTests
 {
     private readonly MethodRiskCalculator _sut = new();
 
+    private static RiskEvaluationContext BuildContext(RequestContext requestContext)
+        => new()
+        {
+            RequestContext = requestContext,
+            Intent = new IntentClassificationResult
+            {
+                Label = "suspicious",
+                Confidence = 0,
+                Status = IntentClassificationStatus.Unavailable
+            }
+        };
+
     [Theory]
     [InlineData("GET", 0.1)]
     [InlineData("HEAD", 0.05)]
@@ -20,42 +32,42 @@ public class MethodRiskCalculatorTests
     [InlineData("CONNECT", 0.8)]
     public async Task CalculateAsync_KnownMethod_ReturnsExpectedRisk(string method, double expectedRisk)
     {
-        var context = new RequestContext { Method = method };
+        var requestContext = new RequestContext { Method = method };
 
-        var result = await _sut.CalculateAsync(context, null, CancellationToken.None);
+        var result = await _sut.CalculateAsync(BuildContext(requestContext), CancellationToken.None);
 
-        result.Should().Be(expectedRisk);
+        result.Score.Should().Be(expectedRisk);
     }
 
     [Fact]
     public async Task CalculateAsync_UnknownMethod_ReturnsDefaultRisk()
     {
-        var context = new RequestContext { Method = "CUSTOM" };
+        var requestContext = new RequestContext { Method = "CUSTOM" };
 
-        var result = await _sut.CalculateAsync(context, null, CancellationToken.None);
+        var result = await _sut.CalculateAsync(BuildContext(requestContext), CancellationToken.None);
 
-        result.Should().Be(0.5);
+        result.Score.Should().Be(0.5);
     }
 
     [Fact]
     public async Task CalculateAsync_CaseInsensitive_MatchesLowercase()
     {
-        var context = new RequestContext { Method = "delete" };
+        var requestContext = new RequestContext { Method = "delete" };
 
-        var result = await _sut.CalculateAsync(context, null, CancellationToken.None);
+        var result = await _sut.CalculateAsync(BuildContext(requestContext), CancellationToken.None);
 
-        result.Should().Be(0.9);
+        result.Score.Should().Be(0.9);
     }
 
     [Fact]
     public void Name_ShouldBe_Method()
     {
-        _sut.Name.Should().Be("method");
+        _sut.Name.Should().Be("MethodRisk");
     }
 
     [Fact]
-    public void Weight_ShouldBe_0Point2()
+    public void Weight_ShouldBe_0Point15()
     {
-        _sut.Weight.Should().Be(0.2);
+        _sut.Weight.Should().Be(0.15);
     }
 }

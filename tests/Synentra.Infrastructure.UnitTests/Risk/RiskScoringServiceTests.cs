@@ -3,7 +3,6 @@ using NSubstitute;
 using Synentra.Application.Abstractions.Caches;
 using Synentra.Application.Abstractions.Persistence;
 using Synentra.Application.Models;
-using Synentra.Domain.Agents;
 using Synentra.Infrastructure.Caches;
 using Synentra.Infrastructure.Risk;
 using Microsoft.Extensions.Logging;
@@ -24,40 +23,63 @@ public class RiskScoringServiceTests
         _cacheService.Current.Returns(_cacheProvider);
 
         var calc = Substitute.For<IRiskCalculator>();
+        calc.Name.Returns("test");
         calc.Weight.Returns(1.0);
-        calc.CalculateAsync(Arg.Any<RequestContext>(), Arg.Any<AgentHistory?>(), Arg.Any<CancellationToken>())
-            .Returns(0.4);
+        calc.CalculateAsync(Arg.Any<RiskEvaluationContext>(), Arg.Any<CancellationToken>())
+            .Returns(RiskCalculatorResult.Create("test", 0.4, 1.0));
         _aggregator = new RiskScoreAggregator([calc]);
 
         _sut = new RiskScoringService(_aggregator, _historyRepo, _cacheService, _logger);
     }
 
+    private static RiskEvaluationContext BuildContext(Guid agentId)
+        => new()
+        {
+            RequestContext = new RequestContext
+            {
+                AgentId = agentId,
+                Method = "GET",
+                Path = "/api/data",
+                TrustScore = 0.8
+            },
+            Intent = new IntentClassificationResult
+            {
+                Label = "suspicious",
+                Confidence = 0,
+                Status = IntentClassificationStatus.Unavailable
+            }
+        };
+
     [Fact]
-    public async Task ComputeRiskScoreAsync_CacheHit_ReturnsCachedScore()
+    public async Task ComputeRiskScoreAsync_CacheHit_ReturnsCachedResult()
     {
         var agentId = Guid.NewGuid();
-        var context = new RequestContext { AgentId = agentId, Method = "GET", Path = "/api/data" };
-        _cacheProvider.TryGetValueAsync<double>(Arg.Any<string>()).Returns((true, 0.99));
+        var context = BuildContext(agentId);
+        var cached = new RiskEvaluationResult
+        {
+            RiskScore = 0.99,
+            TrustScore = 0.8,
+            RiskLevel = "high"
+        };
+        _cacheProvider.TryGetValueAsync<RiskEvaluationResult>(Arg.Any<string>()).Returns((true, cached));
 
         var result = await _sut.ComputeRiskScoreAsync(context, TestContext.Current.CancellationToken);
 
-        result.Should().Be(0.99);
+        result.RiskScore.Should().Be(0.99);
         await _historyRepo.DidNotReceive().GetRecentAsync(Arg.Any<Guid>(), Arg.Any<TimeSpan>(), Arg.Any<CancellationToken>());
     }
 
     [Fact]
-    public async Task ComputeRiskScoreAsync_CacheMiss_ComputesAndCachesScore()
+    public async Task ComputeRiskScoreAsync_CacheMiss_ComputesAndCachesResult()
     {
         var agentId = Guid.NewGuid();
-        var context = new RequestContext { AgentId = agentId, Method = "GET", Path = "/api/data" };
-        _cacheProvider.TryGetValueAsync<double>(Arg.Any<string>()).Returns((false, 0.0));
-        _historyRepo.GetRecentAsync(agentId, Arg.Any<TimeSpan>(), Arg.Any<CancellationToken>())
-            .Returns((AgentHistory?)null);
+        var context = BuildContext(agentId);
+        _cacheProvider.TryGetValueAsync<RiskEvaluationResult>(Arg.Any<string>()).Returns((false, null));
 
         var result = await _sut.ComputeRiskScoreAsync(context, TestContext.Current.CancellationToken);
 
-        result.Should().BeApproximately(0.4, 1e-9);
-        await _cacheProvider.Received(1).SetAsync(Arg.Any<string>(), Arg.Any<double>());
+        result.RiskScore.Should().BeApproximately(0.4, 1e-9);
+        await _cacheProvider.Received(1).SetAsync(Arg.Any<string>(), Arg.Any<RiskEvaluationResult>());
     }
 
     [Fact]

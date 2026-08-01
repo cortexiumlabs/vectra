@@ -8,46 +8,58 @@ public class TimeBasedCalculatorTests
 {
     private readonly TimeBasedCalculator _sut = new();
 
+    private static RiskEvaluationContext BuildContext(RequestContext requestContext)
+        => new()
+        {
+            RequestContext = requestContext,
+            Intent = new IntentClassificationResult
+            {
+                Label = "suspicious",
+                Confidence = 0,
+                Status = IntentClassificationStatus.Unavailable
+            }
+        };
+
     [Fact]
     public async Task CalculateAsync_ReturnsValueBetweenZeroAndPointFive()
     {
-        var context = new RequestContext();
+        var requestContext = new RequestContext();
 
-        var result = await _sut.CalculateAsync(context, null, CancellationToken.None);
+        var result = await _sut.CalculateAsync(BuildContext(requestContext), CancellationToken.None);
 
-        result.Should().BeGreaterThanOrEqualTo(0.0).And.BeLessThanOrEqualTo(0.5);
+        result.Score.Should().BeGreaterThanOrEqualTo(0.0).And.BeLessThanOrEqualTo(0.5);
     }
 
     [Fact]
     public async Task CalculateAsync_ReturnDoesNotExceed0Point5()
     {
         // Even if both weekend and night-time apply (0.2 + 0.3 = 0.5), max is 0.5
-        var context = new RequestContext();
+        var requestContext = new RequestContext();
 
-        var result = await _sut.CalculateAsync(context, null, CancellationToken.None);
+        var result = await _sut.CalculateAsync(BuildContext(requestContext), CancellationToken.None);
 
-        result.Should().BeLessThanOrEqualTo(0.5);
+        result.Score.Should().BeLessThanOrEqualTo(0.5);
     }
 
     [Fact]
-    public void Name_ShouldBe_TimeOfDay()
+    public void Name_ShouldBe_TimeBasedRisk()
     {
-        _sut.Name.Should().Be("time_of_day");
+        _sut.Name.Should().Be("TimeBasedRisk");
     }
 
     [Fact]
-    public void Weight_ShouldBe_0Point1()
+    public void Weight_ShouldBe_0Point050()
     {
-        _sut.Weight.Should().Be(0.1);
+        _sut.Weight.Should().Be(0.05);
     }
 
     [Fact]
     public async Task CalculateAsync_IgnoresProvidedHistory()
     {
-        var context = new RequestContext();
+        var requestContext = new RequestContext();
 
         // Should not throw or fail when history is provided
-        var act = async () => await _sut.CalculateAsync(context, null, CancellationToken.None);
+        var act = async () => await _sut.CalculateAsync(BuildContext(requestContext), CancellationToken.None);
 
         await act.Should().NotThrowAsync();
     }

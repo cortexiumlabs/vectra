@@ -6,6 +6,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using NSubstitute;
 using Synentra.Application.Abstractions.Executions;
+using Synentra.Application.Models;
 using Synentra.BuildingBlocks.Configuration.Policy;
 using Synentra.Domain.Policies;
 using Synentra.Infrastructure.Policy.Providers;
@@ -29,16 +30,39 @@ public class OpaPolicyProviderTests
         return new OpaPolicyProvider(_httpClientFactory, _policyConfiguration, _logger);
     }
 
+    private static PolicyEvaluationContext BuildContext(string policyName)
+        => new()
+        {
+            RequestContext = new RequestContext
+            {
+                AgentId = Guid.NewGuid(),
+                Method = "GET",
+                Path = "/api/data",
+                PolicyName = policyName,
+                Headers = new Dictionary<string, string>()
+            },
+            Intent = new IntentClassificationResult
+            {
+                Label = "suspicious",
+                Confidence = 0,
+                Status = IntentClassificationStatus.Unavailable
+            },
+            Risk = new RiskEvaluationResult
+            {
+                RiskScore = 0.1,
+                TrustScore = 0.8,
+                RiskLevel = "low"
+            }
+        };
+
     [Fact]
     public async Task EvaluateAsync_OpaUrlNotConfigured_ShouldReturnDeny()
     {
         // Arrange
         _policyConfiguration.Value.Returns(new PolicyConfiguration { Providers = new PolicyProviders { Opa = new OpaPolicyConfiguration { BaseUrl = string.Empty } } });
         var provider = new OpaPolicyProvider(_httpClientFactory, _policyConfiguration, _logger);
-        var input = new Dictionary<string, object>();
-
         // Act
-        var decision = await provider.EvaluateAsync("test-policy", input, CancellationToken.None);
+        var decision = await provider.EvaluateAsync(BuildContext("test-policy"), CancellationToken.None);
 
         // Assert
         decision.IsDenied.Should().BeTrue();
@@ -55,10 +79,8 @@ public class OpaPolicyProviderTests
             Content = new StringContent(JsonSerializer.Serialize(opaResponse), Encoding.UTF8, "application/json")
         };
         var provider = CreateProviderWithMockHttp(responseMessage);
-        var input = new Dictionary<string, object>();
-
         // Act
-        var decision = await provider.EvaluateAsync("test-policy", input, CancellationToken.None);
+        var decision = await provider.EvaluateAsync(BuildContext("test-policy"), CancellationToken.None);
 
         // Assert
         decision.IsAllowed.Should().BeTrue();
@@ -75,10 +97,8 @@ public class OpaPolicyProviderTests
             Content = new StringContent(JsonSerializer.Serialize(opaResponse), Encoding.UTF8, "application/json")
         };
         var provider = CreateProviderWithMockHttp(responseMessage);
-        var input = new Dictionary<string, object>();
-
         // Act
-        var decision = await provider.EvaluateAsync("test-policy", input, CancellationToken.None);
+        var decision = await provider.EvaluateAsync(BuildContext("test-policy"), CancellationToken.None);
 
         // Assert
         decision.IsDenied.Should().BeTrue();
@@ -95,10 +115,8 @@ public class OpaPolicyProviderTests
             Content = new StringContent(JsonSerializer.Serialize(opaResponse), Encoding.UTF8, "application/json")
         };
         var provider = CreateProviderWithMockHttp(responseMessage);
-        var input = new Dictionary<string, object>();
-
         // Act
-        var decision = await provider.EvaluateAsync("test-policy", input, CancellationToken.None);
+        var decision = await provider.EvaluateAsync(BuildContext("test-policy"), CancellationToken.None);
 
         // Assert
         decision.IsDenied.Should().BeTrue();
@@ -111,10 +129,8 @@ public class OpaPolicyProviderTests
         // Arrange
         var responseMessage = new HttpResponseMessage(HttpStatusCode.InternalServerError);
         var provider = CreateProviderWithMockHttp(responseMessage);
-        var input = new Dictionary<string, object>();
-
         // Act
-        var decision = await provider.EvaluateAsync("test-policy", input, CancellationToken.None);
+        var decision = await provider.EvaluateAsync(BuildContext("test-policy"), CancellationToken.None);
 
         // Assert
         decision.IsDenied.Should().BeTrue();

@@ -6,6 +6,7 @@ using NSubstitute;
 using System.Net;
 using System.Text.Json;
 using Synentra.Application.Abstractions.Executions;
+using Synentra.Application.Models;
 using Synentra.BuildingBlocks.Configuration.Policy;
 using Synentra.Infrastructure.Policy.Providers;
 
@@ -13,6 +14,31 @@ namespace Synentra.Infrastructure.UnitTests.Policy;
 
 public class OpaPolicyProviderTests
 {
+    private static PolicyEvaluationContext BuildContext(string policyName)
+        => new()
+        {
+            RequestContext = new RequestContext
+            {
+                AgentId = Guid.NewGuid(),
+                Method = "GET",
+                Path = "/api/data",
+                PolicyName = policyName,
+                Headers = new Dictionary<string, string>()
+            },
+            Intent = new IntentClassificationResult
+            {
+                Label = "suspicious",
+                Confidence = 0,
+                Status = IntentClassificationStatus.Unavailable
+            },
+            Risk = new RiskEvaluationResult
+            {
+                RiskScore = 0.1,
+                TrustScore = 0.8,
+                RiskLevel = "low"
+            }
+        };
+
     private static OpaPolicyProvider CreateSut(IHttpClientFactory factory, OpaPolicyConfiguration? opa = null)
     {
         var config = new PolicyConfiguration
@@ -44,7 +70,7 @@ public class OpaPolicyProviderTests
         };
         var sut = new OpaPolicyProvider(factory, Options.Create(config), NullLogger<OpaPolicyProvider>.Instance);
 
-        var result = await sut.EvaluateAsync("policy", new Dictionary<string, object>(), CancellationToken.None);
+        var result = await sut.EvaluateAsync(BuildContext("policy"), CancellationToken.None);
 
         result.IsDenied.Should().BeTrue();
         result.Reason.Should().Contain("OPA");
@@ -56,7 +82,7 @@ public class OpaPolicyProviderTests
         var factory = Substitute.For<IHttpClientFactory>();
         var sut = CreateSut(factory, new OpaPolicyConfiguration { BaseUrl = string.Empty });
 
-        var result = await sut.EvaluateAsync("policy", new Dictionary<string, object>(), CancellationToken.None);
+        var result = await sut.EvaluateAsync(BuildContext("policy"), CancellationToken.None);
 
         result.IsDenied.Should().BeTrue();
     }
@@ -71,7 +97,7 @@ public class OpaPolicyProviderTests
 
         var sut = CreateSut(factory);
 
-        var result = await sut.EvaluateAsync("policy", new Dictionary<string, object>(), CancellationToken.None);
+        var result = await sut.EvaluateAsync(BuildContext("policy"), CancellationToken.None);
 
         result.IsDenied.Should().BeTrue();
     }
@@ -86,7 +112,7 @@ public class OpaPolicyProviderTests
 
         var sut = CreateSut(factory);
 
-        var result = await sut.EvaluateAsync("policy", new Dictionary<string, object>(), CancellationToken.None);
+        var result = await sut.EvaluateAsync(BuildContext("policy"), CancellationToken.None);
 
         result.IsAllowed.Should().BeTrue();
     }
@@ -101,7 +127,7 @@ public class OpaPolicyProviderTests
 
         var sut = CreateSut(factory);
 
-        var result = await sut.EvaluateAsync("policy", new Dictionary<string, object>(), CancellationToken.None);
+        var result = await sut.EvaluateAsync(BuildContext("policy"), CancellationToken.None);
 
         result.IsAllowed.Should().BeTrue();
         result.Reason.Should().Be("ok");
@@ -117,7 +143,7 @@ public class OpaPolicyProviderTests
 
         var sut = CreateSut(factory);
 
-        var result = await sut.EvaluateAsync("policy", new Dictionary<string, object>(), CancellationToken.None);
+        var result = await sut.EvaluateAsync(BuildContext("policy"), CancellationToken.None);
 
         result.IsHitl.Should().BeTrue();
     }
@@ -132,7 +158,7 @@ public class OpaPolicyProviderTests
 
         var sut = CreateSut(factory);
 
-        var result = await sut.EvaluateAsync("policy", new Dictionary<string, object>(), CancellationToken.None);
+        var result = await sut.EvaluateAsync(BuildContext("policy"), CancellationToken.None);
 
         result.IsDenied.Should().BeTrue();
     }
@@ -147,7 +173,7 @@ public class OpaPolicyProviderTests
 
         var sut = CreateSut(factory);
 
-        var result = await sut.EvaluateAsync("policy", new Dictionary<string, object>(), CancellationToken.None);
+        var result = await sut.EvaluateAsync(BuildContext("policy"), CancellationToken.None);
 
         result.IsAllowed.Should().BeTrue();
     }
@@ -162,7 +188,7 @@ public class OpaPolicyProviderTests
 
         var sut = CreateSut(factory);
 
-        var result = await sut.EvaluateAsync("policy", new Dictionary<string, object>(), CancellationToken.None);
+        var result = await sut.EvaluateAsync(BuildContext("policy"), CancellationToken.None);
 
         result.IsHitl.Should().BeTrue();
     }
@@ -177,7 +203,7 @@ public class OpaPolicyProviderTests
 
         var sut = CreateSut(factory);
 
-        var result = await sut.EvaluateAsync("policy", new Dictionary<string, object>(), CancellationToken.None);
+        var result = await sut.EvaluateAsync(BuildContext("policy"), CancellationToken.None);
 
         result.IsDenied.Should().BeTrue();
     }
@@ -191,7 +217,7 @@ public class OpaPolicyProviderTests
 
         var sut = CreateSut(factory);
 
-        var result = await sut.EvaluateAsync("policy", new Dictionary<string, object>(), CancellationToken.None);
+        var result = await sut.EvaluateAsync(BuildContext("policy"), CancellationToken.None);
 
         result.IsDenied.Should().BeTrue();
     }
@@ -205,7 +231,7 @@ public class OpaPolicyProviderTests
 
         var sut = CreateSut(factory);
 
-        var result = await sut.EvaluateAsync("policy", new Dictionary<string, object>(), CancellationToken.None);
+        var result = await sut.EvaluateAsync(BuildContext("policy"), CancellationToken.None);
 
         result.IsDenied.Should().BeTrue();
         result.Reason.Should().Contain("500");
@@ -220,7 +246,7 @@ public class OpaPolicyProviderTests
 
         var sut = CreateSut(factory);
 
-        var result = await sut.EvaluateAsync("policy", new Dictionary<string, object>(), CancellationToken.None);
+        var result = await sut.EvaluateAsync(BuildContext("policy"), CancellationToken.None);
 
         result.IsDenied.Should().BeTrue();
     }

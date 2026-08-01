@@ -2,6 +2,7 @@ using FluentAssertions;
 using NSubstitute;
 using Synentra.Application.Abstractions.Caches;
 using Synentra.Application.Abstractions.Executions;
+using Synentra.Application.Models;
 using Synentra.Domain.Policies;
 using Synentra.Infrastructure.Caches;
 using Synentra.Infrastructure.Policy.Providers;
@@ -31,7 +32,7 @@ public class InternalPolicyProviderTests
     [Fact]
     public async Task EvaluateAsync_EmptyPolicyName_ReturnsAllow()
     {
-        var result = await _sut.EvaluateAsync(string.Empty, new(), CancellationToken.None);
+        var result = await _sut.EvaluateAsync(BuildEvaluationContext(string.Empty), CancellationToken.None);
 
         result.IsAllowed.Should().BeTrue();
     }
@@ -39,7 +40,7 @@ public class InternalPolicyProviderTests
     [Fact]
     public async Task EvaluateAsync_NullPolicyName_ReturnsAllow()
     {
-        var result = await _sut.EvaluateAsync(null!, new(), CancellationToken.None);
+        var result = await _sut.EvaluateAsync(BuildEvaluationContext(null), CancellationToken.None);
 
         result.IsAllowed.Should().BeTrue();
     }
@@ -47,7 +48,7 @@ public class InternalPolicyProviderTests
     [Fact]
     public async Task EvaluateAsync_PolicyNotFound_ReturnsDeny()
     {
-        var result = await _sut.EvaluateAsync("non-existent-policy", new(), CancellationToken.None);
+        var result = await _sut.EvaluateAsync(BuildEvaluationContext("non-existent-policy"), CancellationToken.None);
 
         result.IsDenied.Should().BeTrue();
         result.Reason.Should().Contain("non-existent-policy");
@@ -74,7 +75,7 @@ public class InternalPolicyProviderTests
         SetupLoader(policy);
 
         var input = new Dictionary<string, object> { ["method"] = "DELETE" };
-        var result = await _sut.EvaluateAsync("test-policy", input, CancellationToken.None);
+        var result = await _sut.EvaluateAsync(BuildEvaluationContext("test-policy", input), CancellationToken.None);
 
         result.IsDenied.Should().BeTrue();
         result.Reason.Should().Be("method not allowed");
@@ -101,7 +102,7 @@ public class InternalPolicyProviderTests
         SetupLoader(policy);
 
         var input = new Dictionary<string, object> { ["method"] = "GET" };
-        var result = await _sut.EvaluateAsync("test-policy", input, CancellationToken.None);
+        var result = await _sut.EvaluateAsync(BuildEvaluationContext("test-policy", input), CancellationToken.None);
 
         result.IsAllowed.Should().BeTrue();
         result.Reason.Should().Be("GET is fine");
@@ -128,7 +129,7 @@ public class InternalPolicyProviderTests
         SetupLoader(policy);
 
         var input = new Dictionary<string, object> { ["method"] = "POST" };
-        var result = await _sut.EvaluateAsync("test-policy", input, CancellationToken.None);
+        var result = await _sut.EvaluateAsync(BuildEvaluationContext("test-policy", input), CancellationToken.None);
 
         result.IsHitl.Should().BeTrue();
         result.Reason.Should().Be("needs review");
@@ -154,7 +155,7 @@ public class InternalPolicyProviderTests
         SetupLoader(policy);
 
         var input = new Dictionary<string, object> { ["method"] = "GET" };
-        var result = await _sut.EvaluateAsync("test-policy", input, CancellationToken.None);
+        var result = await _sut.EvaluateAsync(BuildEvaluationContext("test-policy", input), CancellationToken.None);
 
         result.IsAllowed.Should().BeTrue();
     }
@@ -179,7 +180,7 @@ public class InternalPolicyProviderTests
         SetupLoader(policy);
 
         var input = new Dictionary<string, object> { ["method"] = "DELETE" };
-        var result = await _sut.EvaluateAsync("test-policy", input, CancellationToken.None);
+        var result = await _sut.EvaluateAsync(BuildEvaluationContext("test-policy", input), CancellationToken.None);
 
         result.IsDenied.Should().BeTrue();
     }
@@ -212,7 +213,7 @@ public class InternalPolicyProviderTests
         SetupLoader(policy);
 
         var input = new Dictionary<string, object> { ["method"] = "DELETE" };
-        var result = await _sut.EvaluateAsync("test-policy", input, CancellationToken.None);
+        var result = await _sut.EvaluateAsync(BuildEvaluationContext("test-policy", input), CancellationToken.None);
 
         result.IsDenied.Should().BeTrue();
         result.Reason.Should().Be("high priority deny");
@@ -228,7 +229,7 @@ public class InternalPolicyProviderTests
         _cacheProvider.TryGetValueAsync<Dictionary<string, PolicyDefinition>>(Arg.Any<string>())
             .Returns((true, policies));
 
-        await _sut.EvaluateAsync("my-policy", new(), CancellationToken.None);
+        await _sut.EvaluateAsync(BuildEvaluationContext("my-policy"), CancellationToken.None);
 
         await _loader.DidNotReceive().LoadAllAsync(Arg.Any<CancellationToken>());
     }
@@ -242,7 +243,7 @@ public class InternalPolicyProviderTests
         _loader.LoadAllAsync(Arg.Any<CancellationToken>())
             .Returns(new Dictionary<string, PolicyDefinition> { ["my-policy"] = policy });
 
-        await _sut.EvaluateAsync("my-policy", new(), CancellationToken.None);
+        await _sut.EvaluateAsync(BuildEvaluationContext("my-policy"), CancellationToken.None);
 
         await _loader.Received(1).LoadAllAsync(Arg.Any<CancellationToken>());
         await _cacheProvider.Received(1).SetAsync(Arg.Any<string>(), Arg.Any<Dictionary<string, PolicyDefinition>>());
@@ -259,7 +260,7 @@ public class InternalPolicyProviderTests
         };
         SetupLoader(policy);
 
-        var result = await _sut.EvaluateAsync("test-policy", new(), CancellationToken.None);
+        var result = await _sut.EvaluateAsync(BuildEvaluationContext("test-policy"), CancellationToken.None);
 
         result.IsHitl.Should().BeTrue();
     }
@@ -268,5 +269,42 @@ public class InternalPolicyProviderTests
     {
         _loader.LoadAllAsync(Arg.Any<CancellationToken>())
             .Returns(new Dictionary<string, PolicyDefinition> { [policy.Name] = policy });
+    }
+
+    private static PolicyEvaluationContext BuildEvaluationContext(
+        string? policyName,
+        Dictionary<string, object>? input = null)
+    {
+        var method = input is not null && input.TryGetValue("method", out var methodValue)
+            ? methodValue?.ToString() ?? string.Empty
+            : "GET";
+
+        var path = input is not null && input.TryGetValue("path", out var pathValue)
+            ? pathValue?.ToString() ?? "/"
+            : "/";
+
+        return new PolicyEvaluationContext
+        {
+            RequestContext = new RequestContext
+            {
+                AgentId = Guid.NewGuid(),
+                Method = method,
+                Path = path,
+                PolicyName = policyName ?? string.Empty,
+                Headers = new Dictionary<string, string>()
+            },
+            Intent = new IntentClassificationResult
+            {
+                Label = "suspicious",
+                Confidence = 0,
+                Status = IntentClassificationStatus.Unavailable
+            },
+            Risk = new RiskEvaluationResult
+            {
+                RiskScore = 0,
+                TrustScore = 0,
+                RiskLevel = "low"
+            }
+        };
     }
 }

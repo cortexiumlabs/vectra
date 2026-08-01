@@ -1,7 +1,6 @@
 using FluentAssertions;
 using NSubstitute;
 using Synentra.Application.Models;
-using Synentra.Domain.Agents;
 using Synentra.Infrastructure.Risk.Calculators;
 using Synentra.Infrastructure.Semantic;
 
@@ -17,62 +16,73 @@ public class AnomalyDetectionCalculatorTests
         _sut = new AnomalyDetectionCalculator(_anomalyDetector);
     }
 
+    private static RiskEvaluationContext BuildContext(RequestContext requestContext)
+        => new()
+        {
+            RequestContext = requestContext,
+            Intent = new IntentClassificationResult
+            {
+                Label = "suspicious",
+                Confidence = 0,
+                Status = IntentClassificationStatus.Unavailable
+            }
+        };
+
     [Fact]
     public async Task CalculateAsync_DelegatesToAnomalyDetector()
     {
-        var context = new RequestContext { AgentId = Guid.NewGuid() };
-        _anomalyDetector.DetectAsync(context, Arg.Any<CancellationToken>()).Returns(0.75);
+        var requestContext = new RequestContext { AgentId = Guid.NewGuid() };
+        _anomalyDetector.DetectAsync(requestContext, Arg.Any<CancellationToken>()).Returns(0.75);
 
-        var result = await _sut.CalculateAsync(context, null, CancellationToken.None);
+        var result = await _sut.CalculateAsync(BuildContext(requestContext), CancellationToken.None);
 
-        result.Should().Be(0.75);
-        await _anomalyDetector.Received(1).DetectAsync(context, Arg.Any<CancellationToken>());
+        result.Score.Should().Be(0.75);
+        await _anomalyDetector.Received(1).DetectAsync(requestContext, Arg.Any<CancellationToken>());
     }
 
     [Fact]
     public async Task CalculateAsync_ZeroAnomalyScore_ReturnsZero()
     {
-        var context = new RequestContext();
-        _anomalyDetector.DetectAsync(context, Arg.Any<CancellationToken>()).Returns(0.0);
+        var requestContext = new RequestContext();
+        _anomalyDetector.DetectAsync(requestContext, Arg.Any<CancellationToken>()).Returns(0.0);
 
-        var result = await _sut.CalculateAsync(context, null, CancellationToken.None);
+        var result = await _sut.CalculateAsync(BuildContext(requestContext), CancellationToken.None);
 
-        result.Should().Be(0.0);
+        result.Score.Should().Be(0.0);
     }
 
     [Fact]
     public async Task CalculateAsync_PassesCancellationToken()
     {
-        var context = new RequestContext();
+        var requestContext = new RequestContext();
         var cts = new CancellationTokenSource();
-        _anomalyDetector.DetectAsync(context, cts.Token).Returns(0.5);
+        _anomalyDetector.DetectAsync(requestContext, cts.Token).Returns(0.5);
 
-        await _sut.CalculateAsync(context, null, cts.Token);
+        await _sut.CalculateAsync(BuildContext(requestContext), cts.Token);
 
-        await _anomalyDetector.Received(1).DetectAsync(context, cts.Token);
+        await _anomalyDetector.Received(1).DetectAsync(requestContext, cts.Token);
     }
 
     [Fact]
     public void Name_ShouldBe_Anomaly()
     {
-        _sut.Name.Should().Be("anomaly");
+        _sut.Name.Should().Be("AnomalyRisk");
     }
 
     [Fact]
-    public void Weight_ShouldBe_0Point2()
+    public void Weight_ShouldBe_0Point15()
     {
-        _sut.Weight.Should().Be(0.2);
+        _sut.Weight.Should().Be(0.15);
     }
 
     [Fact]
-    public async Task CalculateAsync_IgnoresProvidedHistory()
+    public async Task CalculateAsync_ReturnsDetectedScore()
     {
-        var context = new RequestContext();
-        var history = new AgentHistory { TotalRequests = 100 };
-        _anomalyDetector.DetectAsync(context, Arg.Any<CancellationToken>()).Returns(0.3);
+        var requestContext = new RequestContext();
+        _anomalyDetector.DetectAsync(requestContext, Arg.Any<CancellationToken>()).Returns(0.3);
 
-        var result = await _sut.CalculateAsync(context, history, CancellationToken.None);
+        var result = await _sut.CalculateAsync(BuildContext(requestContext), CancellationToken.None);
 
-        result.Should().Be(0.3);
+        result.Score.Should().Be(0.3);
     }
 }

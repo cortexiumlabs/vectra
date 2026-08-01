@@ -59,10 +59,15 @@ public class DecisionEngineTests
 
     private void SetupAllow()
     {
-        _policyProvider.EvaluateAsync(Arg.Any<string>(), Arg.Any<Dictionary<string, object>>(), Arg.Any<CancellationToken>())
+        _policyProvider.EvaluateAsync(Arg.Any<PolicyEvaluationContext>(), Arg.Any<CancellationToken>())
             .Returns(PolicyDecision.Allow());
-        _riskScoring.ComputeRiskScoreAsync(Arg.Any<RequestContext>(), Arg.Any<CancellationToken>())
-            .Returns(0.1);
+        _riskScoring.ComputeRiskScoreAsync(Arg.Any<RiskEvaluationContext>(), Arg.Any<CancellationToken>())
+            .Returns(new RiskEvaluationResult
+            {
+                RiskScore = 0.1,
+                TrustScore = 0,
+                RiskLevel = "low"
+            });
         _semanticProvider.AnalyzeAsync(Arg.Any<string?>(), Arg.Any<string>(), Arg.Any<CancellationToken>())
             .Returns(new SemanticAnalysisResult { Confidence = 0.9 });
     }
@@ -71,8 +76,15 @@ public class DecisionEngineTests
     public async Task EvaluateAsync_PolicyDeny_ReturnsDeny()
     {
         var sut = CreateSut();
-        _policyProvider.EvaluateAsync(Arg.Any<string>(), Arg.Any<Dictionary<string, object>>(), Arg.Any<CancellationToken>())
+        _policyProvider.EvaluateAsync(Arg.Any<PolicyEvaluationContext>(), Arg.Any<CancellationToken>())
             .Returns(PolicyDecision.Deny("blocked by policy"));
+        _riskScoring.ComputeRiskScoreAsync(Arg.Any<RiskEvaluationContext>(), Arg.Any<CancellationToken>())
+            .Returns(new RiskEvaluationResult
+            {
+                RiskScore = 0.1,
+                TrustScore = 0,
+                RiskLevel = "low"
+            });
         var context = BuildContext();
 
         var result = await sut.EvaluateAsync(context, TestContext.Current.CancellationToken);
@@ -85,8 +97,15 @@ public class DecisionEngineTests
     public async Task EvaluateAsync_PolicyHitl_ReturnsHitl()
     {
         var sut = CreateSut();
-        _policyProvider.EvaluateAsync(Arg.Any<string>(), Arg.Any<Dictionary<string, object>>(), Arg.Any<CancellationToken>())
+        _policyProvider.EvaluateAsync(Arg.Any<PolicyEvaluationContext>(), Arg.Any<CancellationToken>())
             .Returns(PolicyDecision.Hitl("review required"));
+        _riskScoring.ComputeRiskScoreAsync(Arg.Any<RiskEvaluationContext>(), Arg.Any<CancellationToken>())
+            .Returns(new RiskEvaluationResult
+            {
+                RiskScore = 0.1,
+                TrustScore = 0,
+                RiskLevel = "low"
+            });
         var context = BuildContext();
 
         var result = await sut.EvaluateAsync(context, TestContext.Current.CancellationToken);
@@ -104,14 +123,19 @@ public class DecisionEngineTests
     public async Task EvaluateAsync_PolicyDisabled_SkipsPolicyCheck()
     {
         var sut = CreateSut(policyEnabled: false);
-        _riskScoring.ComputeRiskScoreAsync(Arg.Any<RequestContext>(), Arg.Any<CancellationToken>())
-            .Returns(0.1);
+        _riskScoring.ComputeRiskScoreAsync(Arg.Any<RiskEvaluationContext>(), Arg.Any<CancellationToken>())
+            .Returns(new RiskEvaluationResult
+            {
+                RiskScore = 0.1,
+                TrustScore = 0,
+                RiskLevel = "low"
+            });
         var context = BuildContext();
 
         var result = await sut.EvaluateAsync(context, TestContext.Current.CancellationToken);
 
         await _policyProvider.DidNotReceive()
-            .EvaluateAsync(Arg.Any<string>(), Arg.Any<Dictionary<string, object>>(), Arg.Any<CancellationToken>());
+            .EvaluateAsync(Arg.Any<PolicyEvaluationContext>(), Arg.Any<CancellationToken>());
         result.IsAllowed.Should().BeTrue();
     }
 
@@ -119,10 +143,15 @@ public class DecisionEngineTests
     public async Task EvaluateAsync_HighRiskScore_ReturnsHitl()
     {
         var sut = CreateSut(hitlThreshold: 0.7);
-        _policyProvider.EvaluateAsync(Arg.Any<string>(), Arg.Any<Dictionary<string, object>>(), Arg.Any<CancellationToken>())
+        _policyProvider.EvaluateAsync(Arg.Any<PolicyEvaluationContext>(), Arg.Any<CancellationToken>())
             .Returns(PolicyDecision.Allow());
-        _riskScoring.ComputeRiskScoreAsync(Arg.Any<RequestContext>(), Arg.Any<CancellationToken>())
-            .Returns(0.9); // above threshold
+        _riskScoring.ComputeRiskScoreAsync(Arg.Any<RiskEvaluationContext>(), Arg.Any<CancellationToken>())
+            .Returns(new RiskEvaluationResult
+            {
+                RiskScore = 0.9,
+                TrustScore = 0,
+                RiskLevel = "high"
+            }); // above threshold
         var context = BuildContext();
 
         var result = await sut.EvaluateAsync(context, TestContext.Current.CancellationToken);
@@ -147,10 +176,15 @@ public class DecisionEngineTests
     public async Task EvaluateAsync_SemanticEnabled_LowConfidence_ReturnsHitl()
     {
         var sut = CreateSut(semanticEnabled: true, semanticConfidenceThreshold: 0.7);
-        _policyProvider.EvaluateAsync(Arg.Any<string>(), Arg.Any<Dictionary<string, object>>(), Arg.Any<CancellationToken>())
+        _policyProvider.EvaluateAsync(Arg.Any<PolicyEvaluationContext>(), Arg.Any<CancellationToken>())
             .Returns(PolicyDecision.Allow());
-        _riskScoring.ComputeRiskScoreAsync(Arg.Any<RequestContext>(), Arg.Any<CancellationToken>())
-            .Returns(0.1);
+        _riskScoring.ComputeRiskScoreAsync(Arg.Any<RiskEvaluationContext>(), Arg.Any<CancellationToken>())
+            .Returns(new RiskEvaluationResult
+            {
+                RiskScore = 0.1,
+                TrustScore = 0,
+                RiskLevel = "low"
+            });
         _semanticProvider.AnalyzeAsync(Arg.Any<string?>(), Arg.Any<string>(), Arg.Any<CancellationToken>())
             .Returns(new SemanticAnalysisResult { Confidence = 0.4 }); // below threshold
 
@@ -177,10 +211,15 @@ public class DecisionEngineTests
     public async Task EvaluateAsync_SemanticEnabled_AllowLowConfidence_DoesNotHitl()
     {
         var sut = CreateSut(semanticEnabled: true, allowLowConfidence: true, semanticConfidenceThreshold: 0.7);
-        _policyProvider.EvaluateAsync(Arg.Any<string>(), Arg.Any<Dictionary<string, object>>(), Arg.Any<CancellationToken>())
+        _policyProvider.EvaluateAsync(Arg.Any<PolicyEvaluationContext>(), Arg.Any<CancellationToken>())
             .Returns(PolicyDecision.Allow());
-        _riskScoring.ComputeRiskScoreAsync(Arg.Any<RequestContext>(), Arg.Any<CancellationToken>())
-            .Returns(0.1);
+        _riskScoring.ComputeRiskScoreAsync(Arg.Any<RiskEvaluationContext>(), Arg.Any<CancellationToken>())
+            .Returns(new RiskEvaluationResult
+            {
+                RiskScore = 0.1,
+                TrustScore = 0,
+                RiskLevel = "low"
+            });
         _semanticProvider.AnalyzeAsync(Arg.Any<string?>(), Arg.Any<string>(), Arg.Any<CancellationToken>())
             .Returns(new SemanticAnalysisResult { Confidence = 0.3 }); // below threshold, but allowed
 
@@ -350,10 +389,15 @@ public class DecisionEngineTests
     public async Task EvaluateAsync_SemanticEnabled_HighConfidence_AllowsContinuation()
     {
         var sut = CreateSut(semanticEnabled: true, semanticConfidenceThreshold: 0.7);
-        _policyProvider.EvaluateAsync(Arg.Any<string>(), Arg.Any<Dictionary<string, object>>(), Arg.Any<CancellationToken>())
+        _policyProvider.EvaluateAsync(Arg.Any<PolicyEvaluationContext>(), Arg.Any<CancellationToken>())
             .Returns(PolicyDecision.Allow());
-        _riskScoring.ComputeRiskScoreAsync(Arg.Any<RequestContext>(), Arg.Any<CancellationToken>())
-            .Returns(0.1);
+        _riskScoring.ComputeRiskScoreAsync(Arg.Any<RiskEvaluationContext>(), Arg.Any<CancellationToken>())
+            .Returns(new RiskEvaluationResult
+            {
+                RiskScore = 0.1,
+                TrustScore = 0,
+                RiskLevel = "low"
+            });
         _semanticProvider.AnalyzeAsync(Arg.Any<string?>(), Arg.Any<string>(), Arg.Any<CancellationToken>())
             .Returns(new SemanticAnalysisResult { Confidence = 0.95 }); // above threshold
 
@@ -383,8 +427,15 @@ public class DecisionEngineTests
     public async Task EvaluateAsync_DenyDecision_RecordsHistoryAsViolation()
     {
         var sut = CreateSut();
-        _policyProvider.EvaluateAsync(Arg.Any<string>(), Arg.Any<Dictionary<string, object>>(), Arg.Any<CancellationToken>())
+        _policyProvider.EvaluateAsync(Arg.Any<PolicyEvaluationContext>(), Arg.Any<CancellationToken>())
             .Returns(PolicyDecision.Deny("blocked"));
+        _riskScoring.ComputeRiskScoreAsync(Arg.Any<RiskEvaluationContext>(), Arg.Any<CancellationToken>())
+            .Returns(new RiskEvaluationResult
+            {
+                RiskScore = 0.1,
+                TrustScore = 0,
+                RiskLevel = "low"
+            });
         _history.RecordRequestAsync(Arg.Any<Guid>(), Arg.Any<bool>(), Arg.Any<double>(), Arg.Any<CancellationToken>())
             .Returns(Task.CompletedTask);
 
@@ -403,8 +454,15 @@ public class DecisionEngineTests
     public async Task SimulateAsync_PolicyDeny_ReturnsDeny()
     {
         var sut = CreateSut();
-        _policyProvider.EvaluateAsync(Arg.Any<string>(), Arg.Any<Dictionary<string, object>>(), Arg.Any<CancellationToken>())
+        _policyProvider.EvaluateAsync(Arg.Any<PolicyEvaluationContext>(), Arg.Any<CancellationToken>())
             .Returns(PolicyDecision.Deny("blocked by policy"));
+        _riskScoring.ComputeRiskScoreAsync(Arg.Any<RiskEvaluationContext>(), Arg.Any<CancellationToken>())
+            .Returns(new RiskEvaluationResult
+            {
+                RiskScore = 0.1,
+                TrustScore = 0,
+                RiskLevel = "low"
+            });
         var context = BuildContext();
 
         var result = await sut.SimulateAsync(context, TestContext.Current.CancellationToken);
@@ -419,8 +477,15 @@ public class DecisionEngineTests
     public async Task SimulateAsync_PolicyHitl_ReturnsHitl()
     {
         var sut = CreateSut();
-        _policyProvider.EvaluateAsync(Arg.Any<string>(), Arg.Any<Dictionary<string, object>>(), Arg.Any<CancellationToken>())
+        _policyProvider.EvaluateAsync(Arg.Any<PolicyEvaluationContext>(), Arg.Any<CancellationToken>())
             .Returns(PolicyDecision.Hitl("review required"));
+        _riskScoring.ComputeRiskScoreAsync(Arg.Any<RiskEvaluationContext>(), Arg.Any<CancellationToken>())
+            .Returns(new RiskEvaluationResult
+            {
+                RiskScore = 0.1,
+                TrustScore = 0,
+                RiskLevel = "low"
+            });
         var context = BuildContext();
 
         var result = await sut.SimulateAsync(context, TestContext.Current.CancellationToken);
@@ -434,10 +499,15 @@ public class DecisionEngineTests
     public async Task SimulateAsync_HighRiskScore_ReturnsHitl()
     {
         var sut = CreateSut(hitlThreshold: 0.7);
-        _policyProvider.EvaluateAsync(Arg.Any<string>(), Arg.Any<Dictionary<string, object>>(), Arg.Any<CancellationToken>())
+        _policyProvider.EvaluateAsync(Arg.Any<PolicyEvaluationContext>(), Arg.Any<CancellationToken>())
             .Returns(PolicyDecision.Allow());
-        _riskScoring.ComputeRiskScoreAsync(Arg.Any<RequestContext>(), Arg.Any<CancellationToken>())
-            .Returns(0.9); // above threshold
+        _riskScoring.ComputeRiskScoreAsync(Arg.Any<RiskEvaluationContext>(), Arg.Any<CancellationToken>())
+            .Returns(new RiskEvaluationResult
+            {
+                RiskScore = 0.9,
+                TrustScore = 0,
+                RiskLevel = "high"
+            }); // above threshold
         var context = BuildContext();
 
         var result = await sut.SimulateAsync(context, TestContext.Current.CancellationToken);
@@ -452,10 +522,15 @@ public class DecisionEngineTests
     public async Task SimulateAsync_LowConfidence_ReturnsHitl()
     {
         var sut = CreateSut(semanticEnabled: true, semanticConfidenceThreshold: 0.7);
-        _policyProvider.EvaluateAsync(Arg.Any<string>(), Arg.Any<Dictionary<string, object>>(), Arg.Any<CancellationToken>())
+        _policyProvider.EvaluateAsync(Arg.Any<PolicyEvaluationContext>(), Arg.Any<CancellationToken>())
             .Returns(PolicyDecision.Allow());
-        _riskScoring.ComputeRiskScoreAsync(Arg.Any<RequestContext>(), Arg.Any<CancellationToken>())
-            .Returns(0.1);
+        _riskScoring.ComputeRiskScoreAsync(Arg.Any<RiskEvaluationContext>(), Arg.Any<CancellationToken>())
+            .Returns(new RiskEvaluationResult
+            {
+                RiskScore = 0.1,
+                TrustScore = 0,
+                RiskLevel = "low"
+            });
         _semanticProvider.AnalyzeAsync(Arg.Any<string?>(), Arg.Any<string>(), Arg.Any<CancellationToken>())
             .Returns(new SemanticAnalysisResult { Confidence = 0.4 }); // below threshold
 
@@ -497,8 +572,15 @@ public class DecisionEngineTests
     public async Task EvaluateAsync_PolicyDenyWithNullReason_UsesDefaultReason()
     {
         var sut = CreateSut();
-        _policyProvider.EvaluateAsync(Arg.Any<string>(), Arg.Any<Dictionary<string, object>>(), Arg.Any<CancellationToken>())
+        _policyProvider.EvaluateAsync(Arg.Any<PolicyEvaluationContext>(), Arg.Any<CancellationToken>())
             .Returns(PolicyDecision.Deny(null)); // Null reason
+        _riskScoring.ComputeRiskScoreAsync(Arg.Any<RiskEvaluationContext>(), Arg.Any<CancellationToken>())
+            .Returns(new RiskEvaluationResult
+            {
+                RiskScore = 0.1,
+                TrustScore = 0,
+                RiskLevel = "low"
+            });
         var context = BuildContext();
 
         var result = await sut.EvaluateAsync(context, TestContext.Current.CancellationToken);
@@ -511,8 +593,15 @@ public class DecisionEngineTests
     public async Task EvaluateAsync_PolicyHitlWithNullReason_UsesDefaultReason()
     {
         var sut = CreateSut();
-        _policyProvider.EvaluateAsync(Arg.Any<string>(), Arg.Any<Dictionary<string, object>>(), Arg.Any<CancellationToken>())
+        _policyProvider.EvaluateAsync(Arg.Any<PolicyEvaluationContext>(), Arg.Any<CancellationToken>())
             .Returns(PolicyDecision.Hitl(null)); // Null reason
+        _riskScoring.ComputeRiskScoreAsync(Arg.Any<RiskEvaluationContext>(), Arg.Any<CancellationToken>())
+            .Returns(new RiskEvaluationResult
+            {
+                RiskScore = 0.1,
+                TrustScore = 0,
+                RiskLevel = "low"
+            });
         var context = BuildContext();
 
         var result = await sut.EvaluateAsync(context, TestContext.Current.CancellationToken);
@@ -525,10 +614,15 @@ public class DecisionEngineTests
     public async Task EvaluateAsync_NullHitlThreshold_UsesDefault()
     {
         var sut = CreateSut(hitlThreshold: null);
-        _policyProvider.EvaluateAsync(Arg.Any<string>(), Arg.Any<Dictionary<string, object>>(), Arg.Any<CancellationToken>())
+        _policyProvider.EvaluateAsync(Arg.Any<PolicyEvaluationContext>(), Arg.Any<CancellationToken>())
             .Returns(PolicyDecision.Allow());
-        _riskScoring.ComputeRiskScoreAsync(Arg.Any<RequestContext>(), Arg.Any<CancellationToken>())
-            .Returns(0.85); // Above default of 0.8
+        _riskScoring.ComputeRiskScoreAsync(Arg.Any<RiskEvaluationContext>(), Arg.Any<CancellationToken>())
+            .Returns(new RiskEvaluationResult
+            {
+                RiskScore = 0.85,
+                TrustScore = 0,
+                RiskLevel = "high"
+            }); // Above default of 0.8
         var context = BuildContext();
 
         var result = await sut.EvaluateAsync(context, TestContext.Current.CancellationToken);
@@ -540,10 +634,15 @@ public class DecisionEngineTests
     public async Task EvaluateAsync_NullSemanticConfidenceThreshold_UsesDefault()
     {
         var sut = CreateSut(semanticEnabled: true, semanticConfidenceThreshold: null);
-        _policyProvider.EvaluateAsync(Arg.Any<string>(), Arg.Any<Dictionary<string, object>>(), Arg.Any<CancellationToken>())
+        _policyProvider.EvaluateAsync(Arg.Any<PolicyEvaluationContext>(), Arg.Any<CancellationToken>())
             .Returns(PolicyDecision.Allow());
-        _riskScoring.ComputeRiskScoreAsync(Arg.Any<RequestContext>(), Arg.Any<CancellationToken>())
-            .Returns(0.1);
+        _riskScoring.ComputeRiskScoreAsync(Arg.Any<RiskEvaluationContext>(), Arg.Any<CancellationToken>())
+            .Returns(new RiskEvaluationResult
+            {
+                RiskScore = 0.1,
+                TrustScore = 0,
+                RiskLevel = "low"
+            });
         _semanticProvider.AnalyzeAsync(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<CancellationToken>())
             .Returns(new SemanticAnalysisResult { Confidence = 0.6 }); // Below default of 0.7
 
@@ -558,21 +657,31 @@ public class DecisionEngineTests
         var sut = CreateSut();
         var context = BuildContext();
         context.Headers.Add("X-Test", "value");
-        Dictionary<string, object> capturedInput = null!;
+        PolicyEvaluationContext capturedContext = null!;
 
-        _policyProvider.EvaluateAsync(Arg.Any<string>(), Arg.Do<Dictionary<string, object>>(x => capturedInput = x), Arg.Any<CancellationToken>())
-            .Returns(PolicyDecision.Allow());
+        _riskScoring.ComputeRiskScoreAsync(Arg.Any<RiskEvaluationContext>(), Arg.Any<CancellationToken>())
+            .Returns(new RiskEvaluationResult
+            {
+                RiskScore = 0.1,
+                TrustScore = 0,
+                RiskLevel = "low"
+            });
+
+        _policyProvider.EvaluateAsync(Arg.Any<PolicyEvaluationContext>(), Arg.Any<CancellationToken>())
+            .Returns(callInfo =>
+            {
+                capturedContext = callInfo.ArgAt<PolicyEvaluationContext>(0);
+                return PolicyDecision.Allow();
+            });
 
         await sut.EvaluateAsync(context, TestContext.Current.CancellationToken);
 
-        capturedInput.Should().NotBeNull();
-        capturedInput["method"].Should().Be(context.Method);
-        capturedInput["path"].Should().Be(context.Path);
-        capturedInput["headers"].Should().Be(context.Headers);
-        var agent = capturedInput["agent"] as Dictionary<string, object>;
-        agent.Should().NotBeNull();
-        agent["id"].Should().Be(context.AgentId);
-        agent["trust_score"].Should().Be(context.TrustScore);
+        capturedContext.Should().NotBeNull();
+        capturedContext.RequestContext.Method.Should().Be(context.Method);
+        capturedContext.RequestContext.Path.Should().Be(context.Path);
+        capturedContext.RequestContext.Headers.Should().BeEquivalentTo(context.Headers);
+        capturedContext.RequestContext.AgentId.Should().Be(context.AgentId);
+        capturedContext.RequestContext.TrustScore.Should().Be(context.TrustScore);
     }
 }
 

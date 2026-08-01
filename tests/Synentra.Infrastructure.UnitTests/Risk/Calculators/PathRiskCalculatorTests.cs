@@ -8,6 +8,18 @@ public class PathRiskCalculatorTests
 {
     private readonly PathRiskCalculator _sut = new();
 
+    private static RiskEvaluationContext BuildContext(RequestContext requestContext)
+        => new()
+        {
+            RequestContext = requestContext,
+            Intent = new IntentClassificationResult
+            {
+                Label = "suspicious",
+                Confidence = 0,
+                Status = IntentClassificationStatus.Unavailable
+            }
+        };
+
     [Theory]
     [InlineData("/admin/users", 0.8)]
     [InlineData("/api/export", 0.9)]
@@ -26,53 +38,53 @@ public class PathRiskCalculatorTests
     [InlineData("/api/data", 0.1)]
     public async Task CalculateAsync_Path_ReturnsExpectedRisk(string path, double expectedRisk)
     {
-        var context = new RequestContext { Path = path };
+        var requestContext = new RequestContext { Path = path };
 
-        var result = await _sut.CalculateAsync(context, null, CancellationToken.None);
+        var result = await _sut.CalculateAsync(BuildContext(requestContext), CancellationToken.None);
 
-        result.Should().Be(expectedRisk);
+        result.Score.Should().Be(expectedRisk);
     }
 
     [Fact]
     public async Task CalculateAsync_PathWithMultiplePatterns_ReturnsHighestRisk()
     {
         // /users/export matches both /export (0.9) and /users/export (0.95)
-        var context = new RequestContext { Path = "/users/export" };
+        var requestContext = new RequestContext { Path = "/users/export" };
 
-        var result = await _sut.CalculateAsync(context, null, CancellationToken.None);
+        var result = await _sut.CalculateAsync(BuildContext(requestContext), CancellationToken.None);
 
-        result.Should().Be(0.95);
+        result.Score.Should().Be(0.95);
     }
 
     [Fact]
     public async Task CalculateAsync_UnknownPath_ReturnsDefaultLowRisk()
     {
-        var context = new RequestContext { Path = "/api/health" };
+        var requestContext = new RequestContext { Path = "/api/health" };
 
-        var result = await _sut.CalculateAsync(context, null, CancellationToken.None);
+        var result = await _sut.CalculateAsync(BuildContext(requestContext), CancellationToken.None);
 
-        result.Should().Be(0.1);
+        result.Score.Should().Be(0.1);
     }
 
     [Fact]
     public async Task CalculateAsync_CaseInsensitive_MatchesUppercase()
     {
-        var context = new RequestContext { Path = "/ADMIN/users" };
+        var requestContext = new RequestContext { Path = "/ADMIN/users" };
 
-        var result = await _sut.CalculateAsync(context, null, CancellationToken.None);
+        var result = await _sut.CalculateAsync(BuildContext(requestContext), CancellationToken.None);
 
-        result.Should().Be(0.8);
+        result.Score.Should().Be(0.8);
     }
 
     [Fact]
     public void Name_ShouldBe_Path()
     {
-        _sut.Name.Should().Be("path");
+        _sut.Name.Should().Be("PathRisk");
     }
 
     [Fact]
-    public void Weight_ShouldBe_0Point25()
+    public void Weight_ShouldBe_0Point20()
     {
-        _sut.Weight.Should().Be(0.25);
+        _sut.Weight.Should().Be(0.20);
     }
 }
