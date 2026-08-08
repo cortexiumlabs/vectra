@@ -38,7 +38,7 @@ public class SemanticConfigurationTests
         config.ModelType.Should().Be("Community");
         config.PackagePath.Should().BeNull();
         config.LicensePath.Should().BeNull();
-        config.MaxLength.Should().Be(128);
+        config.ModelSize.Should().Be(128);
     }
 
     [Fact]
