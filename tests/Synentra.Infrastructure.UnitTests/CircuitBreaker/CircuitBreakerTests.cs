@@ -1,4 +1,5 @@
 using FluentAssertions;
+using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
 using NSubstitute;
 using Synentra.BuildingBlocks.Configuration.System;
@@ -24,7 +25,7 @@ public class CircuitBreakerTests
                 SamplingWindowSeconds = 30
             }
         });
-        _circuitBreaker = new Synentra.Infrastructure.CircuitBreaker.CircuitBreaker(_options);
+        _circuitBreaker = new Synentra.Infrastructure.CircuitBreaker.CircuitBreaker(_options, NullLogger<Synentra.Infrastructure.CircuitBreaker.CircuitBreaker>.Instance);
     }
 
     [Fact]
@@ -32,7 +33,7 @@ public class CircuitBreakerTests
     {
         // Arrange
         _options.Value.Returns(new SystemConfiguration { CircuitBreaker = new CircuitBreakerConfiguration { Enabled = false } });
-        var cb = new Synentra.Infrastructure.CircuitBreaker.CircuitBreaker(_options);
+        var cb = new Synentra.Infrastructure.CircuitBreaker.CircuitBreaker(_options, NullLogger<Synentra.Infrastructure.CircuitBreaker.CircuitBreaker>.Instance);
 
         // Act
         var isAllowed = cb.IsAllowed("test-host");
