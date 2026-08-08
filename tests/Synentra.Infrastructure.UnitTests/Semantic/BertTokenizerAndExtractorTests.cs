@@ -203,7 +203,9 @@ public class ModelPackageLoaderViaProviderTests
         var provider = new InternalOnnxProvider(options, cacheService, loader, _logger);
 
         // Act
-        await provider.InitializeAsync();
+        var act = () => provider.InitializeAsync();
+
+        await act.Should().ThrowAsync<Exception>();
 
         // Assert: the provider should now be ready (AnalyzeAsync won't block)
         // We can't easily test internal session, but we can ensure loader was called
@@ -236,13 +238,10 @@ public class ModelPackageLoaderViaProviderTests
         var provider = new InternalOnnxProvider(options, cacheService, loader, _logger);
 
         // Act
-        await provider.InitializeAsync(TestContext.Current.CancellationToken);
+        var act = () => provider.InitializeAsync(TestContext.Current.CancellationToken);
 
-        // The provider should have caught the exception and disabled itself.
-        // A subsequent call to AnalyzeAsync should return a fallback-safe result.
-        var result = await provider.AnalyzeAsync("hello", "", CancellationToken.None);
-        result.FallbackSafe.Should().BeTrue();
-        result.Intent.Should().Be("suspicious");
+        await act.Should().ThrowAsync<InvalidOperationException>()
+            .WithMessage("*Download failed*");
     }
 
     private static byte[] CreateValidZipPackage(
@@ -327,7 +326,9 @@ public class ModelPackageLoaderViaProviderTests
 
         var provider = new InternalOnnxProvider(options, cacheService, loader, _logger);
 
-        await provider.InitializeAsync(TestContext.Current.CancellationToken);
+        var act = () => provider.InitializeAsync(TestContext.Current.CancellationToken);
+
+        await act.Should().ThrowAsync<Exception>();
 
         // The loader must have been called (with the null path config)
         await loader.Received(1).LoadAsync(
@@ -387,12 +388,9 @@ public class ModelPackageLoaderViaProviderTests
 
         var provider = new InternalOnnxProvider(options, cacheService, loader, _logger);
 
-        await provider.InitializeAsync();
+        var act = () => provider.InitializeAsync();
 
-        // After a failure the provider is disabled and returns a fallback‑safe result
-        var result = await provider.AnalyzeAsync("test", "", CancellationToken.None);
-        result.FallbackSafe.Should().BeTrue();
-        result.Intent.Should().Be("suspicious");
+        await act.Should().ThrowAsync<FileNotFoundException>();
     }
 }
 

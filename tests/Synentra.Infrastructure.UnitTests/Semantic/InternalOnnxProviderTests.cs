@@ -107,7 +107,7 @@ public class InternalOnnxProviderTests
                 Internal = new InternalOnnxConfiguration
                 {
                     PackagePath = null,
-                    MaxLength = 128
+                    ModelSize = 64
                 }
             }
         });
@@ -115,14 +115,13 @@ public class InternalOnnxProviderTests
         var provider = new InternalOnnxProvider(
             options, _cacheService, loader, NullLogger<InternalOnnxProvider>.Instance);
 
-        // Act – constructor should not throw
-        await provider.InitializeAsync(TestContext.Current.CancellationToken);
+        // Act
+        var act = () => provider.InitializeAsync(TestContext.Current.CancellationToken);
+
+        await act.Should().ThrowAsync<Exception>();
 
         // Assert – the loader was called with the same configuration (including the null PackagePath)
         await loader.Received(1).LoadAsync(Arg.Is<InternalOnnxConfiguration>(c => c.PackagePath == null), Arg.Any<CancellationToken>());
-        // Optionally verify that analysis works afterwards
-        var result = await provider.AnalyzeAsync("test", "", CancellationToken.None);
-        result.FallbackSafe.Should().BeTrue();
     }
 
     [Fact]
@@ -141,7 +140,7 @@ public class InternalOnnxProviderTests
                 Internal = new InternalOnnxConfiguration
                 {
                     PackagePath = "nonexistent_model_package.zip",
-                    MaxLength = 128
+                    ModelSize = 64
                 }
             }
         });
@@ -150,13 +149,9 @@ public class InternalOnnxProviderTests
             options, _cacheService, loader, NullLogger<InternalOnnxProvider>.Instance);
 
         // Act
-        await provider.InitializeAsync(TestContext.Current.CancellationToken);
+        var act = () => provider.InitializeAsync(TestContext.Current.CancellationToken);
 
-        // Assert – after failure, the provider should be disabled and return the fallback safe result
-        var result = await provider.AnalyzeAsync("some query", "", CancellationToken.None);
-        result.FallbackSafe.Should().BeTrue();
-        result.Intent.Should().Be("suspicious");
-        result.Confidence.Should().Be(0.5);
+        await act.Should().ThrowAsync<FileNotFoundException>();
     }
 
     [Fact]
@@ -196,7 +191,8 @@ public class InternalOnnxProviderTests
             Substitute.For<IModelPackageLoader>(),
             NullLogger<InternalOnnxProvider>.Instance);
 
-        act.Should().Throw<ArgumentNullException>();
+        act.Should().Throw<InvalidOperationException>()
+            .WithMessage("*No cache provider is currently configured*");
     }
 
     [Fact]

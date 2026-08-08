@@ -65,7 +65,7 @@ public static class DependencyInjection
         services.AddSingleton<IModelPackageLoader, ModelPackageLoader>();
         services.AddSingleton<InternalOnnxProvider>();
         services.AddHostedService<InternalOnnxInitializer>();
-        services.AddScoped<ISemanticProvider>(CreateSemanticProvider);
+        services.AddSingleton<ISemanticProvider>(sp => sp.GetRequiredService<InternalOnnxProvider>());
 
         services.AddMemoryCache();
 
