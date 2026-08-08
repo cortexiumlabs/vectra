@@ -51,9 +51,12 @@ public class DecisionEngine : IDecisionEngine
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
-    public async Task<DecisionResult> EvaluateAsync(RequestContext context, CancellationToken cancellationToken = default)
+    public async Task<DecisionResult> EvaluateAsync(
+        string semanticInput,
+        RequestContext context, 
+        CancellationToken cancellationToken = default)
     {
-        var intentResult = await EvaluateSemanticAsync(context, cancellationToken);
+        var intentResult = await EvaluateSemanticAsync(semanticInput, context, cancellationToken);
 
         var riskResult = await _riskScoring.ComputeRiskScoreAsync(
             new RiskEvaluationContext
@@ -76,9 +79,12 @@ public class DecisionEngine : IDecisionEngine
         return await FinalizeAsync(context, decision, cancellationToken);
     }
 
-    public async Task<DecisionResult> SimulateAsync(RequestContext context, CancellationToken cancellationToken = default)
+    public async Task<DecisionResult> SimulateAsync(
+        string semanticInput,
+        RequestContext context, 
+        CancellationToken cancellationToken = default)
     {
-        var intentResult = await EvaluateSemanticAsync(context, cancellationToken);
+        var intentResult = await EvaluateSemanticAsync(semanticInput, context, cancellationToken);
 
         var riskResult = await _riskScoring.ComputeRiskScoreAsync(
             new RiskEvaluationContext
@@ -117,24 +123,19 @@ public class DecisionEngine : IDecisionEngine
     {
         policyDecision ??= PolicyDecision.Allow();
 
-        var threshold = _hitl.Threshold ?? 0.8;
-
         if (policyDecision.IsDenied)
             return DecisionResult.Deny(policyDecision.Reason ?? "Policy denied", riskResult.RiskScore);
 
         if (policyDecision.IsHitl)
             return DecisionResult.Hitl(policyDecision.Reason ?? "Policy requires HITL", riskResult.RiskScore);
 
-        if (intentResult.Status == IntentClassificationStatus.LowConfidence && _semantic.AllowLowConfidence != true)
-            return DecisionResult.Hitl($"Low semantic confidence: {intentResult.Confidence:F2}", riskResult.RiskScore);
-
-        if (riskResult.RiskScore > threshold)
-            return DecisionResult.Hitl($"High risk score: {riskResult.RiskScore:F2}", riskResult.RiskScore);
-
         return DecisionResult.Allow(riskResult.RiskScore);
     }
 
-    private async Task<IntentClassificationResult> EvaluateSemanticAsync(RequestContext context, CancellationToken ct)
+    private async Task<IntentClassificationResult> EvaluateSemanticAsync(
+        string semanticInput, 
+        RequestContext context, 
+        CancellationToken ct)
     {
         if (_semantic.Enabled == false)
         {
@@ -149,7 +150,7 @@ public class DecisionEngine : IDecisionEngine
 
         try
         {
-            var result = await _semanticProvider.AnalyzeAsync(context.Body, context.Path, ct);
+            var result = await _semanticProvider.AnalyzeAsync(semanticInput, context.Path, ct);
             var threshold = _semantic.ConfidenceThreshold ?? 0.7;
 
             if (result.Confidence >= threshold)
@@ -170,7 +171,7 @@ public class DecisionEngine : IDecisionEngine
             return new IntentClassificationResult
             {
                 OriginalLabel = result.Intent,
-                Label = "suspicious",
+                Label = result.Intent,
                 Confidence = result.Confidence,
                 Status = IntentClassificationStatus.LowConfidence
             };
