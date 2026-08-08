@@ -62,7 +62,7 @@ public class ModelDownloaderTests : IDisposable
         var httpFactory = new FakeHttpClientFactory();
 
         // Prepare a fake release with one asset (no checksum)
-        var release = CreateFakeRelease(assetName: "intent-model-community.zip", assetUrl: "http://example.com/model.zip");
+        var release = CreateFakeRelease(assetName: "intent-model-community-128.zip", assetUrl: "http://example.com/model.zip");
         gitHub.OnGetLatestRelease = (o, r) => Task.FromResult(release);
 
         // Set up HttpClient to return the model content
@@ -117,7 +117,7 @@ public class ModelDownloaderTests : IDisposable
 
         Func<Task> act = () => downloader.EnsureModelExistsAsync(config, CancellationToken.None);
         await act.Should().ThrowAsync<InvalidOperationException>()
-            .WithMessage("*Asset 'intent-model-community.zip' not found*");
+            .WithMessage("*Asset 'intent-model-community-128.zip'*not found*");
     }
 
     [Fact]
@@ -129,9 +129,9 @@ public class ModelDownloaderTests : IDisposable
 
         // Create a release with model asset and a checksum asset
         var release = CreateFakeRelease(
-            assetName: "intent-model-community.zip",
+            assetName: "intent-model-community-128.zip",
             assetUrl: "http://example.com/model.zip",
-            checksumAssetName: "intent-model-community.zip.sha256",
+            checksumAssetName: "intent-model-community-128.zip.sha256",
             checksumUrl: "http://example.com/model.zip.sha256"
         );
         gitHub.OnGetLatestRelease = (o, r) => Task.FromResult(release);
@@ -145,7 +145,7 @@ public class ModelDownloaderTests : IDisposable
         {
             return new HttpResponseMessage(System.Net.HttpStatusCode.OK)
             {
-                Content = new StringContent($"{hash}  intent-model-community.zip")
+                Content = new StringContent($"{hash}  intent-model-community-128.zip")
             };
         }));
 
@@ -178,9 +178,9 @@ public class ModelDownloaderTests : IDisposable
         var httpFactory = new FakeHttpClientFactory();
 
         var release = CreateFakeRelease(
-            assetName: "intent-model-community.zip",
+            assetName: "intent-model-community-128.zip",
             assetUrl: "http://example.com/model.zip",
-            checksumAssetName: "intent-model-community.zip.sha256",
+            checksumAssetName: "intent-model-community-128.zip.sha256",
             checksumUrl: "http://example.com/model.zip.sha256"
         );
         gitHub.OnGetLatestRelease = (o, r) => Task.FromResult(release);
@@ -223,9 +223,9 @@ public class ModelDownloaderTests : IDisposable
         var httpFactory = new FakeHttpClientFactory();
 
         var release = CreateFakeRelease(
-            assetName: "intent-model-community.zip",
+            assetName: "intent-model-community-128.zip",
             assetUrl: "http://example.com/model.zip",
-            checksumAssetName: "intent-model-community.zip.sha256",
+            checksumAssetName: "intent-model-community-128.zip.sha256",
             checksumUrl: "http://example.com/model.zip.sha256"
         );
         gitHub.OnGetLatestRelease = (o, r) => Task.FromResult(release);
@@ -254,7 +254,7 @@ public class ModelDownloaderTests : IDisposable
         var httpFactory = new FakeHttpClientFactory();
 
         var release = CreateFakeRelease(
-            assetName: "intent-model-community.zip",
+            assetName: "intent-model-community-128.zip",
             assetUrl: "http://example.com/model.zip"
         );
         gitHub.OnGetLatestRelease = (o, r) => Task.FromResult(release);

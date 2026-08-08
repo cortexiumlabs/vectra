@@ -10,6 +10,7 @@ public class ModelDownloader : IModelDownloader
     private readonly ILogger<ModelDownloader> _logger;
     private readonly IGitHubReleaseClient _gitHub;
     private readonly IHttpClientFactory _httpClientFactory;
+    private static readonly HashSet<int> SupportedModelSizes = new HashSet<int> { 64, 128, 256, 512 };
 
     public ModelDownloader(
         ILogger<ModelDownloader> logger,
@@ -30,6 +31,13 @@ public class ModelDownloader : IModelDownloader
         InternalOnnxConfiguration config,
         CancellationToken cancellationToken)
     {
+        if (!SupportedModelSizes.Contains(config.ModelSize ?? 128))
+        {
+            throw new InvalidOperationException(
+                $"Unsupported intent model size '{config.ModelSize}'. " +
+                $"Supported sizes are: {string.Join(", ", SupportedModelSizes.Order())}.");
+        }
+
         string fullPath = ModelPathResolver.GetFullPackagePath(config.PackagePath);
 
         if (File.Exists(fullPath))
@@ -61,11 +69,30 @@ public class ModelDownloader : IModelDownloader
         }
 
         // Locate the model asset
-        const string assetName = "intent-model-community.zip";
-        var asset = release.Assets.FirstOrDefault(a =>
-            a.Name.Equals(assetName, StringComparison.OrdinalIgnoreCase))
-            ?? throw new InvalidOperationException(
-                $"Asset '{assetName}' not found in the latest release of {owner}/{repo}.");
+        string assetName = $"intent-model-community-{config.ModelSize}.zip";
+
+        var matchingAssets = release.Assets
+            .Where(asset => asset.Name.Equals(assetName, StringComparison.OrdinalIgnoreCase))
+            .ToList();
+
+        if (matchingAssets.Count == 0)
+        {
+            string availableAssets = release.Assets.Count == 0
+                ? "(none)"
+                : string.Join(", ", release.Assets.Select(a => a.Name));
+
+            throw new InvalidOperationException(
+                $"Asset '{assetName}' was not found in release '{release.TagName}' " +
+                $"of {owner}/{repo}. Available assets: {availableAssets}");
+        }
+
+        if (matchingAssets.Count > 1)
+        {
+            throw new InvalidOperationException(
+                $"Release '{release.TagName}' contains multiple assets named '{assetName}'.");
+        }
+
+        ReleaseAsset asset = matchingAssets[0];
 
         // Try to locate a checksum asset
         string checksumAssetName = assetName + ".sha256";
