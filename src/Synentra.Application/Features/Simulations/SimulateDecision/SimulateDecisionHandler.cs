@@ -5,6 +5,7 @@ using Synentra.Application.Abstractions.Security;
 using Synentra.Application.Models;
 using Synentra.BuildingBlocks.Errors;
 using Synentra.BuildingBlocks.Results;
+using System.Text;
 
 namespace Synentra.Application.Features.Simulations.SimulateDecision;
 
@@ -50,12 +51,38 @@ public sealed class SimulateDecisionHandler
             Body = action.Body
         };
 
-        var decision = await _decisionEngine.SimulateAsync(context, cancellationToken);
+        var semanticInput = BuildSemanticInput(context);
+
+        var decision = await _decisionEngine.SimulateAsync(semanticInput, context, cancellationToken);
 
         return Result<SimulateDecisionResult>.Success(new SimulateDecisionResult(
             decision.Type,
             decision.Reason,
             decision.TrustScore,
             context.PolicyName));
+    }
+
+    private string BuildSemanticInput(RequestContext ctx)
+    {
+        // Limit total length to ~600 chars to stay well within 64 tokens (~4 chars/token average)
+        var sb = new StringBuilder();
+
+        // 1. METHOD + PATH (Highest signal for reads/writes)
+        sb.Append($"{ctx.Method} {ctx.Path} ");
+        // Example: "GET /todos/1 " or "POST /users "
+
+        // 2. SELECTED HEADERS (Skip Authorization to avoid token bloat & noise)
+        if (ctx.Headers.TryGetValue("Content-Type", out var ct))
+            sb.Append($"Content-Type: {ct} ");
+        if (ctx.Headers.TryGetValue("User-Agent", out var ua))
+            sb.Append($"User-Agent: {ua} ");
+
+        // 3. BODY (Already transformed by JsonToIntentText -> just key-value pairs)
+        if (!string.IsNullOrEmpty(ctx.Body))
+            sb.Append($"Body: {ctx.Body}");
+
+        // 4. Truncate hard if somehow too long (safety net)
+        var result = sb.ToString();
+        return result.Length > 512 ? result.Substring(0, 512) : result;
     }
 }

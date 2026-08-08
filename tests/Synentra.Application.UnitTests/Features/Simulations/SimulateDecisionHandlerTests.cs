@@ -79,7 +79,7 @@ public class SimulateDecisionHandlerTests
         _accessService.GetAgentAsync(agentId, Arg.Any<CancellationToken>())
             .Returns(new AgentRequestAccessResult(true, agent, null));
 
-        _decisionEngine.SimulateAsync(Arg.Any<Synentra.Application.Models.RequestContext>(), Arg.Any<CancellationToken>())
+        _decisionEngine.SimulateAsync(Arg.Any<string>(), Arg.Any<Synentra.Application.Models.RequestContext>(), Arg.Any<CancellationToken>())
             .Returns(DecisionResult.Allow(0.12));
 
         var request = new SimulateDecisionRequest(
