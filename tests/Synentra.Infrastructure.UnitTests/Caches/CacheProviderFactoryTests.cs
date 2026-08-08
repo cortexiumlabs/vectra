@@ -1,5 +1,6 @@
 using FluentAssertions;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
 using NSubstitute;
 using Synentra.BuildingBlocks.Configuration.System;
@@ -25,7 +26,7 @@ public class CacheProviderFactoryTests
             sp = services.BuildServiceProvider();
         }
 
-        return new CacheProviderFactory(Options.Create(config), sp);
+        return new CacheProviderFactory(Options.Create(config), sp, NullLogger<CacheProviderFactory>.Instance);
     }
 
     [Fact]
@@ -55,7 +56,7 @@ public class CacheProviderFactoryTests
         services.AddMemoryCache();
         var sp = services.BuildServiceProvider();
 
-        var act = () => new CacheProviderFactory(null!, sp);
+        var act = () => new CacheProviderFactory(null!, sp, NullLogger<CacheProviderFactory>.Instance);
 
         act.Should().Throw<ArgumentNullException>();
     }
@@ -66,7 +67,7 @@ public class CacheProviderFactoryTests
         var config = new SystemConfiguration();
         config.Storage.Cache.DefaultProvider = "memory";
 
-        var act = () => new CacheProviderFactory(Options.Create(config), null!);
+        var act = () => new CacheProviderFactory(Options.Create(config), null!, NullLogger<CacheProviderFactory>.Instance);
 
         act.Should().Throw<ArgumentNullException>();
     }
@@ -87,7 +88,7 @@ public class CacheProviderFactoryTests
             Endpoint = "localhost:6379"
         };
 
-        var sut = new CacheProviderFactory(Options.Create(config), sp);
+        var sut = new CacheProviderFactory(Options.Create(config), sp, NullLogger<CacheProviderFactory>.Instance);
 
         var provider = sut.Create();
 
@@ -142,7 +143,8 @@ public class CacheProviderFactoryTests
 
         var sut = new CacheProviderFactory(
             Options.Create(config),
-            services.BuildServiceProvider());
+            services.BuildServiceProvider(),
+            NullLogger<CacheProviderFactory>.Instance);
 
         var act = () => sut.Create();
 
@@ -165,7 +167,8 @@ public class CacheProviderFactoryTests
 
         var sut = new CacheProviderFactory(
             Options.Create(config),
-            services.BuildServiceProvider());
+            services.BuildServiceProvider(),
+            NullLogger<CacheProviderFactory>.Instance);
 
         var act = () => sut.Create();
 
@@ -195,7 +198,8 @@ public class CacheProviderFactoryTests
 
         var act = () => new CacheProviderFactory(
             Options.Create(config),
-            services.BuildServiceProvider());
+            services.BuildServiceProvider(),
+            NullLogger<CacheProviderFactory>.Instance);
 
         act.Should().Throw<InvalidOperationException>()
             .WithMessage("*Cache configuration is missing*");
@@ -222,7 +226,8 @@ public class CacheProviderFactoryTests
 
         var sut = new CacheProviderFactory(
             Options.Create(config),
-            services.BuildServiceProvider());
+            services.BuildServiceProvider(),
+            NullLogger<CacheProviderFactory>.Instance);
 
         var provider = sut.Create();
 
