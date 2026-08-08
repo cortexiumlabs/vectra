@@ -1,4 +1,5 @@
 using FluentAssertions;
+using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
 using Synentra.BuildingBlocks.Configuration.System;
 using Synentra.BuildingBlocks.Configuration.System.RateLimit;
@@ -21,7 +22,7 @@ public class AgentRateLimiterWindowResetTests
                 DefaultRequestsPerMinute = 2
             }
         };
-        var sut = new AgentRateLimiter(Options.Create(config));
+        var sut = new AgentRateLimiter(Options.Create(config), NullLogger<AgentRateLimiter>.Instance);
         var agentId = Guid.NewGuid();
 
         // Exhaust the window

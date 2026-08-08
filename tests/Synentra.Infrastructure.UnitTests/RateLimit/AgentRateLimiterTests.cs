@@ -1,4 +1,5 @@
 using FluentAssertions;
+using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
 using Synentra.BuildingBlocks.Configuration.System;
 using Synentra.BuildingBlocks.Configuration.System.RateLimit;
@@ -18,7 +19,7 @@ public class AgentRateLimiterTests
                 DefaultRequestsPerMinute = requestsPerMinute
             }
         };
-        return new AgentRateLimiter(Options.Create(config));
+        return new AgentRateLimiter(Options.Create(config), NullLogger<AgentRateLimiter>.Instance);
     }
 
     [Fact]
@@ -80,7 +81,7 @@ public class AgentRateLimiterTests
     [Fact]
     public void Constructor_NullOptions_ThrowsArgumentNullException()
     {
-        var act = () => new AgentRateLimiter(null!);
+        var act = () => new AgentRateLimiter(null!, NullLogger<AgentRateLimiter>.Instance);
 
         act.Should().Throw<ArgumentNullException>();
     }
