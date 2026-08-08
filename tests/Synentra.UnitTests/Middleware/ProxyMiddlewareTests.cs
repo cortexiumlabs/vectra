@@ -232,7 +232,7 @@ public class ProxyMiddlewareTests
         circuitBreaker.IsAllowed(Arg.Any<string>()).Returns(true);
 
         var decisionEngine = Substitute.For<IDecisionEngine>();
-        decisionEngine.EvaluateAsync(Arg.Any<RequestContext>(), Arg.Any<CancellationToken>())
+        decisionEngine.EvaluateAsync(Arg.Any<string>(), Arg.Any<RequestContext>(), Arg.Any<CancellationToken>())
             .Returns(DecisionResult.Deny("policy violation"));
 
         var middleware = BuildMiddleware(_ => Task.CompletedTask);
@@ -262,7 +262,7 @@ public class ProxyMiddlewareTests
         circuitBreaker.IsAllowed(Arg.Any<string>()).Returns(true);
 
         var decisionEngine = Substitute.For<IDecisionEngine>();
-        decisionEngine.EvaluateAsync(Arg.Any<RequestContext>(), Arg.Any<CancellationToken>())
+        decisionEngine.EvaluateAsync(Arg.Any<string>(), Arg.Any<RequestContext>(), Arg.Any<CancellationToken>())
             .Returns(DecisionResult.Hitl("requires review"));
 
         var hitlService = Substitute.For<IHitlService>();
@@ -297,7 +297,7 @@ public class ProxyMiddlewareTests
         circuitBreaker.IsAllowed(Arg.Any<string>()).Returns(true);
 
         var decisionEngine = Substitute.For<IDecisionEngine>();
-        decisionEngine.EvaluateAsync(Arg.Any<RequestContext>(), Arg.Any<CancellationToken>())
+        decisionEngine.EvaluateAsync(Arg.Any<string>(), Arg.Any<RequestContext>(), Arg.Any<CancellationToken>())
             .Returns(DecisionResult.Allow());
 
         // Fake HttpClient that throws
@@ -334,7 +334,7 @@ public class ProxyMiddlewareTests
         circuitBreaker.IsAllowed(Arg.Any<string>()).Returns(true);
 
         var decisionEngine = Substitute.For<IDecisionEngine>();
-        decisionEngine.EvaluateAsync(Arg.Any<RequestContext>(), Arg.Any<CancellationToken>())
+        decisionEngine.EvaluateAsync(Arg.Any<string>(), Arg.Any<RequestContext>(), Arg.Any<CancellationToken>())
             .Returns(DecisionResult.Allow());
 
         HttpRequestMessage? forwardedRequest = null;
@@ -377,7 +377,7 @@ public class ProxyMiddlewareTests
         circuitBreaker.IsAllowed(Arg.Any<string>()).Returns(true);
 
         var decisionEngine = Substitute.For<IDecisionEngine>();
-        decisionEngine.EvaluateAsync(Arg.Any<RequestContext>(), Arg.Any<CancellationToken>())
+        decisionEngine.EvaluateAsync(Arg.Any<string>(), Arg.Any<RequestContext>(), Arg.Any<CancellationToken>())
             .Returns(DecisionResult.Allow());
 
         var handler = new FixedResponseHttpMessageHandler(HttpStatusCode.OK, "upstream-body");
@@ -413,7 +413,7 @@ public class ProxyMiddlewareTests
         circuitBreaker.IsAllowed(Arg.Any<string>()).Returns(true);
 
         var decisionEngine = Substitute.For<IDecisionEngine>();
-        decisionEngine.EvaluateAsync(Arg.Any<RequestContext>(), Arg.Any<CancellationToken>())
+        decisionEngine.EvaluateAsync(Arg.Any<string>(), Arg.Any<RequestContext>(), Arg.Any<CancellationToken>())
             .Returns(DecisionResult.Allow(0.73));
 
         var handler = new FixedResponseHttpMessageHandler(HttpStatusCode.OK, "upstream-body");
@@ -451,7 +451,7 @@ public class ProxyMiddlewareTests
         circuitBreaker.IsAllowed(Arg.Any<string>()).Returns(true);
 
         var decisionEngine = Substitute.For<IDecisionEngine>();
-        decisionEngine.EvaluateAsync(Arg.Any<RequestContext>(), Arg.Any<CancellationToken>())
+        decisionEngine.EvaluateAsync(Arg.Any<string>(), Arg.Any<RequestContext>(), Arg.Any<CancellationToken>())
             .Returns(DecisionResult.Allow());
 
         var handler = new FixedResponseHttpMessageHandler(HttpStatusCode.InternalServerError, "error");

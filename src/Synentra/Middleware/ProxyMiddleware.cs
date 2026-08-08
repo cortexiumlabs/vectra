@@ -1,11 +1,12 @@
-﻿using System.Text.Json;
-using Synentra.Application.Abstractions.CircuitBreaker;
+﻿using Synentra.Application.Abstractions.CircuitBreaker;
 using Synentra.Application.Abstractions.Executions;
 using Synentra.Application.Abstractions.RateLimit;
 using Synentra.Application.Abstractions.Security;
 using Synentra.Application.Models;
 using Synentra.BuildingBlocks.Configuration.Security;
 using Synentra.Infrastructure.Decision;
+using System.Text;
+using System.Text.Json;
 
 namespace Synentra.Middleware;
 
@@ -111,7 +112,9 @@ public class ProxyMiddleware
         context.Items["PolicyVersion"] = requestContext.PolicyName;
         context.Items["TargetUrl"] = requestContext.TargetUrl;
 
-        var decision = await decisionEngine.EvaluateAsync(requestContext, context.RequestAborted);
+        var semanticInput = BuildSemanticInput(requestContext);
+
+        var decision = await decisionEngine.EvaluateAsync(semanticInput, requestContext, context.RequestAborted);
 
         context.Items["RiskScore"] = decision.TrustScore;
         context.Items["Decision"] = decision.Type.ToString().ToLowerInvariant();
@@ -234,5 +237,29 @@ public class ProxyMiddleware
         {
             return body; // resilient fallback
         }
+    }
+
+    private string BuildSemanticInput(RequestContext ctx)
+    {
+        // Limit total length to ~600 chars to stay well within 64 tokens (~4 chars/token average)
+        var sb = new StringBuilder();
+
+        // 1. METHOD + PATH (Highest signal for reads/writes)
+        sb.Append($"{ctx.Method} {ctx.Path} ");
+        // Example: "GET /todos/1 " or "POST /users "
+
+        // 2. SELECTED HEADERS (Skip Authorization to avoid token bloat & noise)
+        if (ctx.Headers.TryGetValue("Content-Type", out var ct))
+            sb.Append($"Content-Type: {ct} ");
+        if (ctx.Headers.TryGetValue("User-Agent", out var ua))
+            sb.Append($"User-Agent: {ua} ");
+
+        // 3. BODY (Already transformed by JsonToIntentText -> just key-value pairs)
+        if (!string.IsNullOrEmpty(ctx.Body))
+            sb.Append($"Body: {ctx.Body}");
+
+        // 4. Truncate hard if somehow too long (safety net)
+        var result = sb.ToString();
+        return result.Length > 512 ? result.Substring(0, 512) : result;
     }
 }
