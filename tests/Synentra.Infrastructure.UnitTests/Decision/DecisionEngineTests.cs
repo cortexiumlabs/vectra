@@ -554,6 +554,72 @@ public class DecisionEngineTests
         await _history.DidNotReceive().RecordRequestAsync(Arg.Any<Guid>(), Arg.Any<bool>(), Arg.Any<double>(), Arg.Any<CancellationToken>());
     }
 
+    [Fact]
+    public async Task EvaluateAsync_SemanticProviderThrows_DoesNotPropagateAndRecordsAudit()
+    {
+        var sut = CreateSut(semanticEnabled: true);
+
+        _semanticProvider.AnalyzeAsync(Arg.Any<string?>(), Arg.Any<string>(), Arg.Any<CancellationToken>())
+            .Returns<Task<SemanticAnalysisResult>>(x => throw new Exception("boom"));
+
+        _policyProvider.EvaluateAsync(Arg.Any<PolicyEvaluationContext>(), Arg.Any<CancellationToken>())
+            .Returns(PolicyDecision.Allow());
+
+        _riskScoring.ComputeRiskScoreAsync(Arg.Any<RiskEvaluationContext>(), Arg.Any<CancellationToken>())
+            .Returns(new RiskEvaluationResult { RiskScore = 0.1, TrustScore = 0, RiskLevel = "low" });
+
+        var ctx = BuildContext();
+
+        var result = await sut.EvaluateAsync(ctx.Path ?? string.Empty, ctx, TestContext.Current.CancellationToken);
+
+        result.IsAllowed.Should().BeTrue();
+        // Ensure audit was recorded even if semantic failed
+        await _audit.Received(1).AddAsync(Arg.Any<AuditTrail>(), Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task EvaluateAsync_HistoryThrows_DoesNotPropagate()
+    {
+        var sut = CreateSut();
+        SetupAllow();
+
+        _history.RecordRequestAsync(Arg.Any<Guid>(), Arg.Any<bool>(), Arg.Any<double>(), Arg.Any<CancellationToken>())
+            .Returns<Task>(x => throw new Exception("db"));
+
+        var ctx = BuildContext();
+
+        // Should not throw despite history exception
+        var act = async () => await sut.EvaluateAsync(ctx.Path ?? string.Empty, ctx, TestContext.Current.CancellationToken);
+
+        await act.Should().NotThrowAsync();
+
+        // Audit should still be attempted
+        await _audit.Received(1).AddAsync(Arg.Any<AuditTrail>(), Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task SimulateAsync_NullPolicyDecision_DefaultsToAllow()
+    {
+        var sut = CreateSut();
+
+        _policyProvider.EvaluateAsync(Arg.Any<PolicyEvaluationContext>(), Arg.Any<CancellationToken>())
+            .Returns((PolicyDecision?)null);
+
+        _riskScoring.ComputeRiskScoreAsync(Arg.Any<RiskEvaluationContext>(), Arg.Any<CancellationToken>())
+            .Returns(new RiskEvaluationResult { RiskScore = 0.1, TrustScore = 0, RiskLevel = "low" });
+
+        _semanticProvider.AnalyzeAsync(Arg.Any<string?>(), Arg.Any<string>(), Arg.Any<CancellationToken>())
+            .Returns(new SemanticAnalysisResult { Confidence = 0.9 });
+
+        var ctx = BuildContext();
+
+        var result = await sut.SimulateAsync(ctx.Path ?? string.Empty, ctx, TestContext.Current.CancellationToken);
+
+        result.IsAllowed.Should().BeTrue();
+        await _audit.DidNotReceive().AddAsync(Arg.Any<AuditTrail>(), Arg.Any<CancellationToken>());
+        await _history.DidNotReceive().RecordRequestAsync(Arg.Any<Guid>(), Arg.Any<bool>(), Arg.Any<double>(), Arg.Any<CancellationToken>());
+    }
+
     #endregion
 
     private static RequestContext BuildContext() => new()
