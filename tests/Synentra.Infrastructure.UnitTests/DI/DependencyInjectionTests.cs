@@ -360,6 +360,31 @@ public class DependencyInjectionTests
     }
 
     [Fact]
+    public void AddInfrastructure_RegistersHitlService()
+    {
+        var services = BuildServices();
+
+        var hitl = services.GetService<Synentra.Application.Abstractions.Executions.IHitlService>();
+
+        hitl.Should().NotBeNull();
+    }
+
+    [Fact]
+    public void AddInfrastructure_RegistersRiskScoringServices()
+    {
+        var services = BuildServices();
+
+        var aggregator = services.GetService<Synentra.Infrastructure.Risk.RiskScoreAggregator>();
+        var scoring = services.GetService<Synentra.Application.Abstractions.Executions.IRiskScoringService>();
+        var calculators = services.GetServices<Synentra.Infrastructure.Risk.IRiskCalculator>();
+
+        aggregator.Should().NotBeNull();
+        scoring.Should().NotBeNull();
+        calculators.Should().NotBeNull();
+        calculators.Should().NotBeEmpty();
+    }
+
+    [Fact]
     public void AddCache_RegistersConnectionMultiplexerFactory_CanResolve()
     {
         var services = new ServiceCollection();
