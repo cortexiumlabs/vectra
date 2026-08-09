@@ -48,7 +48,7 @@ public class RiskScoreAggregatorTests
     public async Task AggregateAsync_SingleCalculator_ReturnsSingleResult()
     {
         var calc = CreateCalculator("test", 1.0, 0.7);
-        var sut = new RiskScoreAggregator([calc]);
+        var sut = new RiskScoreAggregator(new[] { calc });
 
         var result = await sut.AggregateAsync(BuildContext(), CancellationToken.None);
 
@@ -61,19 +61,19 @@ public class RiskScoreAggregatorTests
     {
         var calc1 = CreateCalculator("c1", 2.0, 0.5);
         var calc2 = CreateCalculator("c2", 1.0, 0.8);
-        var sut = new RiskScoreAggregator([calc1, calc2]);
+        var sut = new RiskScoreAggregator(new[] { calc1, calc2 });
 
         var result = await sut.AggregateAsync(BuildContext(), CancellationToken.None);
 
         result.Should().HaveCount(2);
-        result.Select(x => x.Name).Should().BeEquivalentTo(["c1", "c2"]);
+        result.Select(x => x.Name).Should().BeEquivalentTo(new[] { "c1", "c2" });
     }
 
     [Fact]
     public async Task AggregateAsync_UsesConfiguredWeightWhenResultWeightDiffers()
     {
         var calc = CreateCalculator("c1", 1.0, 0.0);
-        var sut = new RiskScoreAggregator([calc]);
+        var sut = new RiskScoreAggregator(new[] { calc });
 
         var result = await sut.AggregateAsync(BuildContext(), CancellationToken.None);
 
@@ -86,7 +86,7 @@ public class RiskScoreAggregatorTests
         var context = BuildContext();
         context.RequestContext.Method = "DELETE";
         var calc = CreateCalculator("c1", 1.0, 0.5);
-        var sut = new RiskScoreAggregator([calc]);
+        var sut = new RiskScoreAggregator(new[] { calc });
 
         await sut.AggregateAsync(context, CancellationToken.None);
 
@@ -108,5 +108,48 @@ public class RiskScoreAggregatorTests
         result.Should().HaveCount(5);
         foreach (var calc in calcs)
             await calc.Received(1).CalculateAsync(Arg.Any<RiskEvaluationContext>(), Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public void Constructor_NullOptions_ThrowsArgumentNullException()
+    {
+        var calc = CreateCalculator("x", 1.0, 0.1);
+        var act = () => new RiskScoreAggregator(new[] { calc }, null!);
+
+        act.Should().Throw<ArgumentNullException>();
+    }
+
+    [Fact]
+    public async Task AggregateAsync_NullResult_IsReplacedWithDefault()
+    {
+        var calc = Substitute.For<IRiskCalculator>();
+        calc.Name.Returns("Nulling");
+        calc.Weight.Returns(0.7);
+        calc.CalculateAsync(Arg.Any<RiskEvaluationContext>(), Arg.Any<CancellationToken>())
+            .Returns(Task.FromResult<RiskCalculatorResult?>(null));
+
+        var sut = new RiskScoreAggregator(new[] { calc });
+
+        var results = await sut.AggregateAsync(BuildContext(), CancellationToken.None);
+
+        results.Should().ContainSingle();
+        var r = results.Single();
+        r.Name.Should().Be("Nulling");
+        r.Score.Should().Be(0);
+        r.Weight.Should().Be(0.7);
+        r.Signals.Should().BeEmpty();
+    }
+
+    [Fact]
+    public async Task AggregateAsync_UsesConfiguredWeight_FromRiskWeights()
+    {
+        // Use a calculator name that matches RiskWeightsConfiguration (IntentRisk)
+        var calc = CreateCalculator("IntentRisk", 1.0, 0.5);
+        var sut = new RiskScoreAggregator(new[] { calc });
+
+        var results = await sut.AggregateAsync(BuildContext(), CancellationToken.None);
+
+        // default RiskWeightsConfiguration.IntentRisk == 0.25
+        results.Single().Weight.Should().BeApproximately(0.25, 1e-9);
     }
 }
