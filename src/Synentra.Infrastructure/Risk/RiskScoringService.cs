@@ -24,7 +24,7 @@ public class RiskScoringService : IRiskScoringService
     {
         _aggregator = aggregator ?? throw new ArgumentNullException(nameof(aggregator));
         _configuration = new RiskConfiguration();
-        _cacheProvider = cacheService.Current ?? throw new ArgumentNullException(nameof(cacheService));
+        _cacheProvider = cacheService?.Current ?? throw new ArgumentNullException(nameof(cacheService));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
