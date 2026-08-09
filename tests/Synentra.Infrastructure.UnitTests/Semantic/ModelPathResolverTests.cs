@@ -101,4 +101,54 @@ public class ModelPathResolverTests
             result.Should().StartWith(localAppData);
         }
     }
+
+    [Fact]
+    public void GetDefaultPackagePath_FallsBackToUserProfile_WhenLocalAppDataMissing()
+    {
+        // Arrange - force FolderGetter to simulate missing LocalApplicationData
+        var original = ModelPathResolver.FolderGetter;
+        try
+        {
+            ModelPathResolver.FolderGetter = (sf, opt) => sf == Environment.SpecialFolder.LocalApplicationData
+                ? string.Empty
+                : Environment.GetFolderPath(sf, opt);
+
+            var method = typeof(ModelPathResolver).GetMethod("GetDefaultPackagePath",
+                BindingFlags.NonPublic | BindingFlags.Static);
+            method.Should().NotBeNull();
+
+            // Act
+            string result = (string)method!.Invoke(null, null)!;
+
+            // Assert - should use the user's home directory fallback (.synentra)
+            result.Should().Contain(Path.Combine(".synentra", "models"));
+            result.Should().EndWith("community-model.zip");
+        }
+        finally
+        {
+            ModelPathResolver.FolderGetter = original;
+        }
+    }
+
+    [Fact]
+    public void GetFullPackagePath_Throws_WhenNoSafeFolderAvailable()
+    {
+        // Arrange - simulate neither LocalApplicationData nor UserProfile available
+        var original = ModelPathResolver.FolderGetter;
+        try
+        {
+            ModelPathResolver.FolderGetter = (sf, opt) => string.Empty;
+
+            // Act
+            Action act = () => ModelPathResolver.GetFullPackagePath(null);
+
+            // Assert
+            act.Should().Throw<InvalidOperationException>()
+                .WithMessage("*Unable to determine a secure, user‑specific folder*");
+        }
+        finally
+        {
+            ModelPathResolver.FolderGetter = original;
+        }
+    }
 }
