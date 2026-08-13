@@ -206,7 +206,7 @@ public sealed class InternalOnnxProvider : ISemanticProvider, IDisposable
     }
 
     public async Task<SemanticAnalysisResult> AnalyzeAsync(
-        string? semanticInput,
+        string? body,
         string metadata,
         CancellationToken cancellationToken)
     {
@@ -219,13 +219,13 @@ public sealed class InternalOnnxProvider : ISemanticProvider, IDisposable
 
         cancellationToken.ThrowIfCancellationRequested();
 
-        if (string.IsNullOrWhiteSpace(semanticInput))
+        if (string.IsNullOrWhiteSpace(body))
         {
             return CreateFallbackResult(
                 "Semantic input is empty.");
         }
 
-        var cacheKey = $"semantic_internal:{ComputeHash(semanticInput)}";
+        var cacheKey = $"semantic_internal:{ComputeHash(body)}";
 
         var (cacheHit, cachedResult) =
             await _cacheProvider!.TryGetValueAsync<SemanticAnalysisResult>(
@@ -248,7 +248,7 @@ public sealed class InternalOnnxProvider : ISemanticProvider, IDisposable
                 "Internal ONNX tokenizer is not initialized.");
 
         var (rawIds, rawMask) = tokenizer.Tokenize(
-            semanticInput,
+            body,
             _maxLength);
 
         if (rawIds is null)
