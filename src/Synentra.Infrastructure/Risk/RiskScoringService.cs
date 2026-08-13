@@ -12,7 +12,6 @@ namespace Synentra.Infrastructure.Risk;
 public class RiskScoringService : IRiskScoringService
 {
     private readonly RiskScoreAggregator _aggregator;
-    private readonly IAgentHistoryRepository? _historyRepo;
     private readonly ICacheProvider _cacheProvider;
     private readonly RiskConfiguration _configuration;
     private readonly ILogger<RiskScoringService> _logger;
@@ -38,7 +37,6 @@ public class RiskScoringService : IRiskScoringService
     {
         _ = historyRepo ?? throw new ArgumentNullException(nameof(historyRepo));
         _ = configuration ?? throw new ArgumentNullException(nameof(configuration));
-        _historyRepo = historyRepo;
         _configuration = configuration.Value;
     }
 
