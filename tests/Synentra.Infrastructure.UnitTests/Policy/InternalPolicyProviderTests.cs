@@ -6,7 +6,6 @@ using Synentra.Application.Models;
 using Synentra.Domain.Policies;
 using Synentra.Infrastructure.Caches;
 using Synentra.Infrastructure.Policy.Providers;
-using Microsoft.Extensions.Logging;
 
 namespace Synentra.Infrastructure.UnitTests.Policy;
 
@@ -15,7 +14,6 @@ public class InternalPolicyProviderTests
     private readonly ICacheService _cacheService = Substitute.For<ICacheService>();
     private readonly ICacheProvider _cacheProvider = Substitute.For<ICacheProvider>();
     private readonly IPolicyLoader _loader = Substitute.For<IPolicyLoader>();
-    private readonly ILogger<InternalPolicyProvider> _logger = Substitute.For<ILogger<InternalPolicyProvider>>();
     private readonly InternalPolicyProvider _sut;
 
     public InternalPolicyProviderTests()
@@ -26,7 +24,7 @@ public class InternalPolicyProviderTests
         _loader.LoadAllAsync(Arg.Any<CancellationToken>())
             .Returns(new Dictionary<string, PolicyDefinition>());
 
-        _sut = new InternalPolicyProvider(_cacheService, _loader, _logger);
+        _sut = new InternalPolicyProvider(_cacheService, _loader);
     }
 
     [Fact]

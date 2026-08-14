@@ -11,17 +11,14 @@ public class InternalPolicyProvider : IPolicyProvider
 {
     private readonly ICacheProvider _cacheProvider;
     private readonly IPolicyLoader _loader;
-    private readonly ILogger<InternalPolicyProvider> _logger;
     private const string CacheKey = "all_policies";
 
     public InternalPolicyProvider(
         ICacheService cacheService,
-        IPolicyLoader loader,
-        ILogger<InternalPolicyProvider> logger)
+        IPolicyLoader loader)
     {
         _cacheProvider = cacheService.Current ?? throw new ArgumentNullException(nameof(cacheService));
         _loader = loader ?? throw new ArgumentNullException(nameof(loader));
-        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
     public async Task<PolicyDecision> EvaluateAsync(
