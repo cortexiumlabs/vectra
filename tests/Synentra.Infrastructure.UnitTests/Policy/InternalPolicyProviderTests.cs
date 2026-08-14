@@ -248,6 +248,19 @@ public class InternalPolicyProviderTests
     }
 
     [Fact]
+    public async Task EvaluateAsync_CacheMiss_PropagatesCancellationTokenToLoader()
+    {
+        using var cancellationTokenSource = new CancellationTokenSource();
+        var cancellationToken = cancellationTokenSource.Token;
+
+        await _sut.EvaluateAsync(
+            BuildEvaluationContext("non-existent-policy"),
+            cancellationToken);
+
+        await _loader.Received(1).LoadAllAsync(cancellationToken);
+    }
+
+    [Fact]
     public async Task EvaluateAsync_DefaultHitl_ReturnsHitlWhenNoRuleMatches()
     {
         var policy = new PolicyDefinition

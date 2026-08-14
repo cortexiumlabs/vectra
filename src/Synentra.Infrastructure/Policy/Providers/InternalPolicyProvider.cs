@@ -102,7 +102,7 @@ public class InternalPolicyProvider : IPolicyProvider
         if (success && policies != null)
             return policies;
 
-        policies = await _loader.LoadAllAsync();
+        policies = await _loader.LoadAllAsync(cancellationToken);
         await _cacheProvider.SetAsync(CacheKey, policies);
         return policies;
     }
