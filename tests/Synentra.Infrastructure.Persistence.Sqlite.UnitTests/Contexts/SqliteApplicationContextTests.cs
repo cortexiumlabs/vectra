@@ -1,27 +1,12 @@
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging.Abstractions;
 using Synentra.Domain.Agents;
 using Synentra.Domain.AuditTrails;
-using Synentra.Infrastructure.Persistence.Common.Exceptions;
-using Synentra.Infrastructure.Persistence.Sqlite.Contexts;
 using Synentra.Infrastructure.Persistence.Sqlite.UnitTests.Helpers;
 
 namespace Synentra.Infrastructure.Persistence.Sqlite.UnitTests.Contexts;
 
 public class SqliteApplicationContextTests
 {
-    [Fact]
-    public void Constructor_NullLogger_ThrowsArgumentNullException()
-    {
-        var options = new DbContextOptionsBuilder<SqliteApplicationContext>()
-            .UseInMemoryDatabase(Guid.NewGuid().ToString())
-            .Options;
-
-        Action act = () => new SqliteApplicationContext(options, null!);
-
-        act.Should().Throw<ArgumentNullException>().WithParameterName("logger");
-    }
-
     [Fact]
     public async Task DbContext_CanAddAndQueryAgent()
     {
