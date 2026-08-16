@@ -1,5 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 using Synentra.Domain.Agents;
 using Synentra.Domain.AuditTrails;
 using Synentra.Infrastructure.Persistence.Common.Exceptions;
@@ -8,13 +7,9 @@ namespace Synentra.Infrastructure.Persistence.Common;
 
 public abstract class BaseDbContext : DbContext, IDatabaseContext
 {
-    protected readonly ILogger<BaseDbContext> Logger;
-
     protected BaseDbContext(
-            DbContextOptions options,
-            ILogger<BaseDbContext> logger): base(options)
+            DbContextOptions options): base(options)
     {
-        Logger = logger;
     }
 
     public DbSet<AuditTrail> AuditLogs { get; set; }

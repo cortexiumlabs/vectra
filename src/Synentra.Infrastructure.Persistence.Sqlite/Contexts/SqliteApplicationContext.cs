@@ -1,5 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 using Synentra.Infrastructure.Persistence.Common;
 using Synentra.Infrastructure.Persistence.Common.Exceptions;
 
@@ -7,14 +6,10 @@ namespace Synentra.Infrastructure.Persistence.Sqlite.Contexts;
 
 public class SqliteApplicationContext : BaseDbContext
 {
-    private readonly ILogger<SqliteApplicationContext> _logger;
-
     public SqliteApplicationContext(
-        DbContextOptions<SqliteApplicationContext> contextOptions,
-        ILogger<SqliteApplicationContext> logger)
-        : base(contextOptions, logger)
+        DbContextOptions<SqliteApplicationContext> contextOptions)
+        : base(contextOptions)
     {
-        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)

@@ -1,5 +1,4 @@
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging.Abstractions;
 using Synentra.Infrastructure.Persistence.Sqlite.Contexts;
 
 namespace Synentra.Infrastructure.Persistence.Sqlite.UnitTests.Helpers;
@@ -12,7 +11,7 @@ internal static class SqliteTestContextFactory
             .UseInMemoryDatabase(databaseName ?? Guid.NewGuid().ToString())
             .Options;
 
-        return new SqliteApplicationContext(options, NullLogger<SqliteApplicationContext>.Instance);
+        return new SqliteApplicationContext(options);
     }
 
     public static IDbContextFactory<SqliteApplicationContext> CreateFactory(string? databaseName = null)

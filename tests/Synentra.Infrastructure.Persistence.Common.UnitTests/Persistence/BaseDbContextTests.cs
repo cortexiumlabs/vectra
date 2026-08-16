@@ -1,6 +1,5 @@
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging.Abstractions;
 using Synentra.Domain.Agents;
 using Synentra.Domain.AuditTrails;
 using Synentra.Infrastructure.Persistence.Common.Exceptions;
@@ -11,7 +10,7 @@ namespace Synentra.Infrastructure.Persistence.Common.UnitTests.Persistence;
 internal sealed class TestDbContext : BaseDbContext
 {
     public TestDbContext(DbContextOptions options)
-        : base(options, NullLogger<BaseDbContext>.Instance)
+        : base(options)
     {
     }
 }
