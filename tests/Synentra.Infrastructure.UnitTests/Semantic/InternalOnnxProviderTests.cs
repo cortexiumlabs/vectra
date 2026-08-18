@@ -511,31 +511,33 @@ public class InternalOnnxProviderTests
     }
 
     [Fact]
-    public void PadOrTruncate_ExactLength_ReturnsOriginalArray()
+    public void TruncateToLength_ExactLength_ReturnsOriginalArray()
     {
         var values = new long[] { 1, 2, 3 };
 
-        var result = (long[])InvokePrivate("PadOrTruncate", null, values, 3)!;
+        var result = (long[])InvokePrivate("TruncateToLength", null, values, 3)!;
 
         result.Should().BeSameAs(values);
     }
 
     [Fact]
-    public void PadOrTruncate_LongInput_Truncates()
+    public void TruncateToLength_LongInput_Truncates()
     {
         var result = (long[])InvokePrivate(
-            "PadOrTruncate", null, new long[] { 1, 2, 3 }, 2)!;
+            "TruncateToLength", null, new long[] { 1, 2, 3 }, 2)!;
 
         result.Should().Equal(1, 2);
     }
 
     [Fact]
-    public void PadOrTruncate_ShortInput_PadsWithZeros()
+    public void TruncateToLength_ShortInput_ReturnsOriginalArray()
     {
-        var result = (long[])InvokePrivate(
-            "PadOrTruncate", null, new long[] { 1, 2 }, 4)!;
+        var values = new long[] { 1, 2 };
 
-        result.Should().Equal(1, 2, 0, 0);
+        var result = (long[])InvokePrivate(
+            "TruncateToLength", null, values, 4)!;
+
+        result.Should().BeSameAs(values);
     }
 
     [Fact]

@@ -31,23 +31,23 @@ public class BertTokenizerTests
 
         var (inputIds, attentionMask) = sut.Tokenize("hello", maxLength: 8);
 
-        inputIds.Should().HaveCount(8);
-        attentionMask.Should().HaveCount(8);
+        inputIds.Should().HaveCount(3);
+        attentionMask.Should().HaveCount(3);
         // First token is [CLS] (index 2), last non-pad is [SEP] (index 3)
         inputIds[0].Should().Be(2); // [CLS]
+        inputIds[^1].Should().Be(3); // [SEP]
     }
 
     [Fact]
-    public void Tokenize_PadsToMaxLength()
+    public void Tokenize_DoesNotPadToMaxLength()
     {
         var sut = CreateSut();
 
         var (inputIds, attentionMask) = sut.Tokenize("hi", maxLength: 16);
 
-        inputIds.Should().HaveCount(16);
-        attentionMask.Should().HaveCount(16);
-        // Trailing padding tokens should have id 0 and mask 0
-        attentionMask[^1].Should().Be(0L);
+        inputIds.Should().HaveCount(4);
+        attentionMask.Should().HaveCount(4);
+        attentionMask.Should().OnlyContain(value => value == 1L);
     }
 
     [Fact]
@@ -61,6 +61,7 @@ public class BertTokenizerTests
 
         inputIds.Should().HaveCount(16);
         attentionMask.Should().HaveCount(16);
+        attentionMask.Should().OnlyContain(value => value == 1L);
     }
 
     [Fact]
@@ -75,15 +76,16 @@ public class BertTokenizerTests
     }
 
     [Fact]
-    public void Tokenize_EmptyString_ReturnsPaddedResult()
+    public void Tokenize_EmptyString_ReturnsSpecialTokensOnly()
     {
         var sut = CreateSut();
 
         var (inputIds, attentionMask) = sut.Tokenize("", maxLength: 8);
 
-        inputIds.Should().HaveCount(8);
-        // [CLS] + [SEP] then padding
+        inputIds.Should().HaveCount(2);
+        attentionMask.Should().Equal(1L, 1L);
         inputIds[0].Should().Be(2); // [CLS]
+        inputIds[1].Should().Be(3); // [SEP]
     }
 
     [Fact]
@@ -93,7 +95,7 @@ public class BertTokenizerTests
 
         var (inputIds, _) = sut.Tokenize("hello,world", maxLength: 16);
 
-        inputIds.Should().HaveCount(16);
+        inputIds.Should().HaveCount(5);
         // Comma should be tokenized separately
     }
 
@@ -104,7 +106,8 @@ public class BertTokenizerTests
 
         var (inputIds, attentionMask) = sut.Tokenize("hello world", maxLength: 32);
 
-        inputIds.Should().HaveCount(32);
+        inputIds.Should().HaveCount(4);
+        attentionMask.Should().HaveCount(4);
         // First token is [CLS]
         inputIds[0].Should().Be(2);
     }
@@ -116,11 +119,9 @@ public class BertTokenizerTests
 
         var (inputIds, attentionMask) = sut.Tokenize("test data", maxLength: 16);
 
-        // Positions where inputIds != 0 should have mask = 1
-        for (int i = 0; i < 16; i++)
+        for (int i = 0; i < inputIds.Length; i++)
         {
-            if (inputIds[i] == 0)
-                attentionMask[i].Should().Be(0L, $"padding at {i} should have mask 0");
+            attentionMask[i].Should().Be(1L, $"token at {i} should have mask 1");
         }
     }
 

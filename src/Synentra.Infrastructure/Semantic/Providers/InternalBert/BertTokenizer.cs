@@ -58,17 +58,11 @@ public class BertTokenizer
         var inputIds = wordPieceTokens.Select(t => (long)_vocab.GetValueOrDefault(t, _vocab["[UNK]"])).ToArray();
         var attentionMask = inputIds.Select(_ => 1L).ToArray();
 
-        // Pad or truncate
+        // Truncate only; preserve actual sequence length for dynamic-shape inference
         if (inputIds.Length > maxLength)
         {
             inputIds = inputIds.Take(maxLength).ToArray();
             attentionMask = attentionMask.Take(maxLength).ToArray();
-        }
-        else
-        {
-            var padLength = maxLength - inputIds.Length;
-            inputIds = inputIds.Concat(Enumerable.Repeat(0L, padLength)).ToArray();
-            attentionMask = attentionMask.Concat(Enumerable.Repeat(0L, padLength)).ToArray();
         }
 
         return (inputIds, attentionMask);
