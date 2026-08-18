@@ -241,7 +241,7 @@ public class ProxyMiddleware
 
     private string BuildSemanticInput(RequestContext ctx)
     {
-        // Limit total length to ~600 chars to stay well within 64 tokens (~4 chars/token average)
+        // Build compact semantic context; tokenizer enforces the configured max token length.
         var sb = new StringBuilder();
 
         // 1. METHOD + PATH (Highest signal for reads/writes)
@@ -258,8 +258,6 @@ public class ProxyMiddleware
         if (!string.IsNullOrEmpty(ctx.Body))
             sb.Append($"Body: {ctx.Body}");
 
-        // 4. Truncate hard if somehow too long (safety net)
-        var result = sb.ToString();
-        return result.Length > 512 ? result.Substring(0, 512) : result;
+        return sb.ToString();
     }
 }
