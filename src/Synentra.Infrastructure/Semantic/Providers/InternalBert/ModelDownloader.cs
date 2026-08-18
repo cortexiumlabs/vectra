@@ -10,7 +10,6 @@ public class ModelDownloader : IModelDownloader
     private readonly ILogger<ModelDownloader> _logger;
     private readonly IGitHubReleaseClient _gitHub;
     private readonly IHttpClientFactory _httpClientFactory;
-    private static readonly HashSet<int> SupportedModelSizes = new HashSet<int> { 64, 128, 256, 512 };
 
     public ModelDownloader(
         ILogger<ModelDownloader> logger,
@@ -31,13 +30,6 @@ public class ModelDownloader : IModelDownloader
         InternalOnnxConfiguration config,
         CancellationToken cancellationToken)
     {
-        if (!SupportedModelSizes.Contains(config.ModelSize ?? 128))
-        {
-            throw new InvalidOperationException(
-                $"Unsupported intent model size '{config.ModelSize}'. " +
-                $"Supported sizes are: {string.Join(", ", SupportedModelSizes.Order())}.");
-        }
-
         string fullPath = ModelPathResolver.GetFullPackagePath(config.PackagePath);
 
         if (File.Exists(fullPath))
@@ -69,7 +61,7 @@ public class ModelDownloader : IModelDownloader
         }
 
         // Locate the model asset
-        string assetName = $"intent-model-community-{config.ModelSize}.zip";
+        const string assetName = "intent-model-community.zip";
 
         var matchingAssets = release.Assets
             .Where(asset => asset.Name.Equals(assetName, StringComparison.OrdinalIgnoreCase))
