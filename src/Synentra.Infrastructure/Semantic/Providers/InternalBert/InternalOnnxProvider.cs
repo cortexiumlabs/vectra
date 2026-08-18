@@ -269,9 +269,37 @@ public sealed class InternalOnnxProvider : ISemanticProvider, IDisposable
             rawIds.Length,
             rawMask.Length);
 
-        var inputIds = PadOrTruncate(rawIds, _maxLength);
-        var attentionMask = PadOrTruncate(rawMask, _maxLength);
-        var tokenTypeIds = new long[_maxLength];
+        if (rawIds.Length != rawMask.Length)
+        {
+            throw new InvalidOperationException(
+                $"Tokenizer output length mismatch. Input IDs: {rawIds.Length}; " +
+                $"attention mask: {rawMask.Length}.");
+        }
+
+        var sequenceLength = Math.Min(
+            rawIds.Length,
+            _maxLength);
+
+        if (sequenceLength <= 0)
+        {
+            throw new InvalidOperationException(
+                "The tokenizer produced an empty token sequence.");
+        }
+
+        var inputIds = TruncateToLength(
+            rawIds,
+            sequenceLength);
+
+        var attentionMask = TruncateToLength(
+            rawMask,
+            sequenceLength);
+
+        var tokenTypeIds = new long[sequenceLength];
+        var dimensions = new[]
+        {
+            1,
+            sequenceLength
+        };
 
         var availableInputs =
             new Dictionary<string, DenseTensor<long>>(
@@ -279,15 +307,15 @@ public sealed class InternalOnnxProvider : ISemanticProvider, IDisposable
             {
                 ["input_ids"] = new(
                     inputIds,
-                    new[] { 1, _maxLength }),
+                    dimensions),
 
                 ["attention_mask"] = new(
                     attentionMask,
-                    new[] { 1, _maxLength }),
+                    dimensions),
 
                 ["token_type_ids"] = new(
                     tokenTypeIds,
-                    new[] { 1, _maxLength })
+                    dimensions)
             };
 
         var inputs = CreateModelInputs(
@@ -501,6 +529,14 @@ public sealed class InternalOnnxProvider : ISemanticProvider, IDisposable
                 "'attention_mask' input.");
         }
 
+        ValidateDynamicSequenceDimension(
+            session,
+            "input_ids");
+
+        ValidateDynamicSequenceDimension(
+            session,
+            "attention_mask");
+
         if (session.OutputMetadata.Count == 0)
         {
             throw new InvalidOperationException(
@@ -511,6 +547,31 @@ public sealed class InternalOnnxProvider : ISemanticProvider, IDisposable
         {
             throw new InvalidOperationException(
                 "No intent labels were loaded.");
+        }
+    }
+
+    private static void ValidateDynamicSequenceDimension(
+        InferenceSession session,
+        string inputName)
+    {
+        var dimensions = session.InputMetadata[inputName].Dimensions;
+
+        if (dimensions.Length < 2)
+        {
+            throw new InvalidOperationException(
+                $"Internal ONNX model input '{inputName}' must expose batch and " +
+                $"sequence dimensions, but declares [{string.Join(",", dimensions)}].");
+        }
+
+        var sequenceDimension = dimensions[1];
+
+        if (sequenceDimension >= 0)
+        {
+            throw new InvalidOperationException(
+                "Internal ONNX model uses a fixed sequence dimension of " +
+                $"{sequenceDimension} for input '{inputName}'. Dynamic " +
+                "sequence-length inference requires the model to be exported " +
+                "with a dynamic sequence dimension.");
         }
     }
 
@@ -602,24 +663,14 @@ public sealed class InternalOnnxProvider : ISemanticProvider, IDisposable
         return Convert.ToHexString(hash);
     }
 
-    private static long[] PadOrTruncate(
+    private static long[] TruncateToLength(
         long[] values,
-        int requiredLength)
+        int maximumLength)
     {
-        if (values.Length == requiredLength)
+        if (values.Length <= maximumLength)
             return values;
 
-        if (values.Length > requiredLength)
-            return values[..requiredLength];
-
-        var paddedValues = new long[requiredLength];
-
-        Array.Copy(
-            values,
-            paddedValues,
-            values.Length);
-
-        return paddedValues;
+        return values[..maximumLength];
     }
 
     private static string FormatInputMetadata(
