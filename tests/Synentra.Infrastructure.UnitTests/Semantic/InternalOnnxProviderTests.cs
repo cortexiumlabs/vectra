@@ -27,7 +27,6 @@ public class InternalOnnxProviderTests
         Options.Create(new SemanticConfiguration { Enabled = false });
 
     private IOptions<SemanticConfiguration> EnabledOptions(
-        int? modelSize = 8,
         double? confidenceThreshold = 0.7) =>
         Options.Create(new SemanticConfiguration
         {
@@ -37,8 +36,7 @@ public class InternalOnnxProviderTests
             {
                 Internal = new InternalOnnxConfiguration
                 {
-                    PackagePath = "model.zip",
-                    ModelSize = modelSize
+                    PackagePath = "model.zip"
                 }
             }
         });
@@ -158,8 +156,7 @@ public class InternalOnnxProviderTests
             {
                 Internal = new InternalOnnxConfiguration
                 {
-                    PackagePath = null,
-                    ModelSize = 64
+                    PackagePath = null
                 }
             }
         });
@@ -191,8 +188,7 @@ public class InternalOnnxProviderTests
             {
                 Internal = new InternalOnnxConfiguration
                 {
-                    PackagePath = "nonexistent_model_package.zip",
-                    ModelSize = 64
+                    PackagePath = "nonexistent_model_package.zip"
                 }
             }
         });
@@ -374,20 +370,6 @@ public class InternalOnnxProviderTests
 
         act.Should().Throw<InvalidOperationException>()
             .WithMessage("*Internal ONNX configuration is missing*");
-    }
-
-    [Theory]
-    [InlineData(0)]
-    [InlineData(-1)]
-    public void Constructor_NonPositiveModelSize_ThrowsInvalidOperationException(int modelSize)
-    {
-        var act = () => new InternalOnnxProvider(
-            EnabledOptions(modelSize), _cacheService,
-            Substitute.For<IModelPackageLoader>(),
-            NullLogger<InternalOnnxProvider>.Instance);
-
-        act.Should().Throw<InvalidOperationException>()
-            .WithMessage("*must be greater than zero*");
     }
 
     [Theory]

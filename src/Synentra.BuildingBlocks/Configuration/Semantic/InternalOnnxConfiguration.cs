@@ -11,6 +11,4 @@ public class InternalOnnxConfiguration
     /// <summary>Absolute path to the JSON license file that provides the AES-256 decryption key (Pro only).</summary>
     public string? LicensePath { get; set; }
 
-    /// <summary>DistilBERT maximum sequence length. Supported values: 64, 128, 256, and 512.</summary>
-    public int? ModelSize { get; set; } = 128;
 }

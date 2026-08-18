@@ -23,6 +23,7 @@ public sealed class InternalOnnxProvider : ISemanticProvider, IDisposable
     private const string FallbackIntent = "suspicious";
     private const double DefaultFallbackConfidence = 0.5;
     private const double DefaultConfidenceThreshold = 0.7;
+    private const int ModelMaximumSequenceLength = 512;
 
     private readonly ICacheProvider? _cacheProvider;
     private readonly IModelPackageLoader _loader;
@@ -77,14 +78,7 @@ public sealed class InternalOnnxProvider : ISemanticProvider, IDisposable
             ?? throw new InvalidOperationException(
                 "Internal ONNX configuration is missing.");
 
-        _maxLength = _internalConfig.ModelSize ?? 128;
-
-        if (_maxLength <= 0)
-        {
-            throw new InvalidOperationException(
-                $"Internal ONNX model size must be greater than zero. " +
-                $"Configured value: {_maxLength}.");
-        }
+        _maxLength = ModelMaximumSequenceLength;
 
         // Adjust this property path if ConfidenceThreshold belongs to a
         // different configuration object in your solution.
