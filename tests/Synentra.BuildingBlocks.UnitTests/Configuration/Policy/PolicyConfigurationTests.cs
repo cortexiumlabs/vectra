@@ -26,11 +26,11 @@ public class PolicyConfigurationTests
     }
 
     [Fact]
-    public void InternalPolicyConfiguration_DefaultDirectory_ShouldBeEmpty()
+    public void InternalPolicyConfiguration_DefaultDirectory_ShouldBePolicies()
     {
         var config = new InternalPolicyConfiguration();
 
-        config.Directory.Should().BeEmpty();
+        config.Directory.Should().Be("policies");
     }
 
     [Fact]
