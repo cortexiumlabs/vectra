@@ -1,8 +1,14 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
+using Synentra.Application.Abstractions.Persistence;
 using Synentra.Application.Abstractions.Versioning;
+using Synentra.BuildingBlocks.Configuration.System;
+using Synentra.Infrastructure.Persistence.Sqlite.Contexts;
 using Synentra.BuildingBlocks.Clock;
 using Synentra.Extensions;
+using Swashbuckle.AspNetCore.SwaggerGen;
 
 namespace Synentra.UnitTests.Extensions;
 
@@ -108,6 +114,18 @@ public class ServiceCollectionExtensionsTests
         result.Should().BeSameAs(services);
     }
 
+    [Fact]
+    public void AddSynentraApiDocumentation_ConfiguresSwaggerDocument()
+    {
+        var services = new ServiceCollection();
+        services.AddSynentraApiDocumentation();
+        var provider = services.BuildServiceProvider();
+
+        var options = provider.GetRequiredService<IOptions<SwaggerGenOptions>>().Value;
+
+        options.SwaggerGeneratorOptions.SwaggerDocs.ContainsKey("synentra").Should().BeTrue();
+    }
+
     // ── AddSynentraProxyForwarder ───────────────────────────────────────────
 
     [Fact]
@@ -136,5 +154,53 @@ public class ServiceCollectionExtensionsTests
         var services = new ServiceCollection();
         var result = services.AddHttpJsonOptions();
         result.Should().BeSameAs(services);
+    }
+
+    [Fact]
+    public void AddHttpJsonOptions_ConfiguresReferenceHandler()
+    {
+        var services = new ServiceCollection();
+        services.AddHttpJsonOptions();
+        var provider = services.BuildServiceProvider();
+
+        var options = provider.GetRequiredService<IOptions<Microsoft.AspNetCore.Http.Json.JsonOptions>>().Value;
+
+        options.SerializerOptions.ReferenceHandler.Should().Be(System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles);
+        options.SerializerOptions.Converters.Should().Contain(converter => converter is System.Text.Json.Serialization.JsonStringEnumConverter);
+    }
+
+    [Fact]
+    public void AddSynentraPersistence_SqliteProvider_RegistersPersistenceServices()
+    {
+        var services = new ServiceCollection();
+        services.AddOptions();
+        services.Configure<SystemConfiguration>(config =>
+        {
+            config.Storage.Database.DefaultProvider = "sqlite";
+            config.Storage.Database.Providers.Sqlite.ConnectionString = "Data Source=:memory:";
+        });
+
+        var result = services.AddSynentraPersistence();
+
+        result.Should().BeSameAs(services);
+        services.Any(s => s.ServiceType == typeof(IAgentRepository)).Should().BeTrue();
+        services.Any(s => s.ServiceType == typeof(IDbContextFactory<SqliteApplicationContext>)).Should().BeTrue();
+    }
+
+    [Fact]
+    public void AddSynentraPersistence_UnsupportedProvider_ThrowsInvalidOperationException()
+    {
+        var services = new ServiceCollection();
+        services.AddOptions();
+        services.Configure<SystemConfiguration>(config =>
+        {
+            config.Storage.Database.DefaultProvider = "unknown";
+        });
+
+        var act = () => services.AddSynentraPersistence();
+
+        act.Should()
+            .Throw<InvalidOperationException>()
+            .WithMessage("*Unsupported database provider*");
     }
 }
