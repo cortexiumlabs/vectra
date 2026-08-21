@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging;
 using NSubstitute;
 using NSubstitute.ExceptionExtensions;
 using System.Net;
+using System.Reflection;
 using Synentra.Application.Abstractions.CircuitBreaker;
 using Synentra.Application.Abstractions.Executions;
 using Synentra.Application.Abstractions.Persistence;
@@ -320,6 +321,140 @@ public class ProxyMiddlewareTests
     }
 
     [Fact]
+    public async Task InvokeAsync_UpstreamResponseHeaders_CopiesOnlyNonRestrictedHeaders()
+    {
+        var agentId = Guid.NewGuid();
+        var accessService = Substitute.For<IAgentRequestAccessService>();
+        accessService.GetAgentAsync(agentId, Arg.Any<CancellationToken>())
+            .Returns(new AgentRequestAccessResult(true, new Agent("test", "owner", "hash"), null));
+
+        var rateLimiter = Substitute.For<IAgentRateLimiter>();
+        rateLimiter.IsAllowedAsync(agentId, Arg.Any<CancellationToken>()).Returns(true);
+
+        var circuitBreaker = Substitute.For<ICircuitBreaker>();
+        circuitBreaker.IsAllowed(Arg.Any<string>()).Returns(true);
+
+        var decisionEngine = Substitute.For<IDecisionEngine>();
+        decisionEngine.EvaluateAsync(Arg.Any<string>(), Arg.Any<RequestContext>(), Arg.Any<CancellationToken>())
+            .Returns(DecisionResult.Allow());
+
+        var handler = new HeaderResponseHttpMessageHandler();
+        _httpClientFactory.CreateClient(Arg.Any<string>()).Returns(new HttpClient(handler));
+
+        var middleware = BuildMiddleware(_ => Task.CompletedTask);
+        var context = BuildContext("/proxy/http://example.com/api",
+            decisionEngine: decisionEngine, accessService: accessService,
+            rateLimiter: rateLimiter, circuitBreaker: circuitBreaker);
+        context.Items["AgentId"] = agentId;
+        context.Request.Body = new MemoryStream();
+        context.Response.Body = new MemoryStream();
+
+        await middleware.InvokeAsync(context);
+
+        context.Response.Headers.ContainsKey("X-Test").Should().BeTrue();
+        context.Response.Headers.ContainsKey("Transfer-Encoding").Should().BeFalse();
+        context.Response.Headers.ContainsKey("Content-Length").Should().BeFalse();
+    }
+
+    [Theory]
+    [InlineData(null, "/")]
+    [InlineData("", "/")]
+    [InlineData(" orders//1234 ", "/orders/id")]
+    [InlineData("https://example.com/orders/{id}?state=active", "/orders/id?state=active")]
+    [InlineData("/users/2024-01-02/profile", "/users/date/profile")]
+    public void NormalizePath_NormalizesExpectedValue(string? input, string expected)
+    {
+        var result = (string)InvokePrivateStatic("NormalizePath", input)!;
+
+        result.Should().Be(expected);
+    }
+
+    [Theory]
+    [InlineData("123", true)]
+    [InlineData("ord_abc123", true)]
+    [InlineData("01H9Q9QYB6ZX6G4S4WFM3VKVGG", true)]
+    [InlineData("abc", false)]
+    [InlineData("   ", false)]
+    public void IsDynamicIdentifier_ReturnsExpected(string value, bool expected)
+    {
+        var result = (bool)InvokePrivateStatic("IsDynamicIdentifier", value)!;
+
+        result.Should().Be(expected);
+    }
+
+    [Theory]
+    [InlineData("id", "98765", "id")]
+    [InlineData("start", "2024-01-02", "date")]
+    [InlineData("window", "5m", "duration")]
+    [InlineData("amount", "19.99", "number")]
+    [InlineData("status", "DESC", "desc")]
+    [InlineData("q", "Jane Doe", "value")]
+    [InlineData("q", " ", "none")]
+    public void NormalizeQueryValue_ReturnsExpectedValue(string key, string? value, string expected)
+    {
+        var result = (string)InvokePrivateStatic("NormalizeQueryValue", key, value)!;
+
+        result.Should().Be(expected);
+    }
+
+    [Theory]
+    [InlineData(null, "none")]
+    [InlineData("text/json", "application/json")]
+    [InlineData("application/problem+json", "application/problem+json")]
+    [InlineData("application/vnd.custom+json", "application/json")]
+    [InlineData("application/custom+xml", "application/xml")]
+    [InlineData("invalid media", "other")]
+    public void NormalizeContentType_ReturnsExpectedValue(string? input, string expected)
+    {
+        var result = (string)InvokePrivateStatic("NormalizeContentType", input)!;
+
+        result.Should().Be(expected);
+    }
+
+    [Fact]
+    public async Task ReadBodyAsync_InvalidJson_ReturnsOriginalBody()
+    {
+        var middleware = BuildMiddleware(_ => Task.CompletedTask);
+        var context = BuildContext("/proxy/http://example.com/api");
+        var payload = "{\"x\": }";
+        context.Request.ContentLength = payload.Length;
+        context.Request.ContentType = "application/json";
+        context.Request.Body = new MemoryStream(System.Text.Encoding.UTF8.GetBytes(payload));
+
+        var result = await (Task<string?>)InvokePrivateInstance(middleware, "ReadBodyAsync", context.Request)!;
+
+        result.Should().Be(payload);
+        context.Request.Body.Position.Should().Be(0);
+    }
+
+    [Fact]
+    public async Task ReadBodyAsync_JsonBody_ReturnsConvertedText()
+    {
+        var middleware = BuildMiddleware(_ => Task.CompletedTask);
+        var context = BuildContext("/proxy/http://example.com/api");
+        var payload = "{\"action\":\"Export\",\"status\":\"Active\"}";
+        context.Request.ContentLength = payload.Length;
+        context.Request.ContentType = "application/json";
+        context.Request.Body = new MemoryStream(System.Text.Encoding.UTF8.GetBytes(payload));
+
+        var result = await (Task<string?>)InvokePrivateInstance(middleware, "ReadBodyAsync", context.Request)!;
+
+        result.Should().Contain("action export");
+        result.Should().Contain("status active");
+    }
+
+    [Fact]
+    public void BuildSemanticInput_NullContext_ThrowsArgumentNullException()
+    {
+        var middleware = BuildMiddleware(_ => Task.CompletedTask);
+
+        var act = () => InvokePrivateInstance(middleware, "BuildSemanticInput", new object?[] { null });
+
+        act.Should().Throw<TargetInvocationException>()
+            .Where(ex => ex.InnerException is ArgumentNullException);
+    }
+
+    [Fact]
     public async Task InvokeAsync_ForwardsAuthorizationHeader_ButStripsSynentraHeader()
     {
         var agentId = Guid.NewGuid();
@@ -515,6 +650,22 @@ public class ProxyMiddlewareTests
         return context;
     }
 
+    private static object? InvokePrivateStatic(string methodName, params object?[] arguments)
+    {
+        var method = typeof(ProxyMiddleware).GetMethod(methodName, BindingFlags.NonPublic | BindingFlags.Static)
+            ?? throw new InvalidOperationException($"Method '{methodName}' was not found.");
+
+        return method.Invoke(null, arguments);
+    }
+
+    private static object? InvokePrivateInstance(object instance, string methodName, params object?[] arguments)
+    {
+        var method = typeof(ProxyMiddleware).GetMethod(methodName, BindingFlags.NonPublic | BindingFlags.Instance)
+            ?? throw new InvalidOperationException($"Method '{methodName}' was not found.");
+
+        return method.Invoke(instance, arguments);
+    }
+
     // ── Fake handlers ─────────────────────────────────────────────────────
 
     private sealed class FailingHttpMessageHandler : HttpMessageHandler
@@ -566,6 +717,23 @@ public class ProxyMiddlewareTests
             {
                 Content = new StringContent(_body)
             };
+            return Task.FromResult(response);
+        }
+    }
+
+    private sealed class HeaderResponseHttpMessageHandler : HttpMessageHandler
+    {
+        protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+        {
+            var response = new HttpResponseMessage(HttpStatusCode.OK)
+            {
+                Content = new StringContent("ok")
+            };
+
+            response.Headers.TryAddWithoutValidation("Transfer-Encoding", "chunked");
+            response.Headers.TryAddWithoutValidation("X-Test", "value");
+            response.Content.Headers.ContentLength = 2;
+
             return Task.FromResult(response);
         }
     }
