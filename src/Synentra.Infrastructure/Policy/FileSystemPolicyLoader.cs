@@ -14,7 +14,7 @@ public class FileSystemPolicyLoader : IPolicyLoader
     private readonly IDeserializer _deserializer;
 
     public FileSystemPolicyLoader(
-        IOptions<PolicyConfiguration> options, 
+        IOptions<PolicyConfiguration> options,
         ILogger<FileSystemPolicyLoader> logger,
         IDeserializer deserializer)
     {
@@ -23,13 +23,13 @@ public class FileSystemPolicyLoader : IPolicyLoader
         _deserializer = deserializer ?? throw new ArgumentNullException(nameof(deserializer));
     }
 
-    public async Task<PolicyDefinition?> GetPolicyAsync(string policyName, CancellationToken ct)
+    public async Task<PolicyDefinition?> GetPolicyAsync(string policyName, CancellationToken ct = default)
     {
         var allPolicies = await LoadAllAsync(ct);
         return allPolicies.TryGetValue(policyName, out var policy) ? policy : null;
     }
 
-    public async Task<Dictionary<string, PolicyDefinition>> LoadAllAsync(CancellationToken ct)
+    public async Task<Dictionary<string, PolicyDefinition>> LoadAllAsync(CancellationToken ct = default)
     {
         var policyConfiguration = _options.Value.Providers.Internal;
         var policies = new Dictionary<string, PolicyDefinition>();
