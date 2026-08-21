@@ -173,11 +173,7 @@ public sealed class InternalOnnxProvider : ISemanticProvider, IDisposable
             _intentLabels = labels;
 
             _logger.LogInformation(
-                "Internal ONNX model loaded successfully with {LabelCount} labels. " +
-                "Inputs: {Inputs}; Outputs: {Outputs}.",
-                labels.Length,
-                FormatInputMetadata(session.InputMetadata),
-                string.Join(", ", session.OutputMetadata.Keys));
+                "Internal ONNX model loaded successfully with {LabelCount} labels.", labels.Length);
 
             _initializationTcs.TrySetResult();
         }
