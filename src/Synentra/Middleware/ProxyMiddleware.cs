@@ -17,29 +17,35 @@ public class ProxyMiddleware
 {
     private static readonly Regex MultipleSlashesRegex = new(
         @"/{2,}",
-        RegexOptions.Compiled | RegexOptions.CultureInvariant);
+        RegexOptions.Compiled | RegexOptions.CultureInvariant,
+        TimeSpan.FromSeconds(3));
 
     private static readonly Regex WhitespaceRegex = new(
         @"\s+",
-        RegexOptions.Compiled | RegexOptions.CultureInvariant);
+        RegexOptions.Compiled | RegexOptions.CultureInvariant,
+        TimeSpan.FromSeconds(3));
 
     private static readonly Regex NumericIdRegex = new(
         @"^\d+$",
-        RegexOptions.Compiled | RegexOptions.CultureInvariant);
+        RegexOptions.Compiled | RegexOptions.CultureInvariant,
+        TimeSpan.FromSeconds(3));
 
     private static readonly Regex HexIdRegex = new(
         @"^[a-fA-F0-9]{16,64}$",
-        RegexOptions.Compiled | RegexOptions.CultureInvariant);
+        RegexOptions.Compiled | RegexOptions.CultureInvariant,
+        TimeSpan.FromSeconds(3));
 
     private static readonly Regex UlidRegex = new(
         @"^[0-9A-HJKMNP-TV-Z]{26}$",
         RegexOptions.Compiled |
         RegexOptions.CultureInvariant |
-        RegexOptions.IgnoreCase);
+        RegexOptions.IgnoreCase,
+        TimeSpan.FromSeconds(3));
 
     private static readonly Regex OpaqueIdRegex = new(
         @"^(?=.*\d)[A-Za-z0-9_]{20,}$",
-        RegexOptions.Compiled | RegexOptions.CultureInvariant);
+        RegexOptions.Compiled | RegexOptions.CultureInvariant,
+        TimeSpan.FromSeconds(3));
 
     private static readonly Regex PrefixedIdRegex = new(
         @"^(?:id|ord|order|usr|user|acct|account|req|request|job|txn|" +
@@ -48,17 +54,20 @@ public class ProxyMiddleware
         @"[-_][A-Za-z0-9_-]{4,}$",
         RegexOptions.Compiled |
         RegexOptions.CultureInvariant |
-        RegexOptions.IgnoreCase);
+        RegexOptions.IgnoreCase,
+        TimeSpan.FromSeconds(3));
 
     private static readonly Regex IsoDateRegex = new(
         @"^\d{4}-\d{2}-\d{2}$",
-        RegexOptions.Compiled | RegexOptions.CultureInvariant);
+        RegexOptions.Compiled | RegexOptions.CultureInvariant,
+        TimeSpan.FromSeconds(3));
 
     private static readonly Regex DurationRegex = new(
         @"^\d+(?:ms|s|m|h|d|w)$",
         RegexOptions.Compiled |
         RegexOptions.CultureInvariant |
-        RegexOptions.IgnoreCase);
+        RegexOptions.IgnoreCase,
+        TimeSpan.FromSeconds(3));
 
     private static readonly HashSet<string> PreservedQueryValues =
         new(StringComparer.OrdinalIgnoreCase)
