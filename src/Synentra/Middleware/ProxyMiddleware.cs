@@ -1,17 +1,85 @@
-﻿using Synentra.Application.Abstractions.CircuitBreaker;
+﻿using Microsoft.AspNetCore.WebUtilities;
+using Synentra.Application.Abstractions.CircuitBreaker;
 using Synentra.Application.Abstractions.Executions;
 using Synentra.Application.Abstractions.RateLimit;
 using Synentra.Application.Abstractions.Security;
 using Synentra.Application.Models;
 using Synentra.BuildingBlocks.Configuration.Security;
 using Synentra.Infrastructure.Decision;
+using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
+using System.Text.RegularExpressions;
 
 namespace Synentra.Middleware;
 
 public class ProxyMiddleware
 {
+    private static readonly Regex MultipleSlashesRegex = new(
+        @"/{2,}",
+        RegexOptions.Compiled | RegexOptions.CultureInvariant);
+
+    private static readonly Regex WhitespaceRegex = new(
+        @"\s+",
+        RegexOptions.Compiled | RegexOptions.CultureInvariant);
+
+    private static readonly Regex NumericIdRegex = new(
+        @"^\d+$",
+        RegexOptions.Compiled | RegexOptions.CultureInvariant);
+
+    private static readonly Regex HexIdRegex = new(
+        @"^[a-fA-F0-9]{16,64}$",
+        RegexOptions.Compiled | RegexOptions.CultureInvariant);
+
+    private static readonly Regex UlidRegex = new(
+        @"^[0-9A-HJKMNP-TV-Z]{26}$",
+        RegexOptions.Compiled |
+        RegexOptions.CultureInvariant |
+        RegexOptions.IgnoreCase);
+
+    private static readonly Regex OpaqueIdRegex = new(
+        @"^(?=.*\d)[A-Za-z0-9_]{20,}$",
+        RegexOptions.Compiled | RegexOptions.CultureInvariant);
+
+    private static readonly Regex PrefixedIdRegex = new(
+        @"^(?:id|ord|order|usr|user|acct|account|req|request|job|txn|" +
+        @"transaction|inv|invoice|ticket|case|res|resource|tenant|tn|" +
+        @"svc|service|proj|project|sub|subscription|cus|customer)" +
+        @"[-_][A-Za-z0-9_-]{4,}$",
+        RegexOptions.Compiled |
+        RegexOptions.CultureInvariant |
+        RegexOptions.IgnoreCase);
+
+    private static readonly Regex IsoDateRegex = new(
+        @"^\d{4}-\d{2}-\d{2}$",
+        RegexOptions.Compiled | RegexOptions.CultureInvariant);
+
+    private static readonly Regex DurationRegex = new(
+        @"^\d+(?:ms|s|m|h|d|w)$",
+        RegexOptions.Compiled |
+        RegexOptions.CultureInvariant |
+        RegexOptions.IgnoreCase);
+
+    private static readonly HashSet<string> PreservedQueryValues =
+        new(StringComparer.OrdinalIgnoreCase)
+        {
+        "true",
+        "false",
+        "asc",
+        "desc",
+        "active",
+        "inactive",
+        "pending",
+        "approved",
+        "rejected",
+        "failed",
+        "completed",
+        "open",
+        "closed",
+        "all",
+        "none"
+        };
+
     private readonly RequestDelegate _next;
     private readonly IHttpClientFactory _httpClientFactory;
 
@@ -241,23 +309,284 @@ public class ProxyMiddleware
 
     private string BuildSemanticInput(RequestContext ctx)
     {
-        // Build compact semantic context; tokenizer enforces the configured max token length.
-        var sb = new StringBuilder();
+        ArgumentNullException.ThrowIfNull(ctx);
 
-        // 1. METHOD + PATH (Highest signal for reads/writes)
-        sb.Append($"{ctx.Method} {ctx.Path} ");
-        // Example: "GET /todos/1 " or "POST /users "
+        var method = string.IsNullOrWhiteSpace(ctx.Method)
+            ? "NONE"
+            : ctx.Method.Trim().ToUpperInvariant();
 
-        // 2. SELECTED HEADERS (Skip Authorization to avoid token bloat & noise)
-        if (ctx.Headers.TryGetValue("Content-Type", out var ct))
-            sb.Append($"Content-Type: {ct} ");
-        if (ctx.Headers.TryGetValue("User-Agent", out var ua))
-            sb.Append($"User-Agent: {ua} ");
+        var path = NormalizePath(ctx.Path);
 
-        // 3. BODY (Already transformed by JsonToIntentText -> just key-value pairs)
-        if (!string.IsNullOrEmpty(ctx.Body))
-            sb.Append($"Body: {ctx.Body}");
+        var contentType = ctx.Headers.TryGetValue("Content-Type", out var ct)
+            ? NormalizeContentType(ct.ToString())
+            : "none";
 
-        return sb.ToString();
+        var body = string.IsNullOrWhiteSpace(ctx.Body)
+            ? "none"
+            : NormalizeWhitespace(ctx.Body);
+
+        return
+            $"method: {method} [SEP] " +
+            $"path: {path} [SEP] " +
+            $"body: {body} [SEP] " +
+            $"content_type: {contentType}";
+    }
+
+    private static string NormalizePath(string? input)
+    {
+        if (string.IsNullOrWhiteSpace(input))
+            return "/";
+
+        var value = input.Trim();
+
+        // If an absolute URL is accidentally provided, discard the hostname.
+        if (Uri.TryCreate(value, UriKind.Absolute, out var absoluteUri))
+            value = absoluteUri.PathAndQuery;
+
+        // Fragments are not sent to HTTP servers and should not affect intent.
+        var fragmentIndex = value.IndexOf('#');
+        if (fragmentIndex >= 0)
+            value = value[..fragmentIndex];
+
+        var queryIndex = value.IndexOf('?');
+
+        var rawPath = queryIndex >= 0
+            ? value[..queryIndex]
+            : value;
+
+        var rawQuery = queryIndex >= 0
+            ? value[(queryIndex + 1)..]
+            : string.Empty;
+
+        rawPath = rawPath.Replace('\\', '/');
+        rawPath = MultipleSlashesRegex.Replace(rawPath, "/");
+
+        if (!rawPath.StartsWith('/'))
+            rawPath = "/" + rawPath;
+
+        var normalizedSegments = rawPath
+            .Split('/', StringSplitOptions.RemoveEmptyEntries)
+            .Select(NormalizePathSegment);
+
+        var normalizedPath = "/" + string.Join("/", normalizedSegments);
+
+        // Remove the trailing slash, except for the root path.
+        if (normalizedPath.Length > 1)
+            normalizedPath = normalizedPath.TrimEnd('/');
+
+        var normalizedQuery = NormalizeQueryString(rawQuery);
+
+        return normalizedQuery.Length == 0
+            ? normalizedPath
+            : $"{normalizedPath}?{normalizedQuery}";
+    }
+
+    private static string NormalizePathSegment(string segment)
+    {
+        if (string.IsNullOrWhiteSpace(segment))
+            return string.Empty;
+
+        string decoded;
+
+        try
+        {
+            decoded = Uri.UnescapeDataString(segment);
+        }
+        catch (UriFormatException)
+        {
+            decoded = segment;
+        }
+
+        decoded = decoded.Trim();
+
+        if (decoded.Equals("id", StringComparison.OrdinalIgnoreCase) ||
+            decoded.Equals("{id}", StringComparison.OrdinalIgnoreCase) ||
+            decoded.Equals(":id", StringComparison.OrdinalIgnoreCase))
+        {
+            return "id";
+        }
+
+        if (IsDynamicIdentifier(decoded))
+            return "id";
+
+        if (IsoDateRegex.IsMatch(decoded))
+            return "date";
+
+        var normalized = NormalizeWhitespace(decoded)
+            .Replace(' ', '-')
+            .ToLowerInvariant();
+
+        return Uri.EscapeDataString(normalized);
+    }
+
+    private static bool IsDynamicIdentifier(string value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+            return false;
+
+        if (Guid.TryParse(value, out _))
+            return true;
+
+        if (NumericIdRegex.IsMatch(value))
+            return true;
+
+        if (HexIdRegex.IsMatch(value))
+            return true;
+
+        if (UlidRegex.IsMatch(value))
+            return true;
+
+        if (OpaqueIdRegex.IsMatch(value))
+            return true;
+
+        if (PrefixedIdRegex.IsMatch(value))
+            return true;
+
+        return false;
+    }
+
+    private static string NormalizeQueryString(string query)
+    {
+        if (string.IsNullOrWhiteSpace(query))
+            return string.Empty;
+
+        var parsedQuery = QueryHelpers.ParseQuery("?" + query);
+        var normalizedParameters = new List<(string Key, string Value)>();
+
+        foreach (var parameter in parsedQuery)
+        {
+            var key = NormalizeQueryKey(parameter.Key);
+
+            foreach (var value in parameter.Value)
+            {
+                normalizedParameters.Add(
+                    (key, NormalizeQueryValue(key, value)));
+            }
+
+            // Preserve query keys with no assigned value.
+            if (parameter.Value.Count == 0)
+                normalizedParameters.Add((key, "none"));
+        }
+
+        return string.Join(
+            "&",
+            normalizedParameters
+                .OrderBy(parameter => parameter.Key, StringComparer.Ordinal)
+                .ThenBy(parameter => parameter.Value, StringComparer.Ordinal)
+                .Select(parameter =>
+                    $"{Uri.EscapeDataString(parameter.Key)}=" +
+                    $"{Uri.EscapeDataString(parameter.Value)}"));
+    }
+
+    private static string NormalizeQueryKey(string key)
+    {
+        if (string.IsNullOrWhiteSpace(key))
+            return "parameter";
+
+        return NormalizeWhitespace(key)
+            .Replace(' ', '_')
+            .ToLowerInvariant();
+    }
+
+    private static string NormalizeQueryValue(string key, string? value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+            return "none";
+
+        var normalized = NormalizeWhitespace(value);
+
+        if (IsIdentifierQueryKey(key) || IsDynamicIdentifier(normalized))
+            return "id";
+
+        if (IsoDateRegex.IsMatch(normalized) ||
+            DateTimeOffset.TryParse(normalized, out _))
+        {
+            return "date";
+        }
+
+        if (DurationRegex.IsMatch(normalized))
+            return "duration";
+
+        if (decimal.TryParse(
+                normalized,
+                System.Globalization.NumberStyles.Number,
+                System.Globalization.CultureInfo.InvariantCulture,
+                out _))
+        {
+            return "number";
+        }
+
+        if (PreservedQueryValues.Contains(normalized))
+            return normalized.ToLowerInvariant();
+
+        // Avoid allowing customer names, tokens, search terms, or arbitrary
+        // high-cardinality values to become part of the classifier vocabulary.
+        return "value";
+    }
+
+    private static bool IsIdentifierQueryKey(string key)
+    {
+        return key.Equals("id", StringComparison.OrdinalIgnoreCase) ||
+               key.EndsWith("_id", StringComparison.OrdinalIgnoreCase) ||
+               key.EndsWith("-id", StringComparison.OrdinalIgnoreCase) ||
+               key.Equals("cursor", StringComparison.OrdinalIgnoreCase) ||
+               key.Equals("token", StringComparison.OrdinalIgnoreCase) ||
+               key.Equals("request_id", StringComparison.OrdinalIgnoreCase) ||
+               key.Equals("correlation_id", StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static string NormalizeContentType(string? input)
+    {
+        if (string.IsNullOrWhiteSpace(input))
+            return "none";
+
+        // Content-Type should contain one value. Taking the first also handles
+        // improperly combined header values defensively.
+        var firstValue = input
+            .Split(',', 2, StringSplitOptions.TrimEntries)[0];
+
+        if (!MediaTypeHeaderValue.TryParse(firstValue, out var parsed) ||
+            string.IsNullOrWhiteSpace(parsed.MediaType))
+        {
+            return "other";
+        }
+
+        var mediaType = parsed.MediaType.ToLowerInvariant();
+
+        // Normalize nonstandard JSON aliases.
+        if (mediaType is "text/json" or "application/x-json")
+            return "application/json";
+
+        // Preserve JSON media types that carry useful operation semantics.
+        if (mediaType is
+            "application/json-patch+json" or
+            "application/merge-patch+json" or
+            "application/problem+json")
+        {
+            return mediaType;
+        }
+
+        // Normalize vendor-specific JSON and XML types.
+        if (mediaType.EndsWith("+json", StringComparison.Ordinal))
+            return "application/json";
+
+        if (mediaType.EndsWith("+xml", StringComparison.Ordinal))
+            return "application/xml";
+
+        // Parameters such as charset and multipart boundary are intentionally
+        // removed by returning only MediaType.
+        return mediaType;
+    }
+
+    private static string NormalizeWhitespace(string? input)
+    {
+        if (string.IsNullOrWhiteSpace(input))
+            return string.Empty;
+
+        var normalizedUnicode = input.Normalize(NormalizationForm.FormC);
+
+        return WhitespaceRegex
+            .Replace(normalizedUnicode, " ")
+            .Trim();
     }
 }
