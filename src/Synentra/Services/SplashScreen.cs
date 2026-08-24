@@ -1,32 +1,16 @@
-﻿using System.Reflection;
-
-namespace Synentra.Services;
+﻿namespace Synentra.Services;
 
 internal class SplashScreen: ISplashScreen
 {
-    private const string ResourceName = "Synentra.Resources.splash.txt";
-
     public void Render()
     {
         var version = SynentraVersion.GetApplicationVersion();
-        var assembly = Assembly.GetExecutingAssembly();
-
-        using var stream = assembly.GetManifestResourceStream(ResourceName)
-            ?? throw new InvalidOperationException($"Embedded resource '{ResourceName}' not found.");
-
-        using var reader = new StreamReader(stream);
-        var splashContent = reader.ReadToEnd();
 
         Console.ForegroundColor = ConsoleColor.Cyan;
-        Console.WriteLine(splashContent);
-        Console.ForegroundColor = ConsoleColor.Cyan;
-        Console.WriteLine($"    v{version} | © Synentra. All rights reserved.");
-        Console.WriteLine("    https://synentra.io");
-        Console.WriteLine("    ------------------------------------------------");
-        Console.WriteLine("    Intent-Aware Governance for Secure, Observable,");
-        Console.WriteLine("    and Controlled Interactions Across Autonomous");
-        Console.WriteLine("    Agents and Systems.");
-        Console.WriteLine();
+        Console.WriteLine("SYNENTRA");
+        Console.WriteLine("Intent-Aware Governance for Autonomous AI Agents");
+        Console.WriteLine($"v{version} | https://synentra.io");
+        Console.WriteLine("------------------------------------------------");
         Console.ResetColor();
     }
 }

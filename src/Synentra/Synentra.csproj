@@ -76,10 +76,6 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<EmbeddedResource Include="Resources\splash.txt" />
-	</ItemGroup>
-
-	<ItemGroup>
 		<ProjectReference Include="..\Synentra.Infrastructure.Persistence.Sqlite\Synentra.Infrastructure.Persistence.Sqlite.csproj" />
 		<ProjectReference Include="..\Synentra.Infrastructure\Synentra.Infrastructure.csproj" />
 	</ItemGroup>
