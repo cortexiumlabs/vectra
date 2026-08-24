@@ -375,7 +375,6 @@ Full documentation is available at:
 Useful starting points:
 
 * [Getting Started](https://synentra.io/docs/getting-started)
-* [Docker Initialization](https://synentra.io/docs/getting-started/initialize-synentra-docker)
 * [System Configuration](https://synentra.io/docs/configuration/system)
 * [Security Configuration](https://synentra.io/docs/configuration/security)
 * [Semantic Configuration](https://synentra.io/docs/configuration/semantic)
