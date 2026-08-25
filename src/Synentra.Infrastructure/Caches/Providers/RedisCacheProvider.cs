@@ -81,6 +81,6 @@ public class RedisCacheProvider : ICacheProvider
     {
         var db = _redis.GetDatabase();
         await db.KeyDeleteAsync($"hitl:{key}");
-        _logger.LogInformation($"Redis ({_config.Endpoint}) DEL {key}");
+        _logger.LogInformation("Redis ({Endpoint}) DEL {Key}", _config.Endpoint, key);
     }
 }
