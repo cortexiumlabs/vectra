@@ -70,13 +70,15 @@ Default outcome is `Deny`.
 
 ```mermaid
 flowchart LR
-  A[Agent request with Synentra-Authorization JWT] --> B[Synentra /proxy]
-  B --> C[Agent auth + agent status check]
-  C --> D[Policy evaluation]
-  D -->|Allow| E[Forward to upstream API]
-  D -->|Hitl| F[Suspend request and return 202 + /Hitls/{id}]
-  D -->|Deny| G[Return 403]
-  E --> H[Audit log + request log]
+  A["Agent request with Synentra-Authorization JWT"] --> B["Synentra /proxy"]
+  B --> C["Agent auth + agent status check"]
+  C --> D["Policy evaluation"]
+
+  D -->|Allow| E["Forward to upstream API"]
+  D -->|Hitl| F["Suspend request and return 202 + /Hitls/{id}"]
+  D -->|Deny| G["Return 403"]
+
+  E --> H["Audit log + request log"]
   F --> H
   G --> H
 ```
