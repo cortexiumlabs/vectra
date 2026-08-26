@@ -71,7 +71,7 @@ public class RedisCacheProvider : ICacheProvider
         if (redisValue.HasValue)
         {
             var value = JsonSerializer.Deserialize<TItem>(redisValue.ToString());
-            _logger.LogInformation($"Redis ({_config.Endpoint}) GET {key}");
+            _logger.LogInformation("Redis ({Endpoint}) GET {Key}", _config.Endpoint, key);
             return (true, value);
         }
         return (false, default);
