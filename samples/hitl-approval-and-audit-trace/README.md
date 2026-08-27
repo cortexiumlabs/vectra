@@ -73,13 +73,13 @@ Key sample settings:
 
 ```mermaid
 flowchart TD
-  A[Agent sends POST /proxy/http://upstream-api:8080/v1/transfers] --> B[Synentra auth + access checks]
-  B --> C[Policy evaluation]
-  C -->|Hitl| D[Suspend request + write pending HITL + notify webhook]
-  D --> E[Reviewer calls /Hitls/{id}/approve]
-  E --> F[Synentra replays original request upstream]
-  F --> G[Upstream 201 response streamed back]
-  G --> H[Audit records + structured request logs]
+  A["Agent sends POST /proxy/http://upstream-api:8080/v1/transfers"] --> B["Synentra auth + access checks"]
+  B --> C["Policy evaluation"]
+  C -->|HITL| D["Suspend request + write pending HITL + notify webhook"]
+  D --> E["Reviewer calls /Hitls/{id}/approve"]
+  E --> F["Synentra replays original request upstream"]
+  F --> G["Upstream 201 response streamed back"]
+  G --> H["Audit records + structured request logs"]
 ```
 
 ## Step-by-step instructions
