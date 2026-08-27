@@ -1,0 +1,24 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPath": "/v1/customers"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "customers": [
+        {
+          "id": "c-001",
+          "name": "Contoso"
+        },
+        {
+          "id": "c-002",
+          "name": "Fabrikam"
+        }
+      ]
+    }
+  }
+}

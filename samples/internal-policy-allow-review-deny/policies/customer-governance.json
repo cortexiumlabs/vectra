@@ -1,0 +1,58 @@
+{
+  "name": "customer-governance",
+  "description": "Allow safe customer reads, require review for destructive customer actions, and block admin endpoints.",
+  "owner": "platform-security",
+  "createdOn": "2026-01-01T00:00:00Z",
+  "default": "Deny",
+  "rules": [
+    {
+      "name": "deny-admin-endpoints",
+      "reason": "Admin routes are blocked for this agent policy.",
+      "priority": 300,
+      "effect": "Deny",
+      "conditions": [
+        {
+          "field": "input.path",
+          "operator": "startsWith",
+          "value": "/v1/admin"
+        }
+      ]
+    },
+    {
+      "name": "review-customer-delete",
+      "reason": "Customer deletion requires human approval.",
+      "priority": 200,
+      "effect": "Hitl",
+      "conditions": [
+        {
+          "field": "input.method",
+          "operator": "eq",
+          "value": "DELETE"
+        },
+        {
+          "field": "input.path",
+          "operator": "startsWith",
+          "value": "/v1/customers"
+        }
+      ]
+    },
+    {
+      "name": "allow-customer-read",
+      "reason": "Read-only customer access is allowed.",
+      "priority": 100,
+      "effect": "Allow",
+      "conditions": [
+        {
+          "field": "input.method",
+          "operator": "eq",
+          "value": "GET"
+        },
+        {
+          "field": "input.path",
+          "operator": "startsWith",
+          "value": "/v1/customers"
+        }
+      ]
+    }
+  ]
+}
