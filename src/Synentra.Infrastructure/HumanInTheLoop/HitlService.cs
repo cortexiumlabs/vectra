@@ -1,6 +1,8 @@
 ﻿using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System.Net;
+using System.Net.Http.Headers;
+using System.Text;
 using Synentra.Application.Abstractions.Executions;
 using Synentra.Application.Abstractions.Persistence;
 using Synentra.Application.Models;
@@ -234,7 +236,7 @@ public class HitlService : IHitlService
         {
             Method = new HttpMethod(pending.Method),
             RequestUri = new Uri(pending.Url, UriKind.Absolute),
-            Content = pending.Body is not null ? new StringContent(pending.Body) : null,
+            Content = pending.Body is not null ? new ByteArrayContent(Encoding.UTF8.GetBytes(pending.Body)) : null,
             Version = HttpVersion.Version11,
             VersionPolicy = HttpVersionPolicy.RequestVersionOrLower
         };
@@ -245,7 +247,13 @@ public class HitlService : IHitlService
                 continue;
 
             if (string.Equals(key, "Content-Type", StringComparison.OrdinalIgnoreCase))
-                upstreamRequest.Content?.Headers.TryAddWithoutValidation(key, value);
+            {
+                if (upstreamRequest.Content is not null &&
+                    MediaTypeHeaderValue.TryParse(value, out var contentType))
+                {
+                    upstreamRequest.Content.Headers.ContentType = contentType;
+                }
+            }
             else
                 upstreamRequest.Headers.TryAddWithoutValidation(key, value);
         }
