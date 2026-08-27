@@ -1,0 +1,45 @@
+{
+  "name": "payment-hitl-policy",
+  "description": "Require review for payment transfer creation, allow safe balance reads, deny everything else.",
+  "owner": "risk-team",
+  "createdOn": "2026-01-01T00:00:00Z",
+  "default": "Deny",
+  "rules": [
+    {
+      "name": "review-transfer-create",
+      "reason": "Transfers require explicit human approval.",
+      "priority": 200,
+      "effect": "Hitl",
+      "conditions": [
+        {
+          "field": "input.method",
+          "operator": "eq",
+          "value": "POST"
+        },
+        {
+          "field": "input.path",
+          "operator": "startsWith",
+          "value": "/v1/transfers"
+        }
+      ]
+    },
+    {
+      "name": "allow-balance-read",
+      "reason": "Balance reads are allowed.",
+      "priority": 100,
+      "effect": "Allow",
+      "conditions": [
+        {
+          "field": "input.method",
+          "operator": "eq",
+          "value": "GET"
+        },
+        {
+          "field": "input.path",
+          "operator": "startsWith",
+          "value": "/v1/balances"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,43 @@
+services:
+  synentra:
+    build:
+      context: ../..
+      dockerfile: .docker/Dockerfile
+    container_name: synentra-sample-hitl
+    ports:
+      - "7082:7080"
+    volumes:
+      - ./config/appsettings.json:/app/appsettings.json:ro
+      - ./policies:/app/policies:ro
+      - ./data:/data
+    depends_on:
+      - upstream-api
+      - review-webhook
+    networks:
+      - synentra-sample
+
+  upstream-api:
+    image: wiremock/wiremock:3.9.1
+    container_name: synentra-sample-hitl-upstream
+    command: ["--verbose"]
+    ports:
+      - "18082:8080"
+    volumes:
+      - ./upstream:/home/wiremock:ro
+    networks:
+      - synentra-sample
+
+  review-webhook:
+    image: wiremock/wiremock:3.9.1
+    container_name: synentra-sample-hitl-webhook
+    command: ["--verbose"]
+    ports:
+      - "18092:8080"
+    volumes:
+      - ./review-webhook:/home/wiremock:ro
+    networks:
+      - synentra-sample
+
+networks:
+  synentra-sample:
+    driver: bridge
