@@ -39,7 +39,7 @@ public class RedisCacheProvider : ICacheProvider
     {
         var db = _redis.GetDatabase();
         var value = await db.StringGetAsync($"hitl:{key}");
-        _logger.LogInformation($"Redis ({_config.Endpoint}) GET {key}");
+        _logger.LogInformation("Redis ({Endpoint}) GET {Key}", _config.Endpoint, key);
         return value.ToString();
     }
 
