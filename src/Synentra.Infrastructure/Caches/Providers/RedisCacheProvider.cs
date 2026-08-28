@@ -31,8 +31,7 @@ public class RedisCacheProvider : ICacheProvider
             $"hitl:{key}", 
             JsonSerializer.Serialize(value), 
             _config.TimeToLive ?? _ttl);
-
-        _logger.LogInformation($"Redis ({_config.Endpoint}) SET {key}");
+        _logger.LogInformation("Redis ({Endpoint}) SET {Key}", _config.Endpoint, key);
     }
 
     public async Task<object?> GetAsync(object key)
@@ -59,8 +58,7 @@ public class RedisCacheProvider : ICacheProvider
             $"hitl:{key}", 
             serializedValue, 
             _config.TimeToLive ?? _ttl);
-
-        _logger.LogInformation($"Redis ({_config.Endpoint}) SET {key}");
+        _logger.LogInformation("Redis ({Endpoint}) SET {Key}", _config.Endpoint, key);
         return value;
     }
         
