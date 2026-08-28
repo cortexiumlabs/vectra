@@ -5,7 +5,7 @@ namespace Synentra.Commands;
 
 internal static class SynentraCommandLine
 {
-    internal static Func<ISynentraApplicationRunner> RunnerFactory = null!;
+    internal static Func<ISynentraApplicationRunner> RunnerFactory { get; set; } = null!;
 
     static SynentraCommandLine()
     {
