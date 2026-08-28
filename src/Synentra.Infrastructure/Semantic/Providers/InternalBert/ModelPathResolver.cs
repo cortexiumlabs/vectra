@@ -4,7 +4,7 @@ public static class ModelPathResolver
 {
     private const string DefaultModelFileName = "community-model.zip";
     // Exposed for unit tests so we can simulate different folder resolution behaviors.
-    internal static Func<Environment.SpecialFolder, Environment.SpecialFolderOption, string?> FolderGetter =
+    internal static Func<Environment.SpecialFolder, Environment.SpecialFolderOption, string?> FolderGetter { get; set; } =
         Environment.GetFolderPath;
 
     /// <summary>
