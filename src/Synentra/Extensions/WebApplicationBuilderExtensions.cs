@@ -53,7 +53,7 @@ public static class WebApplicationBuilderExtensions
 
         if (!httpsPort.HasValue)
         {
-            Log.Information($"Configuring HTTP endpoint only: HTTP {httpPort}");
+            Log.Information("Configuring HTTP endpoint only: HTTP {HttpPort}", httpPort);
             return;
         }
 
