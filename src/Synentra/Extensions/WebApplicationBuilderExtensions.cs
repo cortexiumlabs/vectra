@@ -84,7 +84,8 @@ public static class WebApplicationBuilderExtensions
             ConfigureListenOptions(listenOptions, httpsConfig);
         });
 
-        Log.Information($"Configuring HTTP and HTTPS endpoints: HTTP {httpPort}, HTTPS {httpsPort}");
+        Log.Information("Configuring HTTP and HTTPS endpoints: HTTP {HttpPort}, HTTPS {HttpsPort}",
+            httpPort, httpsPort);
     }
 
     private static void ConfigureListenOptions(
