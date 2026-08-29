@@ -107,8 +107,7 @@ public static class WebApplicationBuilderExtensions
         ListenOptions listenOptions,
         HttpsServerCertificateConfiguration cert)
     {
-        if (cert == null)
-            throw new ArgumentNullException(nameof(cert));
+        ArgumentNullException.ThrowIfNull(cert);
 
         if (string.IsNullOrWhiteSpace(cert.Password))
         {
