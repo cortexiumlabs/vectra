@@ -10,7 +10,6 @@ namespace Synentra.Infrastructure.Caches.Providers;
 public class RedisCacheProvider : ICacheProvider
 {
     private readonly RedisCacheConfiguration _config;
-    private readonly IServiceProvider _serviceProvider;
     private readonly ILogger<RedisCacheProvider> _logger;
     private readonly IConnectionMultiplexer _redis;
     private TimeSpan _ttl = TimeSpan.FromHours(24);
@@ -19,9 +18,8 @@ public class RedisCacheProvider : ICacheProvider
         IServiceProvider serviceProvider)
     {
         _config = config;
-        _serviceProvider = serviceProvider;
-        _logger = _serviceProvider.GetRequiredService<ILogger<RedisCacheProvider>>();
-        _redis = _serviceProvider.GetRequiredService<IConnectionMultiplexer>();
+        _logger = serviceProvider.GetRequiredService<ILogger<RedisCacheProvider>>();
+        _redis = serviceProvider.GetRequiredService<IConnectionMultiplexer>();
     }
 
     public async Task SetAsync(string key, string value)
