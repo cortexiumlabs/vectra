@@ -121,10 +121,6 @@ public static class ServiceCollectionExtensions
                 services.AddSqlitePersistenceLayer();
                 break;
 
-            //case "postgres":
-            //    services.AddPostgresPersistenceLayer();
-            //    break;
-
             default:
                 throw new InvalidOperationException(
                     $"Unsupported database provider '{provider}'.");
