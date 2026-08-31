@@ -24,11 +24,18 @@ public class SynentraApplicationRunnerTests
         startup.When(x => x.ConfigurePipelineAsync(Arg.Any<WebApplication>()))
             .Do(_ => throw new OperationCanceledException());
 
+        var originalExitAction = SynentraApplicationRunner.ExitAction;
+        SynentraApplicationRunner.ExitAction = _ => { };
+
         try
         {
             await runner.RunAsync([], CancellationToken.None);
         }
         catch { }
+        finally
+        {
+            SynentraApplicationRunner.ExitAction = originalExitAction;
+        }
 
         splash.Received(1).Render();
         startup.Received(1).ConfigureServices(builder);
@@ -43,21 +50,29 @@ public class SynentraApplicationRunnerTests
         builder.Services.AddSingleton(logger);
 
         int capturedExitCode = -1;
+        var originalExitAction = SynentraApplicationRunner.ExitAction;
         SynentraApplicationRunner.ExitAction = code => capturedExitCode = code;
 
-        var ex = new Exception("boom");
-        await SynentraApplicationRunner.HandleStartupFailureAsync(builder, ex);
+        try
+        {
+            var ex = new Exception("boom");
+            await SynentraApplicationRunner.HandleStartupFailureAsync(builder, ex);
 
-        // Verify the exit code
-        capturedExitCode.Should().Be(1);
+            // Verify the exit code
+            capturedExitCode.Should().Be(1);
 
-        // Verify that a critical log was written with the exception
-        logger.Received(1).Log(
-            LogLevel.Critical,
-            Arg.Any<EventId>(),
-            Arg.Is<object>(state => state.ToString()!.Contains("Unhandled exception during application startup")),
-            ex,
-            Arg.Any<Func<object, Exception?, string>>());
+            // Verify that a critical log was written with the exception
+            logger.Received(1).Log(
+                LogLevel.Critical,
+                Arg.Any<EventId>(),
+                Arg.Is<object>(state => state.ToString()!.Contains("Unhandled exception during application startup")),
+                ex,
+                Arg.Any<Func<object, Exception?, string>>());
+        }
+        finally
+        {
+            SynentraApplicationRunner.ExitAction = originalExitAction;
+        }
     }
 
     [Fact]
@@ -73,6 +88,8 @@ public class SynentraApplicationRunnerTests
 
         Console.SetError(writer);
 
+        var originalExitAction = SynentraApplicationRunner.ExitAction;
+
         try
         {
             SynentraApplicationRunner.ExitAction = _ => { };
@@ -85,6 +102,7 @@ public class SynentraApplicationRunnerTests
         }
         finally
         {
+            SynentraApplicationRunner.ExitAction = originalExitAction;
             Console.SetError(original);
         }
     }
