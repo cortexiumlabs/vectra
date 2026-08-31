@@ -48,7 +48,7 @@ internal sealed class SynentraApplicationRunner : ISynentraApplicationRunner
         }
     }
 
-    internal static Action<int> ExitAction = Environment.Exit;
+    internal static Action<int> ExitAction { get; set; } = Environment.Exit;
 
     internal static async Task HandleStartupFailureAsync(
         WebApplicationBuilder builder,
