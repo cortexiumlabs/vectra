@@ -25,7 +25,7 @@ public class SqliteApplicationContext : BaseDbContext
         }
     }
 
-    private void ApplyEntityConfigurations(ModelBuilder modelBuilder)
+    private static void ApplyEntityConfigurations(ModelBuilder modelBuilder)
     {
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(SqliteApplicationContext).Assembly);
     }
