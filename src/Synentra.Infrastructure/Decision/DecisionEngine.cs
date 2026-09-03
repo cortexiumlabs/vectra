@@ -4,7 +4,6 @@ using Synentra.Application.Abstractions.Executions;
 using Synentra.Application.Abstractions.Persistence;
 using Synentra.Application.Models;
 using Synentra.BuildingBlocks.Clock;
-using Synentra.BuildingBlocks.Configuration.HumanInTheLoop;
 using Synentra.BuildingBlocks.Configuration.Policy;
 using Synentra.BuildingBlocks.Configuration.Semantic;
 using Synentra.Domain.AuditTrails;
@@ -15,7 +14,6 @@ namespace Synentra.Infrastructure.Decision;
 public class DecisionEngine : IDecisionEngine
 {
     private readonly SemanticConfiguration _semantic;
-    private readonly HumanInTheLoopConfiguration _hitl;
     private readonly PolicyConfiguration _policy;
 
     private readonly IPolicyProvider _policyProvider;
@@ -28,7 +26,6 @@ public class DecisionEngine : IDecisionEngine
 
     public DecisionEngine(
         IOptions<SemanticConfiguration> semantic,
-        IOptions<HumanInTheLoopConfiguration> hitl,
         IOptions<PolicyConfiguration> policy,
         IPolicyProvider policyProvider,
         IRiskScoringService riskScoring,
@@ -39,7 +36,6 @@ public class DecisionEngine : IDecisionEngine
         ILogger<DecisionEngine> logger)
     {
         _semantic = semantic?.Value ?? throw new ArgumentNullException(nameof(semantic));
-        _hitl = hitl?.Value ?? throw new ArgumentNullException(nameof(hitl));
         _policy = policy?.Value ?? throw new ArgumentNullException(nameof(policy));
 
         _policyProvider = policyProvider ?? throw new ArgumentNullException(nameof(policyProvider));
