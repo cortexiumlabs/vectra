@@ -15,7 +15,7 @@ public class AgentHistoryRepository : IAgentHistoryRepository
         _appContextFactory = appContextFactory ?? throw new ArgumentNullException(nameof(appContextFactory));
     }
 
-    public async Task<AgentStats?> GetStatsAsync(Guid agentId, TimeSpan window, CancellationToken cancellationToken)
+    public async Task<AgentStats?> GetStatsAsync(Guid agentId, TimeSpan window, CancellationToken cancellationToken = default)
     {
         await using var context = await _appContextFactory.CreateDbContextAsync(cancellationToken);
 
@@ -42,7 +42,7 @@ public class AgentHistoryRepository : IAgentHistoryRepository
         };
     }
 
-    public async Task<AgentBaseline?> GetBaselineAsync(Guid agentId, TimeSpan lookback, CancellationToken cancellationToken)
+    public async Task<AgentBaseline?> GetBaselineAsync(Guid agentId, TimeSpan lookback, CancellationToken cancellationToken = default)
     {
         await using var context = await _appContextFactory.CreateDbContextAsync(cancellationToken);
         var start = DateTime.UtcNow - lookback;
@@ -66,7 +66,7 @@ public class AgentHistoryRepository : IAgentHistoryRepository
         };
     }
 
-    public async Task<AgentHistory?> GetRecentAsync(Guid agentId, TimeSpan window, CancellationToken cancellationToken)
+    public async Task<AgentHistory?> GetRecentAsync(Guid agentId, TimeSpan window, CancellationToken cancellationToken = default)
     {
         await using var context = await _appContextFactory.CreateDbContextAsync(cancellationToken);
 
@@ -86,7 +86,7 @@ public class AgentHistoryRepository : IAgentHistoryRepository
         };
     }
 
-    public async Task RecordRequestAsync(Guid agentId, bool wasViolation, double riskScore, CancellationToken cancellationToken)
+    public async Task RecordRequestAsync(Guid agentId, bool wasViolation, double riskScore, CancellationToken cancellationToken = default)
     {
         var now = DateTime.UtcNow;
         var windowStart = new DateTime(now.Year, now.Month, now.Day, now.Hour, now.Minute, 0);

@@ -1,4 +1,3 @@
-using Microsoft.Extensions.Logging;
 using Synentra.Application.Abstractions.Dispatchers;
 using Synentra.Application.Abstractions.Executions;
 using Synentra.Application.Abstractions.Security;
@@ -14,16 +13,13 @@ public sealed class SimulateDecisionHandler
 {
     private readonly IDecisionEngine _decisionEngine;
     private readonly IAgentRequestAccessService _accessService;
-    private readonly ILogger<SimulateDecisionHandler> _logger;
 
     public SimulateDecisionHandler(
         IDecisionEngine decisionEngine,
-        IAgentRequestAccessService accessService,
-        ILogger<SimulateDecisionHandler> logger)
+        IAgentRequestAccessService accessService)
     {
         _decisionEngine = decisionEngine ?? throw new ArgumentNullException(nameof(decisionEngine));
         _accessService = accessService ?? throw new ArgumentNullException(nameof(accessService));
-        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
     public async Task<Result<SimulateDecisionResult>> Handle(

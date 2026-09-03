@@ -53,7 +53,7 @@ public static class WebApplicationBuilderExtensions
 
         if (!httpsPort.HasValue)
         {
-            Log.Information($"Configuring HTTP endpoint only: HTTP {httpPort}");
+            Log.Information("Configuring HTTP endpoint only: HTTP {HttpPort}", httpPort);
             return;
         }
 
@@ -84,7 +84,8 @@ public static class WebApplicationBuilderExtensions
             ConfigureListenOptions(listenOptions, httpsConfig);
         });
 
-        Log.Information($"Configuring HTTP and HTTPS endpoints: HTTP {httpPort}, HTTPS {httpsPort}");
+        Log.Information("Configuring HTTP and HTTPS endpoints: HTTP {HttpPort}, HTTPS {HttpsPort}",
+            httpPort, httpsPort);
     }
 
     private static void ConfigureListenOptions(
@@ -106,8 +107,7 @@ public static class WebApplicationBuilderExtensions
         ListenOptions listenOptions,
         HttpsServerCertificateConfiguration cert)
     {
-        if (cert == null)
-            throw new ArgumentNullException(nameof(cert));
+        ArgumentNullException.ThrowIfNull(cert);
 
         if (string.IsNullOrWhiteSpace(cert.Password))
         {

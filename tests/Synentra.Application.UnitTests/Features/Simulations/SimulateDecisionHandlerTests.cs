@@ -1,5 +1,4 @@
 using FluentAssertions;
-using Microsoft.Extensions.Logging;
 using NSubstitute;
 using Synentra.Application.Abstractions.Executions;
 using Synentra.Application.Abstractions.Security;
@@ -14,13 +13,12 @@ public class SimulateDecisionHandlerTests
 {
     private readonly IDecisionEngine _decisionEngine = Substitute.For<IDecisionEngine>();
     private readonly IAgentRequestAccessService _accessService = Substitute.For<IAgentRequestAccessService>();
-    private readonly ILogger<SimulateDecisionHandler> _logger = Substitute.For<ILogger<SimulateDecisionHandler>>();
 
     private readonly SimulateDecisionHandler _sut;
 
     public SimulateDecisionHandlerTests()
     {
-        _sut = new SimulateDecisionHandler(_decisionEngine, _accessService, _logger);
+        _sut = new SimulateDecisionHandler(_decisionEngine, _accessService);
     }
 
     [Fact]
@@ -105,7 +103,7 @@ public class SimulateDecisionHandlerTests
     [Fact]
     public void Constructor_NullDecisionEngine_Throws()
     {
-        var act = () => new SimulateDecisionHandler(null!, _accessService, _logger);
+        var act = () => new SimulateDecisionHandler(null!, _accessService);
         act.Should().Throw<ArgumentNullException>().WithParameterName("decisionEngine");
     }
 
