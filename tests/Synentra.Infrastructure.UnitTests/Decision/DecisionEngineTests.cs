@@ -6,7 +6,6 @@ using Synentra.Application.Abstractions.Executions;
 using Synentra.Application.Abstractions.Persistence;
 using Synentra.Application.Models;
 using Synentra.BuildingBlocks.Clock;
-using Synentra.BuildingBlocks.Configuration.HumanInTheLoop;
 using Synentra.BuildingBlocks.Configuration.Policy;
 using Synentra.BuildingBlocks.Configuration.Semantic;
 using Synentra.Domain.AuditTrails;
@@ -41,12 +40,10 @@ public class DecisionEngineTests
             ConfidenceThreshold = semanticConfidenceThreshold,
             AllowLowConfidence = allowLowConfidence
         };
-        var hitlConfig = new HumanInTheLoopConfiguration { };
         var policyConfig = new PolicyConfiguration { Enabled = policyEnabled };
 
         return new DecisionEngine(
             Options.Create(semanticConfig),
-            Options.Create(hitlConfig),
             Options.Create(policyConfig),
             _policyProvider,
             _riskScoring,
@@ -245,7 +242,6 @@ public class DecisionEngineTests
     {
         var act = () => new DecisionEngine(
             null!,
-            Options.Create(new HumanInTheLoopConfiguration()),
             Options.Create(new PolicyConfiguration()),
             _policyProvider, _riskScoring, _semanticProvider,
             _history, _audit, _clock, _logger);
@@ -258,22 +254,8 @@ public class DecisionEngineTests
     {
         var act = () => new DecisionEngine(
             Options.Create(new SemanticConfiguration()),
-            Options.Create(new HumanInTheLoopConfiguration()),
             Options.Create(new PolicyConfiguration()),
             null!, _riskScoring, _semanticProvider,
-            _history, _audit, _clock, _logger);
-
-        act.Should().Throw<ArgumentNullException>();
-    }
-
-    [Fact]
-    public void Constructor_NullHitlOptions_ThrowsArgumentNullException()
-    {
-        var act = () => new DecisionEngine(
-            Options.Create(new SemanticConfiguration()),
-            null!,
-            Options.Create(new PolicyConfiguration()),
-            _policyProvider, _riskScoring, _semanticProvider,
             _history, _audit, _clock, _logger);
 
         act.Should().Throw<ArgumentNullException>();
@@ -284,7 +266,6 @@ public class DecisionEngineTests
     {
         var act = () => new DecisionEngine(
             Options.Create(new SemanticConfiguration()),
-            Options.Create(new HumanInTheLoopConfiguration()),
             null!,
             _policyProvider, _riskScoring, _semanticProvider,
             _history, _audit, _clock, _logger);
@@ -297,7 +278,6 @@ public class DecisionEngineTests
     {
         var act = () => new DecisionEngine(
             Options.Create(new SemanticConfiguration()),
-            Options.Create(new HumanInTheLoopConfiguration()),
             Options.Create(new PolicyConfiguration()),
             _policyProvider, _riskScoring, null!,
             _history, _audit, _clock, _logger);
@@ -310,7 +290,6 @@ public class DecisionEngineTests
     {
         var act = () => new DecisionEngine(
             Options.Create(new SemanticConfiguration()),
-            Options.Create(new HumanInTheLoopConfiguration()),
             Options.Create(new PolicyConfiguration()),
             _policyProvider, null!, _semanticProvider,
             _history, _audit, _clock, _logger);
@@ -323,7 +302,6 @@ public class DecisionEngineTests
     {
         var act = () => new DecisionEngine(
             Options.Create(new SemanticConfiguration()),
-            Options.Create(new HumanInTheLoopConfiguration()),
             Options.Create(new PolicyConfiguration()),
             _policyProvider, _riskScoring, _semanticProvider,
             null!, _audit, _clock, _logger);
@@ -336,7 +314,6 @@ public class DecisionEngineTests
     {
         var act = () => new DecisionEngine(
             Options.Create(new SemanticConfiguration()),
-            Options.Create(new HumanInTheLoopConfiguration()),
             Options.Create(new PolicyConfiguration()),
             _policyProvider, _riskScoring, _semanticProvider,
             _history, null!, _clock, _logger);
@@ -349,7 +326,6 @@ public class DecisionEngineTests
     {
         var act = () => new DecisionEngine(
             Options.Create(new SemanticConfiguration()),
-            Options.Create(new HumanInTheLoopConfiguration()),
             Options.Create(new PolicyConfiguration()),
             _policyProvider, _riskScoring, _semanticProvider,
             _history, _audit, null!, _logger);
@@ -362,7 +338,6 @@ public class DecisionEngineTests
     {
         var act = () => new DecisionEngine(
             Options.Create(new SemanticConfiguration()),
-            Options.Create(new HumanInTheLoopConfiguration()),
             Options.Create(new PolicyConfiguration()),
             _policyProvider, _riskScoring, _semanticProvider,
             _history, _audit, _clock, null!);
