@@ -4,6 +4,8 @@ using Synentra.Application.Features.Agents.AssignPolicy;
 using Synentra.Application.Features.Agents.DeleteAgent;
 using Synentra.Application.Features.Agents.LiftQuarantine;
 using Synentra.Application.Features.Agents.RegisterAgent;
+using Synentra.Application.Features.Audit.AuditDetails;
+using Synentra.Application.Features.Audit.AuditList;
 using Synentra.Application.Features.Authentications.GenerateToken;
 using Synentra.Application.Features.Hitl.Approve;
 using Synentra.Application.Features.Hitl.Deny;
@@ -70,6 +72,31 @@ public static class DispatcherExtensions
         CancellationToken cancellationToken)
     {
         return dispatcher.Dispatch(new LiftQuarantineRequest { AgentId = agentId }, cancellationToken);
+    }
+
+    #endregion
+
+    #region Audit
+
+    public static Task<PaginatedResult<AuditListResult>> AuditList(
+        this IDispatcher dispatcher,
+        int page,
+        int pageSize,
+        CancellationToken cancellationToken)
+    {
+        return dispatcher.Dispatch(new AuditListRequest
+        {
+            Page = page,
+            PageSize = pageSize
+        }, cancellationToken);
+    }
+
+    public static Task<Result<AuditDetailsResult>> AuditDetails(
+        this IDispatcher dispatcher,
+        long id,
+        CancellationToken cancellationToken)
+    {
+        return dispatcher.Dispatch(new AuditDetailsRequest { Id = id }, cancellationToken);
     }
 
     #endregion

@@ -6,6 +6,8 @@ using Synentra.Application.Features.Agents.AgentsList;
 using Synentra.Application.Features.Agents.AssignPolicy;
 using Synentra.Application.Features.Agents.DeleteAgent;
 using Synentra.Application.Features.Agents.RegisterAgent;
+using Synentra.Application.Features.Audit.AuditDetails;
+using Synentra.Application.Features.Audit.AuditList;
 using Synentra.Application.Features.Authentications.GenerateToken;
 using Synentra.Application.Features.Policies.PoliciesList;
 using Synentra.Application.Features.Policies.PolicyDetails;
@@ -119,6 +121,36 @@ public class DispatcherExtensionsTests
         result.Should().BeSameAs(expected);
         await _dispatcher.Received(1).Dispatch(
             Arg.Is<PolicyDetailsRequest>(r => r.Name == "SecurityPolicy"),
+            CancellationToken.None);
+    }
+
+    [Fact]
+    public async Task AuditList_ShouldDispatchWithCorrectPaging()
+    {
+        var expected = PaginatedResult<AuditListResult>.Success([], 1, 25, 0);
+        _dispatcher.Dispatch(Arg.Any<AuditListRequest>(), CancellationToken.None)
+            .Returns(Task.FromResult(expected));
+
+        var result = await _dispatcher.AuditList(1, 25, CancellationToken.None);
+
+        result.Should().BeSameAs(expected);
+        await _dispatcher.Received(1).Dispatch(
+            Arg.Is<AuditListRequest>(r => r.Page == 1 && r.PageSize == 25),
+            CancellationToken.None);
+    }
+
+    [Fact]
+    public async Task AuditDetails_ShouldDispatchWithCorrectId()
+    {
+        var expected = Result<AuditDetailsResult>.Success(new AuditDetailsResult { Id = 42 });
+        _dispatcher.Dispatch(Arg.Any<AuditDetailsRequest>(), CancellationToken.None)
+            .Returns(Task.FromResult(expected));
+
+        var result = await _dispatcher.AuditDetails(42, CancellationToken.None);
+
+        result.Should().BeSameAs(expected);
+        await _dispatcher.Received(1).Dispatch(
+            Arg.Is<AuditDetailsRequest>(r => r.Id == 42),
             CancellationToken.None);
     }
 }
