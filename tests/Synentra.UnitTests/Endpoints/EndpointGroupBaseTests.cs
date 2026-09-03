@@ -55,6 +55,14 @@ public class EndpointGroupBaseTests
         act.Should().NotThrow();
     }
 
+    [Fact]
+    public void Map_Audit_DoesNotThrow()
+    {
+        var app = BuildApp();
+        var act = () => new Audit().Map(app);
+        act.Should().NotThrow();
+    }
+
     private static WebApplication BuildApp()
     {
         var builder = WebApplication.CreateBuilder();

@@ -91,4 +91,62 @@ public class AuditRepositoryTests
 
         await act.Should().NotThrowAsync();
     }
+
+    [Fact]
+    public async Task GetPagedAsync_ReturnsItemsAndTotalCount()
+    {
+        var dbName = Guid.NewGuid().ToString();
+        var factory = CreateFactory(dbName);
+        var repo = new AuditRepository(factory);
+
+        await repo.AddAsync(new AuditTrail
+        {
+            AgentId = Guid.NewGuid(),
+            Action = "GET /a",
+            TargetUrl = "/a",
+            Status = "ALLOWED",
+            Timestamp = DateTime.UtcNow.AddMinutes(-1)
+        });
+
+        await repo.AddAsync(new AuditTrail
+        {
+            AgentId = Guid.NewGuid(),
+            Action = "GET /b",
+            TargetUrl = "/b",
+            Status = "DENIED",
+            Timestamp = DateTime.UtcNow
+        });
+
+        var (items, totalCount) = await repo.GetPagedAsync(1, 10);
+
+        totalCount.Should().Be(2);
+        items.Should().HaveCount(2);
+    }
+
+    [Fact]
+    public async Task GetByIdAsync_ReturnsAuditTrail_WhenExists()
+    {
+        var dbName = Guid.NewGuid().ToString();
+        var factory = CreateFactory(dbName);
+        var repo = new AuditRepository(factory);
+
+        var auditTrail = new AuditTrail
+        {
+            AgentId = Guid.NewGuid(),
+            Action = "PUT /resource",
+            TargetUrl = "/resource",
+            Status = "ALLOWED",
+            Timestamp = DateTime.UtcNow
+        };
+
+        await repo.AddAsync(auditTrail);
+
+        await using var ctx = SqliteTestContextFactory.Create(dbName);
+        var id = await ctx.AuditLogs.Select(a => a.Id).FirstAsync();
+
+        var result = await repo.GetByIdAsync(id);
+
+        result.Should().NotBeNull();
+        result!.Id.Should().Be(id);
+    }
 }
