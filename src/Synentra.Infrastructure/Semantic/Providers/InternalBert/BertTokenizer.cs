@@ -5,7 +5,6 @@ namespace Synentra.Infrastructure.Semantic.Providers.InternalBert;
 public class BertTokenizer
 {
     private readonly Dictionary<string, int> _vocab;
-    private readonly List<string> _tokenStrings;
     private readonly Regex _whitespaceRegex = new Regex(@"\s+", RegexOptions.None, TimeSpan.FromSeconds(3));
 
     /// <summary>Initializes the tokenizer from in-memory vocab lines.</summary>
@@ -14,7 +13,6 @@ public class BertTokenizer
         _vocab = new Dictionary<string, int>(vocabLines.Length);
         for (int i = 0; i < vocabLines.Length; i++)
             _vocab[vocabLines[i]] = i;
-        _tokenStrings = vocabLines.ToList();
     }
 
     public (long[] InputIds, long[] AttentionMask) Tokenize(string text, int maxLength = 128)
