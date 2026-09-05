@@ -117,9 +117,6 @@ public class ProxyMiddleware
             return;
         }
 
-        // 2. Store the destination base URI
-        var destinationBaseUri = $"{targetUri.Scheme}://{targetUri.Authority}";
-
         // 3. Override request path and query for YARP
         context.Request.Path = targetUri.AbsolutePath;
         context.Request.QueryString = new QueryString(targetUri.Query);
