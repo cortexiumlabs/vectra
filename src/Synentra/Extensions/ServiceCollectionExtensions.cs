@@ -161,10 +161,7 @@ public static class ServiceCollectionExtensions
 
                 var corsConfiguration = systemConfig.Cors;
 
-                if (corsConfiguration.AllowedOrigins.Contains("*", StringComparer.Ordinal))
-                    policy.AllowAnyOrigin();
-                else
-                    policy.WithOrigins(corsConfiguration.AllowedOrigins);
+                policy.WithOrigins(corsConfiguration.AllowedOrigins);
 
                 if (corsConfiguration.AllowedMethods.Contains("*", StringComparer.Ordinal))
                     policy.AllowAnyMethod();
