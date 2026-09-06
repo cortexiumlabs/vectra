@@ -1,18 +1,20 @@
 ﻿using Microsoft.Extensions.Options;
 using Microsoft.OpenApi;
-using System.Text.Json.Serialization;
 using Synentra.Application.Abstractions.Versioning;
 using Synentra.BuildingBlocks.Clock;
 using Synentra.BuildingBlocks.Configuration.HumanInTheLoop;
 using Synentra.BuildingBlocks.Configuration.Observability;
 using Synentra.BuildingBlocks.Configuration.Policy;
+using Synentra.BuildingBlocks.Configuration.Risk;
 using Synentra.BuildingBlocks.Configuration.SecretManagement;
 using Synentra.BuildingBlocks.Configuration.Security;
 using Synentra.BuildingBlocks.Configuration.Semantic;
-using Synentra.BuildingBlocks.Configuration.Risk;
 using Synentra.BuildingBlocks.Configuration.System;
+using Synentra.BuildingBlocks.Configuration.System.Cors;
 using Synentra.Infrastructure.Persistence.Sqlite;
 using Synentra.Services;
+using System.Text.Json.Serialization;
+using static OllamaSharp.OllamaApiClient;
 
 namespace Synentra.Extensions;
 
@@ -141,6 +143,41 @@ public static class ServiceCollectionExtensions
                 client.Timeout = TimeSpan.FromSeconds(30);
                 client.DefaultRequestHeaders.ConnectionClose = false;
             });
+        return services;
+    }
+
+    #endregion
+
+    #region Cors
+
+    public static IServiceCollection AddSynentraCors(this IServiceCollection services)
+    {
+        services.AddCors(options =>
+        {
+            options.AddPolicy("SynentraCors", policy =>
+            {
+                using var scope = services.BuildServiceProvider().CreateScope();
+                var systemConfig = scope.ServiceProvider.GetRequiredService<IOptions<SystemConfiguration>>().Value;
+
+                var corsConfiguration = systemConfig.Cors;
+
+                if (corsConfiguration.AllowedOrigins.Contains("*", StringComparer.Ordinal))
+                    policy.AllowAnyOrigin();
+                else
+                    policy.WithOrigins(corsConfiguration.AllowedOrigins);
+
+                if (corsConfiguration.AllowedMethods.Contains("*", StringComparer.Ordinal))
+                    policy.AllowAnyMethod();
+                else
+                    policy.WithMethods(corsConfiguration.AllowedMethods);
+
+                if (corsConfiguration.AllowedHeaders.Contains("*", StringComparer.Ordinal))
+                    policy.AllowAnyHeader();
+                else
+                    policy.WithHeaders(corsConfiguration.AllowedHeaders);
+            });
+        });
+
         return services;
     }
 
