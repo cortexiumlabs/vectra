@@ -275,15 +275,13 @@ public class ProxyMiddleware
             name.Equals("Upgrade",           StringComparison.OrdinalIgnoreCase) ||
             name.Equals("Trailer",           StringComparison.OrdinalIgnoreCase);
 
-        foreach (var header in response.Headers)
+        foreach (var header in response.Headers.Where(h => !IsRestrictedHeader(h.Key)))
         {
-            if (!IsRestrictedHeader(header.Key))
-                context.Response.Headers[header.Key] = string.Join(", ", header.Value);
+            context.Response.Headers[header.Key] = string.Join(", ", header.Value);
         }
-        foreach (var header in response.Content.Headers)
+        foreach (var header in response.Content.Headers.Where(h => !IsRestrictedHeader(h.Key)))
         {
-            if (!IsRestrictedHeader(header.Key))
-                context.Response.Headers[header.Key] = string.Join(", ", header.Value);
+            context.Response.Headers[header.Key] = string.Join(", ", header.Value);
         }
 
         await response.Content.CopyToAsync(context.Response.Body);
