@@ -16,7 +16,6 @@ internal sealed class StartupConfiguration : IStartupConfiguration
     {
         var services = builder.Services;
         var configuration = builder.Configuration;
-        var environment = builder.Environment;
 
         // Data Protection
         var dpKeysDir = Path.Combine(
