@@ -1,6 +1,7 @@
 using FluentAssertions;
 using Synentra.BuildingBlocks.Configuration.System;
 using Synentra.BuildingBlocks.Configuration.System.CircuitBreaker;
+using Synentra.BuildingBlocks.Configuration.System.Cors;
 using Synentra.BuildingBlocks.Configuration.System.RateLimit;
 using Synentra.BuildingBlocks.Configuration.System.Server;
 using Synentra.BuildingBlocks.Configuration.System.Storage.Cache;
@@ -20,6 +21,35 @@ public class SystemConfigurationTests
         config.Storage.Should().NotBeNull();
         config.RateLimit.Should().NotBeNull();
         config.CircuitBreaker.Should().NotBeNull();
+        config.Cors.Should().NotBeNull();
+    }
+
+    [Fact]
+    public void CorsConfiguration_DefaultValues_ShouldBeCorrect()
+    {
+        var config = new CorsConfiguration();
+
+        config.Enabled.Should().BeTrue();
+        config.AllowedOrigins.Should().ContainSingle().Which.Should().Be("https://localhost:7181");
+        config.AllowedMethods.Should().Contain(["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"]);
+        config.AllowedHeaders.Should().Contain(["Content-Type", "Authorization", "Synentra-Authorization"]);
+    }
+
+    [Fact]
+    public void CorsConfiguration_ShouldAllowCustomValues()
+    {
+        var config = new CorsConfiguration
+        {
+            Enabled = false,
+            AllowedOrigins = ["https://consumer.example.com"],
+            AllowedMethods = ["GET"],
+            AllowedHeaders = ["Authorization"]
+        };
+
+        config.Enabled.Should().BeFalse();
+        config.AllowedOrigins.Should().ContainSingle().Which.Should().Be("https://consumer.example.com");
+        config.AllowedMethods.Should().ContainSingle().Which.Should().Be("GET");
+        config.AllowedHeaders.Should().ContainSingle().Which.Should().Be("Authorization");
     }
 
     [Fact]

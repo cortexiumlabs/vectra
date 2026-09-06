@@ -53,18 +53,8 @@ internal sealed class StartupConfiguration : IStartupConfiguration
             .AddSynentraProxyForwarder()
             .AddSynentraHealthChecker()
             .AddSynentraVersion()
-            .AddSynentraApplication();
-
-        services.AddCors(options =>
-        {
-            options.AddPolicy("ConsoleCors", policy =>
-            {
-                policy
-                    .WithOrigins("https://localhost:7181")
-                    .WithMethods("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS")
-                    .WithHeaders("Content-Type", "Authorization", "Synentra-Authorization");
-            });
-        });
+            .AddSynentraApplication()
+            .AddSynentraCors();
 
         builder.AddSynentraObservability();
 
@@ -90,7 +80,7 @@ internal sealed class StartupConfiguration : IStartupConfiguration
         app.UseMiddleware<AgentAuthMiddleware>();
         app.UseMiddleware<RequestLoggingMiddleware>();
 
-        app.UseCors("ConsoleCors");
+        app.UseSynentraCors();
 
         // Proxy branch
         app.MapWhen(

@@ -101,4 +101,13 @@ public static class ApplicationBuilderExtensions
             app.UseHttpsRedirection();
         return app;
     }
+
+    public static IApplicationBuilder UseSynentraCors(this IApplicationBuilder app)
+    {
+        using var scope = app.ApplicationServices.CreateScope();
+        var serverConfiguration = scope.ServiceProvider.GetRequiredService<IOptions<SystemConfiguration>>();
+        if (serverConfiguration.Value.Cors.Enabled == true)
+            app.UseCors("SynentraCors");
+        return app;
+    }
 }

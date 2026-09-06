@@ -1,4 +1,5 @@
 ﻿using Synentra.BuildingBlocks.Configuration.System.CircuitBreaker;
+using Synentra.BuildingBlocks.Configuration.System.Cors;
 using Synentra.BuildingBlocks.Configuration.System.RateLimit;
 using Synentra.BuildingBlocks.Configuration.System.Server;
 
@@ -10,4 +11,5 @@ public class SystemConfiguration
     public StorageConfiguration Storage { get; set; } = new();
     public RateLimitConfiguration RateLimit { get; set; } = new();
     public CircuitBreakerConfiguration CircuitBreaker { get; set; } = new();
+    public CorsConfiguration Cors { get; set; } = new();
 }
